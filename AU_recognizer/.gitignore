@@ -1,0 +1,4 @@
+var/guide.pdf
+var/.logs/*
+projects/*
+var/.conf/AU_rec.ini

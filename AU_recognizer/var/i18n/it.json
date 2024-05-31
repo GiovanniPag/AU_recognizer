@@ -1,0 +1,306 @@
+{
+  "title": "AU recognition - per 3DMM",
+  "menu": {
+    "menu_file": {
+      "label": "File",
+      "underline": 0,
+      "new_project": {
+        "label": "Nuovo Progetto",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "open_project": {
+        "label": "Apri...",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "settings": {
+        "label": "Impostazioni",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "exit": {
+        "label": "Chiudi",
+        "default_state": "normal",
+        "underline": 0
+      }
+    },
+    "menu_edit": {
+      "label": "Modifica",
+      "underline": 0,
+      "undo": {
+        "label": "Annulla",
+        "default_state": "disabled",
+        "underline": 0,
+        "accelerator": "Control+Z"
+      },
+      "redo": {
+        "label": "Ripristina",
+        "default_state": "disabled",
+        "underline": 0,
+        "accelerator": "Control+Shift+Z"
+      },
+      "cut": {
+        "label": "Taglia",
+        "default_state": "normal",
+        "underline": 2,
+        "accelerator": "Control+X"
+      },
+      "copy": {
+        "label": "Copia",
+        "default_state": "normal",
+        "underline": 0,
+        "accelerator": "Control+C"
+      },
+      "paste": {
+        "label": "Incolla",
+        "default_state": "normal",
+        "underline": 0,
+        "accelerator": "Control+V"
+      },
+      "delete": {
+        "label": "Elimina",
+        "default_state": "normal",
+        "underline": 0
+      }
+    },
+    "menu_help": {
+      "label": "Aiuto",
+      "underline": 0,
+      "language": {
+        "label": "Lingua",
+        "default_state": "normal",
+        "underline": 0,
+        "it": {
+          "label": "Italiano"
+        },
+        "en": {
+          "label": "Inglese"
+        }
+      },
+      "about": {
+        "label": "Informazioni",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "logs": {
+        "label": "Mostra Cartella dei Log",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "guide": {
+        "label": "Guida",
+        "default_state": "normal",
+        "underline": 0
+      }
+    }
+  },
+  "radio_buttons": {
+    "detail": "Dettagliato",
+    "coarse": "Grossolano"
+  },
+  "entry_buttons": {
+    "no_text": "",
+    "general": "Percorso:",
+    "i18n_path": "Percorso i18n:",
+    "logger_path": "impostazioni logger:",
+    "log_folder": "cartella dei log:",
+    "projects_folder": "cartella base dei progetti:",
+    "path_to_model": "percorso modelli 3dmm:",
+    "l_combo": "Linguaggio:",
+    "m_combo": "Modello:",
+    "mode_radio": "Modalità:",
+    "c_simages": "Salva immagini",
+    "c_scodes": "Salva Codici FLAME",
+    "c_smesh": "Salva Mesh"
+  },
+  "menu_contextual": {
+    "tree_view": {
+      "selected_project": {
+        "label": "Progetto:",
+        "default_state": "normal"
+      },
+      "add_images": {
+        "label": "Aggiungi immagini al progetto",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "select_project": {
+        "label": "Seleziona Progetto",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "close_project": {
+        "label": "Chiudi Progetto",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "delete_project": {
+        "label": "Elimina Progetto",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "selected_file": {
+        "label": "File:",
+        "default_state": "normal"
+      },
+      "open_file": {
+        "label": "Apri File",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "delete_file": {
+        "label": "Elimina File",
+        "default_state": "normal",
+        "underline": 1
+      },
+      "rename_file": {
+        "label": "Rinomina File",
+        "default_state": "normal",
+        "underline": 1
+      }
+    }
+  },
+  "dialog": {
+    "project_message": {
+      "project_exist": {
+        "message": "Errore nel nome del progetto",
+        "title": "AU recognition - Errore progetto",
+        "detail": "Nella cartella selezionata esiste già un progetto, o una cartella, con questo nome."
+      },
+      "name_taken": {
+        "message": "Errore durante le rinominazione",
+        "title": "AU recognition - Errore Rinominazione",
+        "detail": "Nella cartella esiste già un file, o una cartella, con questo nome."
+      },
+      "about": {
+        "message": "AU recognition 2023",
+        "title": "Informazioni su AU recognition",
+        "detail": "Un progetto per Computer Graphics and 3D che concilia FACS e 3DMM"
+      },
+      "project_already_open": {
+        "message": "Errore di selezione del progetto",
+        "title": "AU recognition - Errore progetto",
+        "detail": "Il progetto selezionato è già presente tra i progetti aperti."
+      },
+      "project_open_success": {
+        "message": "Progetto aperto",
+        "title": "AU recognition - progetto",
+        "detail": "Il progetto è stato aperto con successo."
+      },
+      "not_project": {
+        "message": "Errore di selezione del progetto",
+        "title": "AU recognition - Errore progetto",
+        "detail": "La cartella selezionata non rappresenta un progetto leggibile."
+      },
+      "corrupted_project": {
+        "message": "Errore del progetto",
+        "title": "AU recognition - Errore progetto",
+        "detail": "Il progetto si è corrotto e non è più leggibile."
+      }
+    },
+    "confirmation_dialog": {
+      "delete_project": {
+        "message": "Conferma cancellazione progetto",
+        "title": "AU recognition - Conferma Cancellazione",
+        "detail": "vuoi cancellare il progetto e tutti i file contenuti?"
+      },
+      "delete_folder": {
+        "message": "Conferma cancellazione cartella",
+        "title": "AU recognition - Conferma Cancellazione",
+        "detail": "vuoi cancellare la cartella e tutti i file contenuti?"
+      },
+      "delete_file": {
+        "message": "Conferma cancellazione file",
+        "title": "AU recognition - Conferma Cancellazione",
+        "detail": "vuoi cancellare il file?"
+      },
+      "corrupt_project": {
+        "message": "Conferma cancellazione file importante",
+        "title": "AU recognition - Conferma Cancellazione",
+        "detail": "Questo file è importante per il progetto, la sua cancellazione chiuderà in automatico il progetto, vuoi cancellare il file?"
+      }
+    },
+    "p_options": {
+      "title": "AU recognition - Opzioni Progetto",
+      "name": "Nome progetto:",
+      "name_tip": "Il nome del progetto non deve essere più lungo di 50 caratteri e non deve contenere spazi, caratteri o simboli speciali (- e _ sono concessi)."
+    },
+    "p_rename": {
+      "title": "AU recognition - Rinomina file o cartella",
+      "name": "Nuovo nome:",
+      "name_tip": "nuovo nome del file o della cartella."
+    },
+    "ask_confirm_abort": {
+      "title": "AU recognition - Opzioni Progetto",
+      "confirm": "Nome progetto:",
+      "abort": "Il nome del progetto non deve essere più lungo di 50 caratteri e non deve contenere spazi, caratteri o simboli speciali (- e _ sono concessi)."
+    },
+    "choose_folder_pr": {
+      "title": "Seleziona la cartella in cui creare la cartella base del progetto"
+    },
+    "choose_folder": {
+      "title": "Seleziona una cartella"
+    },
+    "choose_images": {
+      "title": "Seleziona le Immagini da aggiungere al progetto"
+    },
+    "buttons": {
+      "ok": "Ok",
+      "back": "Indietro",
+      "save": "Salva",
+      "close": "Chiudi",
+      "confirm": "Conferma",
+      "cancel": "Annulla",
+      "yes": "Si",
+      "no": "No",
+      "fit_all": "Adatta tutte",
+      "fit_sel": "Adatta selezionate"
+    }
+  },
+  "tree_view": {
+    "columns": {
+      "name": "Nome",
+      "size": "Dimensione",
+      "modified": "Ultima modifica",
+      "images": "Immagini",
+      "fitted": "Adattate"
+    }
+  },
+  "selected_file": {
+    "file": "Nome del file:",
+    "suffix": "Tipo di file:",
+    "open_s": "Apri nel sistema",
+    "no_file": "Nessun file selezionato",
+    "type": {
+      "unknown": "File",
+      ".ini": "File di configurazione",
+      ".odt": "File di testo",
+      ".jpg": "File immagine",
+      ".bmp": "File immagine",
+      ".png": "File immagine",
+      ".mtl": "Libreria di modelli di materiali",
+      ".obj": "File per geometrie 3D",
+      ".npy": "File binario di un array numpy",
+      "folder": "Cartella"
+    }
+  },
+  "selected_project": {
+    "name": "Nome",
+    "path": "Percorso",
+    "fit": "Adattamento 3dmm",
+    "au_rec": "Individuazione AU",
+    "done": "Fatto",
+    "not_done": "Non Fatto",
+    "no_project": "Nessun progetto selezionato"
+  },
+  "project_actions": {
+    "fit": {
+      "name": "Adattamento 3dmm",
+      "select_img": "Seleziona immagini"
+    },
+    "au_rec": {
+      "name": "Individuazione AU"
+    }
+  }
+}
