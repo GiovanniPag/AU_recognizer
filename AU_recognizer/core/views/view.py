@@ -48,7 +48,6 @@ class MenuBar(tk.Menu, View):
         self.columnconfigure(0, weight=1)
         self.menu_apple = tk.Menu(self, name=M_APPLE)
         self.menu_file = tk.Menu(self)
-        self.menu_edit = tk.Menu(self)
         self.menu_help = tk.Menu(self, name=M_HELP)
         self.menu_help_language = tk.Menu(self.menu_help)
         self.language = tk.StringVar()
@@ -84,30 +83,6 @@ class MenuBar(tk.Menu, View):
             M_EXIT: {
                 M_MASTER: self.menu_file,
                 M_INDEX: 3
-            },
-            M_UNDO: {
-                M_MASTER: self.menu_edit,
-                M_INDEX: 0
-            },
-            M_REDO: {
-                M_MASTER: self.menu_edit,
-                M_INDEX: 1
-            },
-            M_CUT: {
-                M_MASTER: self.menu_edit,
-                M_INDEX: 2
-            },
-            M_COPY: {
-                M_MASTER: self.menu_edit,
-                M_INDEX: 3
-            },
-            M_PASTE: {
-                M_MASTER: self.menu_edit,
-                M_INDEX: 4
-            },
-            M_DELETE: {
-                M_MASTER: self.menu_edit,
-                M_INDEX: 5
             },
             M_LANGUAGE: {
                 M_MASTER: self.menu_help,
@@ -147,20 +122,12 @@ class MenuBar(tk.Menu, View):
             self.add_cascade_item(menu_name=M_APPLE, menu_to_add=self.menu_apple, info={})
             self.master.createcommand(MAC_SHOW_HELP, ...)
         self.add_cascade_item(menu_name=M_FILE, menu_to_add=self.menu_file, info=i18n.menu_file)
-        self.add_cascade_item(menu_name=M_EDIT, menu_to_add=self.menu_edit, info=i18n.menu_edit)
         self.add_cascade_item(menu_name=M_HELP, menu_to_add=self.menu_help, info=i18n.menu_help)
         # menu_file items
         self.add_command_item(cmd_name=M_NEW, info=i18n.menu_file_new)
         self.add_command_item(cmd_name=M_OPEN, info=i18n.menu_file_open)
         self.add_command_item(cmd_name=M_SETTINGS, info=i18n.menu_file_settings)
         self.add_command_item(cmd_name=M_EXIT, info=i18n.menu_file_exit)
-        # menu_edit items
-        self.add_command_item(cmd_name=M_UNDO, info=i18n.menu_edit_undo)
-        self.add_command_item(cmd_name=M_REDO, info=i18n.menu_edit_redo)
-        self.add_command_item(cmd_name=M_CUT, info=i18n.menu_edit_cut)
-        self.add_command_item(cmd_name=M_COPY, info=i18n.menu_edit_copy)
-        self.add_command_item(cmd_name=M_PASTE, info=i18n.menu_edit_paste)
-        self.add_command_item(cmd_name=M_DELETE, info=i18n.menu_edit_delete)
         # menu_help items
         self.add_cascade_item(menu_name=M_LANGUAGE, menu_to_add=self.menu_help_language, info=i18n.menu_help_language)
         # separator
@@ -175,20 +142,12 @@ class MenuBar(tk.Menu, View):
     def update_language(self):
         logger.debug(f"{self.winfo_name()} update language")
         self.update_command_or_cascade(name=M_FILE, info_updated=i18n.menu_file)
-        self.update_command_or_cascade(name=M_EDIT, info_updated=i18n.menu_edit)
         self.update_command_or_cascade(name=M_HELP, info_updated=i18n.menu_help)
         # menu_file items
         self.update_command_or_cascade(name=M_NEW, info_updated=i18n.menu_file_new)
         self.update_command_or_cascade(name=M_OPEN, info_updated=i18n.menu_file_open)
         self.update_command_or_cascade(name=M_SETTINGS, info_updated=i18n.menu_file_settings)
         self.update_command_or_cascade(name=M_EXIT, info_updated=i18n.menu_file_exit)
-        # menu_edit items
-        self.update_command_or_cascade(name=M_UNDO, info_updated=i18n.menu_edit_undo)
-        self.update_command_or_cascade(name=M_REDO, info_updated=i18n.menu_edit_redo)
-        self.update_command_or_cascade(name=M_CUT, info_updated=i18n.menu_edit_cut)
-        self.update_command_or_cascade(name=M_COPY, info_updated=i18n.menu_edit_copy)
-        self.update_command_or_cascade(name=M_PASTE, info_updated=i18n.menu_edit_paste)
-        self.update_command_or_cascade(name=M_DELETE, info_updated=i18n.menu_edit_delete)
         # menu_help items
         self.update_command_or_cascade(name=M_LANGUAGE, info_updated=i18n.menu_help_language)
         self.update_command_or_cascade(name=M_ABOUT, info_updated=i18n.menu_help_about)

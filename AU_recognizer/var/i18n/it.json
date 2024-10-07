@@ -25,45 +25,6 @@
         "underline": 0
       }
     },
-    "menu_edit": {
-      "label": "Modifica",
-      "underline": 0,
-      "undo": {
-        "label": "Annulla",
-        "default_state": "disabled",
-        "underline": 0,
-        "accelerator": "Control+Z"
-      },
-      "redo": {
-        "label": "Ripristina",
-        "default_state": "disabled",
-        "underline": 0,
-        "accelerator": "Control+Shift+Z"
-      },
-      "cut": {
-        "label": "Taglia",
-        "default_state": "normal",
-        "underline": 2,
-        "accelerator": "Control+X"
-      },
-      "copy": {
-        "label": "Copia",
-        "default_state": "normal",
-        "underline": 0,
-        "accelerator": "Control+C"
-      },
-      "paste": {
-        "label": "Incolla",
-        "default_state": "normal",
-        "underline": 0,
-        "accelerator": "Control+V"
-      },
-      "delete": {
-        "label": "Elimina",
-        "default_state": "normal",
-        "underline": 0
-      }
-    },
     "menu_help": {
       "label": "Aiuto",
       "underline": 0,

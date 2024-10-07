@@ -41,20 +41,12 @@ class I18N:
                 self.title = data['title']
                 # menu cascade items
                 self.menu_file = data['menu']['menu_file']
-                self.menu_edit = data['menu']['menu_edit']
                 self.menu_help = data['menu']['menu_help']
                 # menu file items
                 self.menu_file_new = data['menu']['menu_file']["new_project"]
                 self.menu_file_open = data['menu']['menu_file']["open_project"]
                 self.menu_file_settings = data['menu']['menu_file']["settings"]
                 self.menu_file_exit = data['menu']['menu_file']["exit"]
-                # menu edit items
-                self.menu_edit_undo = data['menu']['menu_edit']["undo"]
-                self.menu_edit_redo = data['menu']['menu_edit']["redo"]
-                self.menu_edit_cut = data['menu']['menu_edit']["cut"]
-                self.menu_edit_copy = data['menu']['menu_edit']["copy"]
-                self.menu_edit_paste = data['menu']['menu_edit']["paste"]
-                self.menu_edit_delete = data['menu']['menu_edit']["delete"]
                 # menu help items
                 self.menu_help_language = data['menu']['menu_help']["language"]
                 self.menu_help_language_it = data['menu']['menu_help']["language"]['it']
