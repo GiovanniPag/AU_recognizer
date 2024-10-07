@@ -56,11 +56,12 @@
       }
     }
   },
-    "radio_buttons": {
+  "radio_buttons": {
     "detail": "Detail",
     "coarse": "Coarse"
   },
   "entry_buttons": {
+    "no_text": "",
     "general": "Path:",
     "i18n_path": "Path i18n:",
     "logger_path": "Logger settings:",
@@ -148,7 +149,7 @@
       "about": {
         "message": "PyNect 2022",
         "title": "About Pynect",
-        "detail": "A project for Computer Graphics and 3D"
+        "detail": "A project for Computer Graphics and 3D that uses Facs and 3DMM"
       },
       "project_already_open": {
         "message": "Project selection error",
@@ -165,10 +166,15 @@
         "title": "Pynect - Project error",
         "detail": "The selected folder isn't a readable project."
       },
-      "no_device": {
-        "message": "Sensor opening error",
-        "title": "Pynect - Sensor Error",
-        "detail": "No connected sensor was detected."
+      "corrupted_project": {
+        "message": "Project Error",
+        "title": "AU recognition - Project Error",
+        "detail": "The project is not compatible."
+      },
+      "no_images_selected": {
+        "message": "Selection Error",
+        "title": "AU recognition - Selection Error",
+        "detail": "No image selected."
       }
     },
     "confirmation_dialog": {
@@ -232,6 +238,16 @@
       "no": "No",
       "fit_all": "Fit all",
       "fit_sel": "Fit selected"
+    },
+    "image_selection": {
+      "columns": {
+        "images": "Images",
+        "fitted": "Fitted"
+      },
+      "data": {
+        "fitted": "Fitted",
+        "not_fitted": "Not fitted"
+      }
     }
   },
   "tree_view": {

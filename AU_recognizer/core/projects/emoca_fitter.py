@@ -19,7 +19,12 @@ def emoca_fit(fit_data, images_to_fit, project_data):
     #             MF_SAVE_MESH: self.save_mesh.get_value(),
     #             MF_FIT_MODE: self.fit_mode.get_value()
     #         }
-    images_to_fit=str(images_to_fit.resolve())
+    if isinstance(images_to_fit, list):
+        # If it's a list, ensure each image path is resolved
+        images_to_fit = [str(image.resolve()) for image in images_to_fit]
+    else:
+        # If it's a single path (folder), resolve it directly
+        images_to_fit = str(images_to_fit.resolve())
     _project_name = str(project_data.sections()[0])
     project_path = Path(project_data[_project_name][P_PATH])
     path_to_models = Path(nect_config[CONFIG][MODEL_FOLDER])

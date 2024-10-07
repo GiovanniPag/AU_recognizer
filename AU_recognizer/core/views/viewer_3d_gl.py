@@ -14,6 +14,7 @@ from AU_recognizer import VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_CO
 from AU_recognizer.core.util import hex_to_float_rgba, nect_config, extract_data, hex_to_float_rgb, load_materials, \
     prepare_data_for_opengl
 from AU_recognizer.core.util.geometry_3d import quaternion_to_matrix, axis_angle_to_quaternion, quaternion_multiply
+from AU_recognizer.core.views import View
 
 
 class Viewer3DGl(OpenGLFrame):
@@ -338,3 +339,64 @@ void main()
    gl_FragColor = vec4(vertex_color,0.25f);
 }
 """
+
+
+class MeshViewer(View):
+    def __init__(self, master=None, obj_file_path=None):
+        super().__init__(master)
+        self.master = master
+        self.update_config()
+        self.create_view(obj_file_path)
+        self.bind_events()
+
+    def create_view(self, obj_file_path):
+        self.pack()
+
+        # Initialize OpenGL viewer
+        self.viewer = Viewer3DGl(self, obj_file_path)
+        self.viewer.pack(fill=tk.BOTH, expand=True)
+
+        # Add controls frame
+        self.controls_frame = Frame(self)
+        self.controls_frame.pack(side=tk.LEFT, fill=tk.Y)
+
+        # Add checkboxes for controls
+        self.show_texture_var = tk.BooleanVar()
+        self.wireframe_mode_var = tk.BooleanVar()
+
+        self.show_texture_check = tk.Checkbutton(self.controls_frame, text="Show Texture", variable=self.show_texture_var,
+                                                 command=self.toggle_texture)
+        self.show_texture_check.pack()
+
+        self.wireframe_mode_check = tk.Checkbutton(self.controls_frame, text="Wireframe Mode",
+                                                   variable=self.wireframe_mode_var, command=self.toggle_wireframe)
+        self.wireframe_mode_check.pack()
+
+    def update_config(self):
+        """Load and set up configuration from nect_config."""
+        self._fill_color = str(nect_config[VIEWER][FILL_COLOR])
+        self._line_color = str(nect_config[VIEWER][LINE_COLOR])
+        # Additional configurations...
+
+    def toggle_texture(self):
+        # Logic to show or hide texture based on the checkbox state
+        if self.show_texture_var.get():
+            print("Show Texture enabled")
+            # Enable textures in your OpenGL rendering logic
+        else:
+            print("Show Texture disabled")
+            # Disable textures in your OpenGL rendering logic
+
+    def toggle_wireframe(self):
+        # Logic to toggle wireframe mode based on the checkbox state
+        if self.wireframe_mode_var.get():
+            print("Wireframe Mode enabled")
+            # Set OpenGL to wireframe mode
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+        else:
+            print("Wireframe Mode disabled")
+            # Set OpenGL to fill mode
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+
+    def update_language(self):
+        pass

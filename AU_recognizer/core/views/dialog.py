@@ -1,4 +1,5 @@
 import tkinter as tk
+from pprint import pprint
 from tkinter import ttk
 from abc import abstractmethod
 
@@ -130,8 +131,8 @@ class SelectFitImageDialog(Dialog):
         self.image_treeview[T_COLUMNS] = (TD_IMAGES, TD_FITTED)
         self.image_treeview.column(TD_IMAGES, anchor=T_CENTER, minwidth=300, width=300)
         self.image_treeview.column(TD_FITTED, anchor=T_CENTER, minwidth=100, width=100, stretch=False)
-        self.image_treeview.heading(TD_IMAGES, text=i18n.tree_view[T_COLUMNS][TD_IMAGES])
-        self.image_treeview.heading(TD_FITTED, text=i18n.tree_view[T_COLUMNS][TD_FITTED])
+        self.image_treeview.heading(TD_IMAGES, text=i18n.im_sel_dialog[T_COLUMNS][TD_IMAGES])
+        self.image_treeview.heading(TD_FITTED, text=i18n.im_sel_dialog[T_COLUMNS][TD_FITTED])
         # select mode
         self.image_treeview["selectmode"] = "extended"
         # displayColumns
@@ -160,9 +161,13 @@ class SelectFitImageDialog(Dialog):
         image_suffixes = ['.jpg', '.png', '.bmp']
         # Get all image files with the specified suffixes
         image_files = [file for file in images_path.iterdir() if file.suffix.lower() in image_suffixes]
+        # Sort images by name (alphabetically)
+        image_files.sort(key=lambda x: x.name.lower())
         for idx, image in enumerate(image_files):
             tag = 'even' if idx % 2 == 0 else 'odd'
-            self.image_treeview.insert('', tk.END, values=(image.name, 'Not Fitted', image), tags=(tag,))
+            output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MF_MODEL] / image.stem
+            fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() else i18n.im_sel_dialog["data"]["not_fitted"]
+            self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
         # Define tags and styles for alternating row colors
         self.image_treeview.tag_configure('even', background='#f0f0ff')
         self.image_treeview.tag_configure('odd', background='#ffffff')
@@ -174,7 +179,21 @@ class SelectFitImageDialog(Dialog):
 
     def fit_selected(self):
         logger.debug(f"{self.__class__.__name__} fit selected images")
-        # emoca_fit(fit_data=self.fit_data,images_to_fit=self.selected_images ,project_data=self.project)
+        selected_items = self.image_treeview.selection()
+        images_to_fit = []
+        for item in selected_items:
+            image_name = self.image_treeview.item(item, 'values')[0]
+            images_to_fit.append(Path(self.project[self._project_name][P_PATH]) / F_INPUT / image_name)
+        if images_to_fit:
+            emoca_fit(fit_data=self.fit_data, images_to_fit=images_to_fit, project_data=self.project)
+        else:
+            logger.info("No images where selected.")
+            data = i18n.project_message["no_images_selected"]
+            DialogMessage(master=self,
+                          title=data[I18N_TITLE],
+                          message=data[I18N_MESSAGE],
+                          detail=data[I18N_DETAIL],
+                          icon=INFORMATION_ICON).show()
 
     def ask_value(self):
         logger.debug(f"{self.__class__.__name__} ask value")
@@ -223,7 +242,8 @@ class SettingsDialog(Dialog):
         self._point_size = IntPicker(master=self.viewer_frame, label_text="point_size",
                                      default=nect_config[VIEWER][POINT_SIZE], min_value=1, max_value=20)
         self._moving_step = FloatPicker(master=self.viewer_frame, label_text="moving_step",
-                                      default=nect_config[VIEWER][MOVING_STEP], min_value=0.01, max_value=1, increment=0.01)
+                                        default=nect_config[VIEWER][MOVING_STEP], min_value=0.01, max_value=1,
+                                        increment=0.01)
 
     def create_view(self):
         logger.debug(f"{self.__class__.__name__} create view method")

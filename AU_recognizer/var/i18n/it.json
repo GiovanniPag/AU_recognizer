@@ -170,6 +170,11 @@
         "message": "Errore del progetto",
         "title": "AU recognition - Errore progetto",
         "detail": "Il progetto si è corrotto e non è più leggibile."
+      },
+      "no_images_selected": {
+        "message": "Errore di selezione",
+        "title": "AU recognition - Errore selezione",
+        "detail": "Nessuna immagine selezionata."
       }
     },
     "confirmation_dialog": {
@@ -233,6 +238,16 @@
       "no": "No",
       "fit_all": "Adatta tutte",
       "fit_sel": "Adatta selezionate"
+    },
+    "image_selection": {
+      "columns": {
+        "images": "Immagini",
+        "fitted": "Adattate"
+      },
+      "data": {
+        "fitted": "Adattata",
+        "not_fitted": "Non adattata"
+      }
     }
   },
   "tree_view": {
@@ -240,8 +255,7 @@
       "name": "Nome",
       "size": "Dimensione",
       "modified": "Ultima modifica",
-      "images": "Immagini",
-      "fitted": "Adattate"
+      "images": "Immagini"
     }
   },
   "selected_file": {
