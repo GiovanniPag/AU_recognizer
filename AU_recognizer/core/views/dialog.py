@@ -165,8 +165,8 @@ class SelectFitImageDialog(Dialog):
         image_files.sort(key=lambda x: x.name.lower())
         for idx, image in enumerate(image_files):
             tag = 'even' if idx % 2 == 0 else 'odd'
-            output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MF_MODEL] / image.stem
-            fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() else i18n.im_sel_dialog["data"]["not_fitted"]
+            output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MF_MODEL]
+            fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() and (any(d.is_dir() and d.name.startswith(image.stem) for d in output_folder.iterdir())) else i18n.im_sel_dialog["data"]["not_fitted"]
             self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
         # Define tags and styles for alternating row colors
         self.image_treeview.tag_configure('even', background='#f0f0ff')
