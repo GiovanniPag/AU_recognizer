@@ -148,6 +148,7 @@ TM_FILE_PATH = "file_path"
 # tree view dialog
 TD_FITTED = "fitted"
 TD_IMAGES = "images"
+TD_HIDE_FITTED = "hide_fitted"
 
 # project view strings
 PV_PATH = "path"

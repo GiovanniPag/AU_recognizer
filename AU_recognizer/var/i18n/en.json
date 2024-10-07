@@ -247,7 +247,8 @@
       "data": {
         "fitted": "Fitted",
         "not_fitted": "Not fitted"
-      }
+      },
+      "hide_fitted": "Hide fitted images"
     }
   },
   "tree_view": {

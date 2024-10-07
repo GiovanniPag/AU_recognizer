@@ -120,6 +120,15 @@ class SelectFitImageDialog(Dialog):
         self.scroll_frame = ScrollWrapperView(master=self.main_frame)
         self.bottom_frame = ttk.Frame(self.main_frame)
         self.image_treeview = ttk.Treeview(self.scroll_frame, selectmode='extended')
+        # Variable for checkbox state
+        self.hide_fitted_var = tk.BooleanVar(value=False)
+        # Create the checkbox
+        self.hide_fitted_checkbox = ttk.Checkbutton(
+            self.main_frame,
+            text=i18n.im_sel_dialog[TD_HIDE_FITTED],
+            variable=self.hide_fitted_var,
+            command=self.populate_image_treeview  # Refresh the Treeview when toggled
+        )
 
     def create_view(self):
         logger.debug(f"{self.__class__.__name__} create view")
@@ -127,6 +136,8 @@ class SelectFitImageDialog(Dialog):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         self.scroll_frame.pack(fill=tk.BOTH, expand=True)
         self.scroll_frame.add(self.image_treeview)
+        # Add the checkbox above the Treeview
+        self.hide_fitted_checkbox.pack(anchor='w')
         # Treeview for images
         self.image_treeview[T_COLUMNS] = (TD_IMAGES, TD_FITTED)
         self.image_treeview.column(TD_IMAGES, anchor=T_CENTER, minwidth=300, width=300)
@@ -155,6 +166,9 @@ class SelectFitImageDialog(Dialog):
 
     def populate_image_treeview(self):
         logger.debug(f"{self.__class__.__name__} populate image treeview")
+        # Clear existing entries in the Treeview
+        for item in self.image_treeview.get_children():
+            self.image_treeview.delete(item)
         # List all image files in the folder_path
         images_path = Path(self.project[self._project_name][P_PATH]) / F_INPUT
         # List of desired image suffixes
@@ -167,7 +181,9 @@ class SelectFitImageDialog(Dialog):
             tag = 'even' if idx % 2 == 0 else 'odd'
             output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MF_MODEL]
             fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() and (any(d.is_dir() and d.name.startswith(image.stem) for d in output_folder.iterdir())) else i18n.im_sel_dialog["data"]["not_fitted"]
-            self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
+            # Check the state of the checkbox to decide whether to add the image
+            if not self.hide_fitted_var.get() or fit_status == i18n.im_sel_dialog["data"]["not_fitted"]:
+                self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
         # Define tags and styles for alternating row colors
         self.image_treeview.tag_configure('even', background='#f0f0ff')
         self.image_treeview.tag_configure('odd', background='#ffffff')
@@ -176,6 +192,8 @@ class SelectFitImageDialog(Dialog):
         logger.debug(f"{self.__class__.__name__} fit all images")
         emoca_fit(fit_data=self.fit_data, images_to_fit=Path(self.project[self._project_name][P_PATH]) / F_INPUT,
                   project_data=self.project)
+        logger.debug("<<UpdateTreeSmall>> event generation")
+        self.master.event_generate("<<UpdateTreeSmall>>")
 
     def fit_selected(self):
         logger.debug(f"{self.__class__.__name__} fit selected images")
@@ -194,6 +212,8 @@ class SelectFitImageDialog(Dialog):
                           message=data[I18N_MESSAGE],
                           detail=data[I18N_DETAIL],
                           icon=INFORMATION_ICON).show()
+        logger.debug("<<UpdateTreeSmall>> event generation")
+        self.master.event_generate("<<UpdateTreeSmall>>")
 
     def ask_value(self):
         logger.debug(f"{self.__class__.__name__} ask value")

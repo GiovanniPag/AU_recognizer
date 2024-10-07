@@ -69,3 +69,4 @@ def emoca_fit(fit_data, images_to_fit, project_data):
 
     torch.cuda.empty_cache()  # Clear GPU memory
     logger.warning(f"fitting done")
+    return True

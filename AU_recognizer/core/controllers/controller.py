@@ -341,8 +341,6 @@ class TreeController(Controller):
 
     def __init__(self, context_controller: TreeViewMenuController, master=None) -> None:
         super().__init__()
-        self.last_consistency_check = datetime.min  # Initialize the timestamp
-        self.consistency_check_interval = timedelta(seconds=180)  # Set the check interval (e.g., 30 seconds)
         self.master = master
         self.context_controller = context_controller
         self.view: ProjectTreeView or None = None
@@ -405,13 +403,7 @@ class TreeController(Controller):
             selected_item_id = selection[0]
             selected_item = self.view.item(selected_item_id)
             logger.debug(f"selected item {selected_item}")
-            # Check if the consistency check should run (based on time interval)
-            now = datetime.now()
-            if now - self.last_consistency_check >= self.consistency_check_interval:
-                self.__recursive_consistency_check(selected_item_id)
-                self.last_consistency_check = now  # Update the timestamp after running the check
-            else:
-                logger.debug("Skipped consistency check; interval not reached.")
+            self.__recursive_consistency_check(selected_item_id)
             self.__last_selected_file = ast.literal_eval(selected_item[T_VALUES][-1])
             self.master.event_generate("<<selected_item>>")
         else:

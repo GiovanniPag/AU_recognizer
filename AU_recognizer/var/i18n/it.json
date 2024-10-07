@@ -247,7 +247,8 @@
       "data": {
         "fitted": "Adattata",
         "not_fitted": "Non adattata"
-      }
+      },
+      "hide_fitted": "Nascondi le immagini adattate"
     }
   },
   "tree_view": {
