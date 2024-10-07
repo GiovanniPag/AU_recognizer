@@ -27,6 +27,10 @@ def emoca_fit(fit_data, images_to_fit, project_data):
     output_folder = project_path / F_OUTPUT / model_name
     mode = fit_data[MF_FIT_MODE]
 
+    # 0) clear memory
+    # Clear previous model if it exists
+    torch.cuda.empty_cache()  # Clear any cached GPU memory
+
     # 1) Load the model
     emoca, conf = load_model(path_to_models, model_name, mode)
     emoca.cuda()
@@ -35,14 +39,12 @@ def emoca_fit(fit_data, images_to_fit, project_data):
     # 2) Create a dataset
     dataset = TestData(images_to_fit, face_detector="fan", max_detection=20)
 
-    torch.cuda.empty_cache()  # Clear GPU memory
-
-    # 4) Run the model on the data
+    # 3) Run the model on the data
     for i in auto.tqdm(range(len(dataset))):
         try:
             batch = dataset[i]
-        except:
-            logger.warning(f"error during fitting {dataset.imagepath_list[i]}")
+        except Exception as e:
+            logger.warning(f"error during fitting {dataset.imagepath_list[i]}: {e}")
             continue
         vals, visdict = test(emoca, batch)
         current_bs = batch["image"].shape[0]
@@ -59,4 +61,6 @@ def emoca_fit(fit_data, images_to_fit, project_data):
                 save_images(output_folder, name, visdict, with_detection=True, i=j)
             if fit_data[MF_SAVE_CODES]:
                 save_codes(Path(output_folder), name, vals, i=j)
+
+    torch.cuda.empty_cache()  # Clear GPU memory
     logger.warning(f"fitting done")
