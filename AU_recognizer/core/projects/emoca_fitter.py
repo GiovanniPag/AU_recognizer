@@ -1,3 +1,5 @@
+import torch
+
 from AU_recognizer import CONFIG, MODEL_FOLDER, P_PATH, F_OUTPUT, MF_MODEL, MF_FIT_MODE, MF_SAVE_IMAGES, MF_SAVE_MESH, \
     MF_SAVE_CODES, logger
 from AU_recognizer.core.util import nect_config
@@ -22,7 +24,7 @@ def emoca_fit(fit_data, images_to_fit, project_data):
     project_path = Path(project_data[_project_name][P_PATH])
     path_to_models = Path(nect_config[CONFIG][MODEL_FOLDER])
     model_name = fit_data[MF_MODEL]
-    output_folder = project_path / F_OUTPUT
+    output_folder = project_path / F_OUTPUT / model_name
     mode = fit_data[MF_FIT_MODE]
 
     # 1) Load the model
@@ -32,6 +34,8 @@ def emoca_fit(fit_data, images_to_fit, project_data):
 
     # 2) Create a dataset
     dataset = TestData(images_to_fit, face_detector="fan", max_detection=20)
+
+    torch.cuda.empty_cache()  # Clear GPU memory
 
     # 4) Run the model on the data
     for i in auto.tqdm(range(len(dataset))):
