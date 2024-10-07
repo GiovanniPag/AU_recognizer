@@ -111,7 +111,19 @@
     "mode_radio": "Mode:",
     "c_simages": "Save images",
     "c_scodes": "Save FLAME codes",
-    "c_smesh": "Save Mesh"
+    "c_smesh": "Save Mesh",
+    "fill_color": "Fill color:",
+    "line_color": "Line color:",
+    "canvas_color": "Canvas color:",
+    "point_color": "Point color:",
+    "point_size": "Point size:",
+    "moving_step": "Move step:",
+    "zoom_slider": "Zoom:",
+    "x_slider": "rotation X:",
+    "y_slider": "rotation Y:",
+    "z_slider": "rotation Z:",
+    "reset_rot": "Reset Rotation:",
+    "no_fill": "no fill:"
   },
   "menu_contextual": {
     "tree_view": {
@@ -243,6 +255,10 @@
     },
     "choose_images": {
       "title": "Select the Images to add to the project"
+    },
+    "setting_dialog": {
+      "general_tab": "General",
+      "viewer_3d_tab": "Viewer 3D"
     },
     "buttons": {
       "ok": "Ok",

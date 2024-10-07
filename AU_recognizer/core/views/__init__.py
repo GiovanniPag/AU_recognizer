@@ -6,7 +6,7 @@ from abc import abstractmethod
 from enum import Enum, auto
 from math import floor
 from pathlib import Path
-from tkinter import filedialog
+from tkinter import filedialog, colorchooser
 
 from PIL import ImageTk
 from PIL import Image
@@ -290,7 +290,7 @@ class EntryButton(View):
             self._path_label.set(dir_name)
 
 
-class ComboEntry(View):
+class ComboLabel(View):
     def __init__(self, master=None, label_text="no_text", values="", selected="", state="readonly", **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
@@ -318,16 +318,17 @@ class ComboEntry(View):
 
 
 class CheckLabel(View):
-    def __init__(self, master=None, label_text="no_text", default=False, **kwargs):
+    def __init__(self, master=None, label_text="no_text", default=False, command=None, **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
         self.label_text = label_text
         self._path_label_info = tk.StringVar(value=i18n.entry_buttons[label_text])
         self.value = tk.BooleanVar(value=default)
+        self.command=command
         self.update_language()
 
     def create_view(self):
-        check_box = ttk.Checkbutton(self, textvariable=self._path_label_info, variable=self.value)
+        check_box = ttk.Checkbutton(self, textvariable=self._path_label_info, variable=self.value, command=self.command)
         check_box.pack(side=tk.LEFT, expand=True, fill=tk.X)
 
     def get_value(self):
@@ -371,3 +372,127 @@ class RadioList(View):
         self.radio_frame.configure(text=i18n.entry_buttons[self.list_title])
         for btn_name, btn_data in self.radio_buttons.items():
             btn_data[RADIO_TEXT].set(value=i18n.radio_buttons[btn_name])
+
+
+class ColorPicker(View):
+    def __init__(self, master=None, label_text="no_text", default="#FFFFFF", **kwargs):
+        super().__init__(master, **kwargs)
+        self.master = master
+        self.label_text = label_text
+        self._label_info = tk.StringVar(value=i18n.entry_buttons[label_text])
+        self.color = tk.StringVar(value=default)
+        self.color_button = None
+        self.update_language()
+
+    def create_view(self):
+        ttk.Label(self, textvariable=self._label_info).pack(side=tk.LEFT)
+        button_frame = tk.Frame(self, padx=5)
+        button_frame.pack(side=tk.LEFT, expand=True, fill=tk.X)
+        self.color_button = tk.Button(button_frame, text="", relief='flat', command=self.pick_color, width=12, height=1)
+        self.color_button.pack(side=tk.LEFT)
+        self.color_button['bg'] = self.color.get()
+        self.color_button['activebackground'] = self.color.get()
+
+    def pick_color(self):
+        logger.debug("pick color")
+        color = colorchooser.askcolor(initialcolor=self.color.get())
+        if color[1]:
+            logger.debug(f"color picked {color}")
+            self.color.set(color[1])
+            self.color_button['bg'] = color[1]
+            self.color_button['activebackground'] = color[1]
+
+    def get_value(self):
+        return self.color.get()
+
+    def update_language(self):
+        self._label_info.set(i18n.entry_buttons[self.label_text])
+
+
+class IntPicker(View):
+    def __init__(self, master=None, label_text="no_text", default=0, min_value=0, max_value=100, increment=1, **kwargs):
+        super().__init__(master, **kwargs)
+        self.master = master
+        self.label_text = label_text
+        self._label_info = tk.StringVar(value=i18n.entry_buttons[label_text])
+        self.int_value = tk.IntVar(value=default)
+        self.min_value = min_value
+        self.max_value = max_value
+        self.increment = increment
+        self.update_language()
+
+    def create_view(self):
+        ttk.Label(self, textvariable=self._label_info).pack(side=tk.LEFT)
+        spinbox_frame = tk.Frame(self, padx=5)
+        spinbox_frame.pack(side=tk.LEFT, expand=True, fill=tk.X)
+        spinbox = tk.Spinbox(spinbox_frame, from_=self.min_value, to=self.max_value, increment=self.increment,
+                             textvariable=self.int_value, width=5)
+        spinbox.pack(side=tk.LEFT)
+
+    def get_value(self):
+        return self.int_value.get()
+
+    def update_language(self):
+        self._label_info.set(i18n.entry_buttons[self.label_text])
+
+
+class FloatPicker(View):
+    def __init__(self, master=None, label_text="no_text", default=0.0, min_value=0.01, max_value=1, increment=0.01, **kwargs):
+        super().__init__(master, **kwargs)
+        self.master = master
+        self.label_text = label_text
+        self._label_info = tk.StringVar(value=label_text)
+        self.float_value = tk.DoubleVar(value=default)
+        self.min_value = min_value
+        self.max_value = max_value
+        self.increment = increment
+        self.update_language()
+
+    def create_view(self):
+        ttk.Label(self, textvariable=self._label_info).pack(side=tk.LEFT)
+        spinbox_frame = tk.Frame(self, padx=5)
+        spinbox_frame.pack(side=tk.LEFT, expand=True, fill=tk.X)
+        spinbox = ttk.Spinbox(spinbox_frame, from_=self.min_value, to=self.max_value, increment=self.increment,
+                              textvariable=self.float_value, width=5)
+        spinbox.pack(side=tk.LEFT)
+
+    def get_value(self):
+        return self.float_value.get()
+
+    def update_language(self):
+        # Update the label text according to the current language or any other mechanism
+        self._label_info.set(self.label_text)
+
+
+class ScaleLabel(View):
+    def __init__(self, master=None, label_text="no_text", from_=1.1, to=1000.0, initial_value=1.1, increment=0.1,orient=tk.HORIZONTAL,
+                 command=None, **kwargs):
+        super().__init__(master, **kwargs)
+        self.master = master
+        self.label_text = label_text
+        self._path_label_info = tk.StringVar(value=i18n.entry_buttons[label_text])
+        self._scale_slider = None
+        self.from_ = from_
+        self.to = to
+        self.increment=increment
+        self.value = tk.DoubleVar(value=initial_value)
+        self.orient = orient
+        self.command = command
+        self.update_language()
+
+    def create_view(self):
+        ttk.Label(self, textvariable=self._path_label_info).pack(side=tk.LEFT)
+        scale_frame = tk.Frame(self)
+        scale_frame.pack(side=tk.LEFT, expand=True, fill=tk.X)
+        self._scale_slider = ttk.Scale(scale_frame, from_=self.from_, to=self.to, orient=self.orient,
+                                       command=self.command, variable=self.value)
+        self._scale_slider.pack(side=tk.LEFT, expand=True, fill=tk.X)
+
+    def get(self):
+        return self._scale_slider.get()
+
+    def set(self, new_value):
+        self._scale_slider.set(new_value)
+
+    def update_language(self):
+        self._path_label_info.set(i18n.entry_buttons[self.label_text])

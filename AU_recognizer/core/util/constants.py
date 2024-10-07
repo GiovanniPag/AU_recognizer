@@ -7,6 +7,7 @@ CONFIG_FILE = Path.cwd() / "AU_recognizer" / "var" / ".conf" / "AU_rec.ini"
 # config file sections
 OPEN_PROJECTS = "open projects"
 CONFIG = "config"
+VIEWER = "viewer_3d"
 # config file config section items
 LANGUAGE = "language"
 I18N_PATH = "i18n_path"
@@ -25,6 +26,21 @@ LOG_FOLDER_DEFAULT = "AU_recognizer/var/.logs/"
 PROJECTS_FOLDER_DEFAULT = "AU_recognizer/projects/"
 MODEL_FOLDER_DEFAULT = "AU_recognizer/../emoca/assets/EMOCA/models"
 GUIDE_FILE_DEFAULT = "AU_recognizer/var/guide.pdf"
+# config file viewer section items
+FILL_COLOR = "fill_color"
+LINE_COLOR = "line_color"
+CANVAS_COLOR = "canvas_color"
+POINT_COLOR = "point_color"
+POINT_SIZE = "point_size"
+MOVING_STEP = "moving_step"
+
+# config file viewer section default values
+FILL_COLOR_DEFAULT = "#000000"
+LINE_COLOR_DEFAULT = "#0000FF"
+CANVAS_COLOR_DEFAULT = "#FFFFFF"
+POINT_COLOR_DEFAULT = "#131313"
+POINT_SIZE_DEFAULT = 1
+MOVING_STEP_DEFAULT = 10
 
 # project config file items
 P_NAME = "name"
@@ -165,3 +181,13 @@ MF_SAVE_IMAGES = "save_images"
 MF_SAVE_CODES = "save_codes"
 MF_SAVE_MESH = "save_mesh"
 MF_FIT_MODE = "fit_mode"
+
+# Setting Dialog
+GENERAL_TAB = "general_tab"
+VIEWER_TAB = "viewer_3d_tab"
+
+# Define arrow symbols
+up_arrow = '\u2191'
+down_arrow = '\u2193'
+left_arrow = '\u2190'
+right_arrow = '\u2192'

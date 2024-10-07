@@ -37,6 +37,14 @@ if not exist:
         MODEL_FOLDER: MODEL_FOLDER_DEFAULT,
         GUIDE_FILE: GUIDE_FILE_DEFAULT
     }
+    nect_config[VIEWER] = {
+        FILL_COLOR: FILL_COLOR_DEFAULT,
+        LINE_COLOR: LINE_COLOR_DEFAULT,
+        CANVAS_COLOR: CANVAS_COLOR_DEFAULT,
+        POINT_COLOR: POINT_COLOR_DEFAULT,
+        POINT_SIZE: POINT_SIZE_DEFAULT,
+        MOVING_STEP: MOVING_STEP_DEFAULT
+    }
     nect_config[OPEN_PROJECTS] = {}
 # global logger
 logging.config.fileConfig(fname=Path(nect_config[CONFIG][LOGGER_PATH]), disable_existing_loggers=False,

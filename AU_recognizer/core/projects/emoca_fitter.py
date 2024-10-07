@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from AU_recognizer import CONFIG, MODEL_FOLDER, P_PATH, F_OUTPUT, MF_MODEL, MF_FIT_MODE, MF_SAVE_IMAGES, MF_SAVE_MESH, \
     MF_SAVE_CODES, logger
 from AU_recognizer.core.util import nect_config

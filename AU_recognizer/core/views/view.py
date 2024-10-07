@@ -1,19 +1,17 @@
 import tkinter as tk
 from configparser import ConfigParser
-from pprint import pprint
 
 from tkinter import ttk, VERTICAL
 from typing import Optional
-
-from PIL import Image, ImageTk
 
 from AU_recognizer.core.controllers import Controller
 from AU_recognizer.core.util import config
 from AU_recognizer.core.util.config import logger, nect_config
 from AU_recognizer.core.util.constants import *
 from AU_recognizer.core.util.language_resource import i18n
-from AU_recognizer.core.views import View, AutoScrollbar, ScrollFrame, ComboEntry, CheckLabel, RadioList
+from AU_recognizer.core.views import View, AutoScrollbar, ScrollFrame, ComboLabel, CheckLabel, RadioList
 from AU_recognizer.core.views.image_viewer import CanvasImage
+from AU_recognizer.core.views.viewer_3d import Viewer3D
 
 
 class ScrollWrapperView(View):
@@ -394,6 +392,7 @@ class Viewer3DView(View):
         self.data = None
         self.master = master
         self.__canvas_image: Optional[CanvasImage] = None
+        self.__canvas_3d: Optional[Viewer3D] = None
         self.__placeholder = ttk.Frame(self)
 
     def update_language(self):
@@ -416,6 +415,10 @@ class Viewer3DView(View):
             logger.debug("show image in Viewer3D view")
             self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path)
             self.__canvas_image.grid(row=0, column=0, sticky='nswe')
+        elif type_of_file == "obj":
+            self.__canvas_3d = Viewer3D(placeholder=self.__placeholder, obj_file_path=path)
+            self.__canvas_3d.grid(row=0, column=0, sticky='nswe')
+            self.__canvas_3d.update_display()
         else:
             logger.debug("no file")
             # no file
@@ -428,6 +431,10 @@ class Viewer3DView(View):
             if path.suffix in (".png", ".bmp", ".jpg"):
                 self.data = data
                 self.__update_view(type_of_file="image")
+            # is obj
+            if path.suffix == ".obj":
+                self.data = data
+                self.__update_view(type_of_file="obj")
 
 
 class SelectedFileView(View):
@@ -474,14 +481,14 @@ class SelectedFileView(View):
             else:
                 widget.grid_forget()
         if self.data:
-            ttk.Label(self, textvariable=self._file_label_info).grid(column=0, row=0, sticky=(tk.W, tk.E))
-            ttk.Label(self, textvariable=self._file_label).grid(column=1, row=0, sticky=(tk.W, tk.E))
-            ttk.Label(self, textvariable=self._suffix_label_info).grid(column=0, row=1, sticky=(tk.W, tk.E))
-            ttk.Label(self, textvariable=self._suffix_label).grid(column=1, row=1, sticky=(tk.W, tk.E))
+            ttk.Label(self, textvariable=self._file_label_info).grid(column=0, row=0, sticky=tk.EW)
+            ttk.Label(self, textvariable=self._file_label).grid(column=1, row=0, sticky=tk.EW)
+            ttk.Label(self, textvariable=self._suffix_label_info).grid(column=0, row=1, sticky=tk.EW)
+            ttk.Label(self, textvariable=self._suffix_label).grid(column=1, row=1, sticky=tk.EW)
             # update buttons
-            self._open_s.grid(column=0, row=2, sticky=(tk.W, tk.E))
+            self._open_s.grid(column=0, row=2, sticky=tk.EW)
         else:
-            ttk.Label(self, textvariable=self._no_file).grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+            ttk.Label(self, textvariable=self._no_file).grid(column=0, row=0, sticky=tk.NSEW)
 
     def set_command(self, btn_name, command):
         logger.debug(f"ModelFit action view set command {command} for {btn_name}")
@@ -529,11 +536,11 @@ class ProjectInfoView(View):
             self.columnconfigure(0, weight=0)
             self.columnconfigure(1, weight=1)
             ttk.Label(self, textvariable=self._name_label_info).grid(column=0, row=0, sticky=tk.W)
-            ttk.Label(self, textvariable=self._name_label).grid(column=1, row=0, sticky=(tk.W, tk.E))
+            ttk.Label(self, textvariable=self._name_label).grid(column=1, row=0, sticky=tk.EW)
             ttk.Label(self, textvariable=self._path_label_info).grid(column=0, row=1, sticky=tk.W)
-            ttk.Label(self, textvariable=self._path_label).grid(column=1, row=1, sticky=(tk.W, tk.E))
+            ttk.Label(self, textvariable=self._path_label).grid(column=1, row=1, sticky=tk.EW)
         else:
-            ttk.Label(self, textvariable=self._no_project).grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+            ttk.Label(self, textvariable=self._no_project).grid(column=0, row=0, sticky=tk.NSEW)
 
     def __step_done_set_label(self, label, info_to_check):
         logger.debug(f"set {label} of {info_to_check} as done or not")
@@ -563,7 +570,7 @@ class ModelFitView(View):
         self.scrollFrame.viewPort.columnconfigure(0, weight=1)
         self._project_info: Optional[ConfigParser] = None
         models = [x for x in Path(nect_config[CONFIG][MODEL_FOLDER]).iterdir() if x.is_dir()]
-        self.model_combobox = ComboEntry(master=self.scrollFrame.viewPort, label_text="m_combo",
+        self.model_combobox = ComboLabel(master=self.scrollFrame.viewPort, label_text="m_combo",
                                          selected="EMOCA_v2_lr_mse_20",
                                          values=[str(file_name.stem) for file_name in models], state="readonly")
         self.save_images = CheckLabel(master=self.scrollFrame.viewPort, label_text="c_simages", default=True)
@@ -587,7 +594,7 @@ class ModelFitView(View):
 
     def create_view(self):
         logger.debug("create view in ModelFit view")
-        self.scrollFrame.grid(row=0, column=0, sticky=(tk.N, tk.W, tk.E, tk.S), padx=10, pady=5)
+        self.scrollFrame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=5)
         # Combo box for model selection
         self.model_combobox.create_view()
         # Checkboxes for options

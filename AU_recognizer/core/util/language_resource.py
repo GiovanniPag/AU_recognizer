@@ -101,6 +101,8 @@ class I18N:
                 self.entry_buttons = data['entry_buttons']
                 # radio buttons
                 self.radio_buttons = data['radio_buttons']
+                # settings dialog
+                self.settings_dialog = data['dialog']["setting_dialog"]
 
 
 i18n = I18N()

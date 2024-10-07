@@ -112,7 +112,19 @@
     "mode_radio": "Modalità:",
     "c_simages": "Salva immagini",
     "c_scodes": "Salva Codici FLAME",
-    "c_smesh": "Salva Mesh"
+    "c_smesh": "Salva Mesh",
+    "fill_color": "Colore riempimento:",
+    "line_color": "Colore linee:",
+    "canvas_color": "Colore sfondo:",
+    "point_color": "Colore punti:",
+    "point_size": "Dimensione punti:",
+    "moving_step": "Incremento di movimento:",
+    "zoom_slider": "Zoom:",
+    "x_slider": "rotazione X:",
+    "y_slider": "rotazione Y:",
+    "z_slider": "rotazione Z:",
+    "reset_rot": "Resetta Rotazione:",
+    "no_fill": "senza riempimento:"
   },
   "menu_contextual": {
     "tree_view": {
@@ -244,6 +256,10 @@
     },
     "choose_images": {
       "title": "Seleziona le Immagini da aggiungere al progetto"
+    },
+    "setting_dialog": {
+      "general_tab": "Generale",
+      "viewer_3d_tab": "Visualizzatore 3D"
     },
     "buttons": {
       "ok": "Ok",
