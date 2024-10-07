@@ -212,3 +212,6 @@ class AURecognizer(tk.Tk):
         self.selected_file.update_language()
         self.project_info.update_language()
         self.project_actions.update_language()
+
+    def can_grab_focus(self):
+        return not self.tree_menu.is_open

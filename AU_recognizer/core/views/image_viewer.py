@@ -15,7 +15,7 @@ MAX_IMAGE_PIXELS = 1500000000  # maximum pixels in the image, use it carefully
 
 # canvas to Display and zoom image
 class CanvasImage:
-    def __init__(self, placeholder, path):
+    def __init__(self, placeholder, path, can_grab_focus=True):
         # Initialize the ImageFrame
         self.imscale = 1.0  # scale for the canvas image zoom, public for outer classes
         self.__delta = 1.3  # zoom magnitude
@@ -83,7 +83,8 @@ class CanvasImage:
         # Put image into container rectangle and use it to set proper coordinates to the image
         self.container = self.canvas.create_rectangle((0, 0, self.imwidth, self.imheight), width=0)
         self.__show_image()  # show image on the canvas
-        self.canvas.focus_set()  # set focus on the canvas
+        if can_grab_focus:
+            self.canvas.focus_set()  # set focus on the canvas
 
     def smaller(self):
         """ Resize image proportionally and return smaller image """
@@ -188,11 +189,13 @@ class CanvasImage:
     def __move_from(self, event):
         """ Remember previous coordinates for scrolling with the mouse """
         self.canvas.scan_mark(event.x, event.y)
+        self.canvas.focus_set()  # set focus on the canvas
 
     def __move_to(self, event):
         """ Drag (move) canvas to the new position """
         self.canvas.scan_dragto(event.x, event.y, gain=1)
         self.__show_image()  # zoom tile and show it on the canvas
+        self.canvas.focus_set()  # set focus on the canvas
 
     def outside(self, x, y):
         """ Checks if the point (x,y) is outside the image area """

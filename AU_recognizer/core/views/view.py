@@ -204,6 +204,7 @@ class TreeViewMenu(tk.Menu, View):
         super().__init__(master, tearoff=0)
         self.master = master
         self.data = None
+        self.is_open = False
         self.__menu_names = {
             MT_SEL_P: {
                 M_MASTER: self,
@@ -372,19 +373,20 @@ class Viewer3DView(View):
         path = Path(self.data[P_PATH])
         if type_of_file == "image":
             logger.debug("show image in Viewer3D view")
-            self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path)
+            self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path, can_grab_focus=self.master.can_grab_focus())
             self.__canvas_image.grid(row=0, column=0, sticky='nswe')
         elif type_of_file == "obj":
-            self.__canvas_3d = Viewer3D(placeholder=self.__placeholder, obj_file_path=path)
-            self.__canvas_3d.grid(row=0, column=0, sticky='nswe')
-            self.__canvas_3d.update_display()
+            logger.debug("show mesh in Viewer3D view")
+            # self.__canvas_3d = Viewer3D(placeholder=self.__placeholder, obj_file_path=path)
+            # self.__canvas_3d.grid(row=0, column=0, sticky='nswe')
+            # self.__canvas_3d.update_display()
         else:
             logger.debug("no file")
             # no file
 
     def update_selected_file(self, data: Optional[dict] = None):
         logger.debug("update selected file in selected file view")
-        if data:
+        if data and data != self.data:
             path = Path(data[P_PATH])
             # is image
             if path.suffix in (".png", ".bmp", ".jpg"):

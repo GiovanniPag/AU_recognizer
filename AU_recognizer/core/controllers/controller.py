@@ -285,6 +285,7 @@ class TreeViewMenuController(Controller):
     def open_menu(self, event, data):
         logger.debug(f"open tree view menu at {event.__dict__} with data {data}")
         self.view.set_selected(data)
+        self.view.is_open = True
         self.view.post(event.x_root, event.y_root)
         self.view.focus_set()
         self.view.bind_all("<Button-1>", self.on_close)
@@ -306,6 +307,7 @@ class TreeViewMenuController(Controller):
 
     def unpost_menu(self, _):
         logger.debug(f"unpost_menu of tree view menu {_}")
+        self.view.is_open = False
         self.view.unbind_all("<Button-1>")
         self.view.unbind_all("<Button-2>")
         self.view.after_cancel(self.after_id)
