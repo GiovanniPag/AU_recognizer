@@ -166,7 +166,7 @@ class AURecognizer(tk.Tk):
         logger.debug("attach virtual event controllers for <<LanguageChange>>")
         self.bind("<<LanguageChange>>", lambda event: self.update_app_language())
         logger.debug("attach virtual event controllers for <<UpdateTree>>")
-        self.bind("<<UpdateTree>>", lambda event: self.tree_controller.update_tree_view(populate_root=True))
+        self.bind("<<UpdateTree>>", lambda event: self.tree_controller.update_tree_view(populate_root=True, sort_tree=True))
         logger.debug("attach virtual event controllers for <<selected_project>>")
         self.bind("<<selected_project>>", self.select_project)
         logger.debug("attach virtual event controllers for <<selected_file>>")

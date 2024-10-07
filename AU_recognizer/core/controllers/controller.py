@@ -3,7 +3,7 @@ import re
 import shutil
 from collections import namedtuple
 import tkinter as tk
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from tkinter import filedialog
 from typing import Optional
 
@@ -341,6 +341,8 @@ class TreeController(Controller):
 
     def __init__(self, context_controller: TreeViewMenuController, master=None) -> None:
         super().__init__()
+        self.last_consistency_check = datetime.min  # Initialize the timestamp
+        self.consistency_check_interval = timedelta(seconds=180)  # Set the check interval (e.g., 30 seconds)
         self.master = master
         self.context_controller = context_controller
         self.view: ProjectTreeView or None = None
@@ -368,7 +370,7 @@ class TreeController(Controller):
         self.view.bind('<<contextual_menu>>', self.show_contextual_menu)
         self.view.tag_bind('item', "<Button-3>", self.show_contextual_menu_trigger)
         logger.debug("populate treeview items")
-        self.update_tree_view(populate_root=True)
+        self.update_tree_view(populate_root=True, sort_tree=True)
 
     def show_contextual_menu_trigger(self, _):
         logger.debug(f"show contextual menu of treeview trigger {_}")
@@ -397,12 +399,19 @@ class TreeController(Controller):
             self.view.selection_remove(item)
 
     def focus_item(self, _):
-        self.schedule_update()
+
         selection = self.view.selection()
         if selection:
             selected_item_id = selection[0]
             selected_item = self.view.item(selected_item_id)
             logger.debug(f"selected item {selected_item}")
+            # Check if the consistency check should run (based on time interval)
+            now = datetime.now()
+            if now - self.last_consistency_check >= self.consistency_check_interval:
+                self.__recursive_consistency_check(selected_item_id)
+                self.last_consistency_check = now  # Update the timestamp after running the check
+            else:
+                logger.debug("Skipped consistency check; interval not reached.")
             self.__last_selected_file = ast.literal_eval(selected_item[T_VALUES][-1])
             self.master.event_generate("<<selected_item>>")
         else:
@@ -457,12 +466,14 @@ class TreeController(Controller):
         logger.debug("Tree_view controller event to update view")
         self.update_tree_view()
 
-    def update_tree_view(self, populate_root=False):
+    def update_tree_view(self, populate_root=False, sort_tree=False):
         logger.debug(f"Tree_view controller update view, populate_root = {populate_root}")
         self.nodes_consistency_check()
         if populate_root:
             self.populate_root_nodes()
         self.update_tree_nodes()
+        if sort_tree:
+            self.sort_tree()
 
     def remove_tree_node(self, path):
         if self.view.exists(path):
@@ -538,6 +549,29 @@ class TreeController(Controller):
                 self.__recursive_consistency_check(child_node)
         else:
             self.remove_tree_node(data[P_PATH])
+
+    def sort_tree(self):
+        logger.debug("sort tree items recursively")
+        # Sort all root nodes and their children
+        for root_node in self.view.get_children(""):
+            self.__recursive_sort_tree(root_node)
+
+    def __recursive_sort_tree(self, node):
+        # Sort the current node only if it has children
+        if self.view.get_children(node):
+            self.__sort_tree_node(node)
+        # Recursively sort all children
+        for child_node in self.view.get_children(node):
+            self.__recursive_sort_tree(child_node)
+
+    def __sort_tree_node(self, parent_node=""):
+        # Retrieve all child nodes of the parent node
+        children = self.view.get_children(parent_node)
+        # Sort the children based on the displayed text (name of the file or directory)
+        sorted_children = sorted(children, key=lambda x: self.view.item(x, 'text').lower())
+        # Reinsert the sorted nodes into the tree
+        for index, child in enumerate(sorted_children):
+            self.view.move(child, parent_node, index)
 
 
 class SelectedFileController(Controller):
