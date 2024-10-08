@@ -1,6 +1,7 @@
 import platform as pf
-import time
+import tkinter as tk
 from pathlib import Path
+from tkinter import ttk
 
 import numpy as np
 from OpenGL.GL import *
@@ -341,62 +342,36 @@ void main()
 """
 
 
-class MeshViewer(View):
+class MeshViewer(tk.Toplevel):
     def __init__(self, master=None, obj_file_path=None):
-        super().__init__(master)
-        self.master = master
-        self.update_config()
-        self.create_view(obj_file_path)
-        self.bind_events()
+        super().__init__()
+        self.title("3D Mesh Viewer")
+        self.geometry("800x600")
+        self.__update_config()
+        self.__frame = ttk.Frame(self, width=800, height=600)
+        self.__opengl_frame = Viewer3DGl(self.__frame, obj_file_path)
+        self.create_view()
+        self.protocol("WM_DELETE_WINDOW", self.__on_close)
 
-    def create_view(self, obj_file_path):
-        self.pack()
+    def __on_close(self):
+        self.destroy()
 
+    def create_view(self):
         # Initialize OpenGL viewer
-        self.viewer = Viewer3DGl(self, obj_file_path)
-        self.viewer.pack(fill=tk.BOTH, expand=True)
+        self.__frame.pack_propagate(False)  # Prevent the frame from resizing to fit the OpenGLFrame
+        self.__frame.grid(row=0, column=0, sticky='nswe')
+        self.__opengl_frame.pack(fill=tk.BOTH, expand=True)
+        # TODO: Add viewing mode: point cloud, texture, mesh, wireframe...
 
-        # Add controls frame
-        self.controls_frame = Frame(self)
-        self.controls_frame.pack(side=tk.LEFT, fill=tk.Y)
-
-        # Add checkboxes for controls
-        self.show_texture_var = tk.BooleanVar()
-        self.wireframe_mode_var = tk.BooleanVar()
-
-        self.show_texture_check = tk.Checkbutton(self.controls_frame, text="Show Texture", variable=self.show_texture_var,
-                                                 command=self.toggle_texture)
-        self.show_texture_check.pack()
-
-        self.wireframe_mode_check = tk.Checkbutton(self.controls_frame, text="Wireframe Mode",
-                                                   variable=self.wireframe_mode_var, command=self.toggle_wireframe)
-        self.wireframe_mode_check.pack()
-
-    def update_config(self):
+    def __update_config(self):
         """Load and set up configuration from nect_config."""
         self._fill_color = str(nect_config[VIEWER][FILL_COLOR])
         self._line_color = str(nect_config[VIEWER][LINE_COLOR])
-        # Additional configurations...
-
-    def toggle_texture(self):
-        # Logic to show or hide texture based on the checkbox state
-        if self.show_texture_var.get():
-            print("Show Texture enabled")
-            # Enable textures in your OpenGL rendering logic
-        else:
-            print("Show Texture disabled")
-            # Disable textures in your OpenGL rendering logic
-
-    def toggle_wireframe(self):
-        # Logic to toggle wireframe mode based on the checkbox state
-        if self.wireframe_mode_var.get():
-            print("Wireframe Mode enabled")
-            # Set OpenGL to wireframe mode
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-        else:
-            print("Wireframe Mode disabled")
-            # Set OpenGL to fill mode
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        # TODO: Additional configurations...
 
     def update_language(self):
+        # TODO: update language...
         pass
+
+    def display(self):
+        self.__opengl_frame.animate = 1
