@@ -11,7 +11,6 @@ from AU_recognizer.core.util.constants import *
 from AU_recognizer.core.util.language_resource import i18n
 from AU_recognizer.core.views import View, AutoScrollbar, ScrollFrame, ComboLabel, CheckLabel, RadioList
 from AU_recognizer.core.views.image_viewer import CanvasImage
-from AU_recognizer.core.views.viewer_3d import Viewer3D
 from AU_recognizer.core.views.viewer_3d_gl import Viewer3DGl
 
 
@@ -353,7 +352,7 @@ class Viewer3DView(View):
         self.data = None
         self.master = master
         self.__canvas_image: Optional[CanvasImage] = None
-        self.__canvas_3d: Optional[Viewer3D] = None
+        self.__canvas_3d: Optional[Viewer3DGl] = None
         self.__placeholder = ttk.Frame(self)
 
     def update_language(self):
