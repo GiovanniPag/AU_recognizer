@@ -341,37 +341,40 @@ void main()
 }
 """
 
-
-class MeshViewer(tk.Toplevel):
-    def __init__(self, master=None, obj_file_path=None):
+class MeshViewerApp(tk.Tk):
+    def __init__(self, obj_file_path=None):
         super().__init__()
-        self.title("3D Mesh Viewer")
-        self.geometry("800x600")
-        self.__update_config()
-        self.__frame = ttk.Frame(self, width=800, height=600)
-        self.__opengl_frame = Viewer3DGl(self.__frame, obj_file_path)
-        self.create_view()
+        self.title("Main App with Embedded Mesh Viewer")
+        self.geometry("1000x800")
+
+        # Create a main frame to hold the OpenGL viewer and other widgets
+        self.main_frame = ttk.Frame(self, width=800, height=600)
+        self.main_frame.grid(row=0, column=0, sticky="nswe")
+
+        # Create a frame for the OpenGL viewer within the main frame
+        self.opengl_frame_container = ttk.Frame(self.main_frame, width=600, height=400)
+        self.opengl_frame_container.grid(row=0, column=1, sticky="nswe")
+
+        # Add other widgets (e.g., buttons) to the main frame
+        self.controls_frame = ttk.Frame(self.main_frame, width=200, height=400)
+        self.controls_frame.grid(row=0, column=0, sticky="nswe")
+
+        # Example widget: a button in the controls frame
+        self.example_button = ttk.Button(self.controls_frame, text="Example Button")
+        self.example_button.pack(pady=20)
+
+        # Create and pack the OpenGL viewer inside the frame container
+        self.opengl_viewer = Viewer3DGl(self.opengl_frame_container, obj_file_path)
+        self.opengl_viewer.pack(fill=tk.BOTH, expand=True)
+
+        # Setup resizing behavior
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=3)
+        self.main_frame.grid_columnconfigure(1, weight=1)
+
         self.protocol("WM_DELETE_WINDOW", self.__on_close)
 
     def __on_close(self):
         self.destroy()
-
-    def create_view(self):
-        # Initialize OpenGL viewer
-        self.__frame.pack_propagate(False)  # Prevent the frame from resizing to fit the OpenGLFrame
-        self.__frame.grid(row=0, column=0, sticky='nswe')
-        self.__opengl_frame.pack(fill=tk.BOTH, expand=True)
-        # TODO: Add viewing mode: point cloud, texture, mesh, wireframe...
-
-    def __update_config(self):
-        """Load and set up configuration from nect_config."""
-        self._fill_color = str(nect_config[VIEWER][FILL_COLOR])
-        self._line_color = str(nect_config[VIEWER][LINE_COLOR])
-        # TODO: Additional configurations...
-
-    def update_language(self):
-        # TODO: update language...
-        pass
-
-    def display(self):
-        self.__opengl_frame.animate = 1

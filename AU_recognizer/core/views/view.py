@@ -12,7 +12,7 @@ from AU_recognizer.core.util.language_resource import i18n
 from AU_recognizer.core.views import View, AutoScrollbar, ScrollFrame, ComboLabel, CheckLabel, RadioList
 from AU_recognizer.core.views.image_viewer import CanvasImage
 from AU_recognizer.core.views.viewer_3d import Viewer3D
-from AU_recognizer.core.views.viewer_3d_gl import MeshViewer
+from AU_recognizer.core.views.viewer_3d_gl import Viewer3DGl
 
 
 class ScrollWrapperView(View):
@@ -369,19 +369,22 @@ class Viewer3DView(View):
 
     def __update_view(self, type_of_file):
         logger.debug("update view in selected Viewer3D view")
+        if self.__canvas_3d:
+            self.__canvas_3d.destroy()
         for widget in self.__placeholder.winfo_children():
             widget.destroy()
         path = Path(self.data[P_PATH])
         if type_of_file == "image":
             logger.debug("show image in Viewer3D view")
-            self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path, can_grab_focus=self.master.can_grab_focus())
+            self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path,
+                                              can_grab_focus=self.master.can_grab_focus())
             self.__canvas_image.grid(row=0, column=0, sticky='nswe')
         elif type_of_file == "obj":
             logger.debug("show mesh in Viewer3D view")
             # Create a new OpenGL window
-            self.__mesh_viewer = MeshViewer(master=self.master, obj_file_path=path)
-            self.__mesh_viewer.display()
-            self.__mesh_viewer.grab_set()  # Make it modal if needed
+            self.__canvas_3d = Viewer3DGl(placeholder=self.__placeholder, obj_file_path=path)
+            self.__canvas_3d.grid(row=0, column=0, sticky='nswe')
+            self.__canvas_3d.animate = 1
         else:
             logger.debug("no file")
             # no file

@@ -4,8 +4,7 @@
 # 2) take the fitted mesh and recognize activated AU
 from AU_recognizer.AURecognizer import AURecognizer
 import tkinter as tk
-from AU_recognizer.core.views.viewer_3d_gl import Viewer3DGl
-
+from AU_recognizer.core.views.viewer_3d_gl import Viewer3DGl, MeshViewerApp
 
 # if __name__ == "__main__":
 #
@@ -16,6 +15,10 @@ from AU_recognizer.core.views.viewer_3d_gl import Viewer3DGl
 #     app.pack(fill=tk.BOTH, expand=tk.YES)
 #     app.animate = 1
 #     root.mainloop()
+
+# if __name__ == "__main__":
+#     app = MeshViewerApp(obj_file_path="AU_recognizer/projects/training_data/output/EMOCA_v2_lr_mse_20/a000/mesh_coarse.obj")
+#     app.mainloop()
 
 if __name__ == "__main__":
     # create main application
