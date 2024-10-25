@@ -1,8 +1,11 @@
 import tkinter as tk
 from configparser import ConfigParser
+from pprint import pprint
 
 from tkinter import ttk, VERTICAL
 from typing import Optional
+
+from OpenGL.GL import GL_NO_ERROR, glGetError
 
 from AU_recognizer.core.controllers import Controller
 from AU_recognizer.core.util import config
@@ -344,64 +347,6 @@ class ProjectTreeView(ttk.Treeview, View):
         self.heading(T_MODIFIED, text=i18n.tree_view[T_COLUMNS][T_MODIFIED])
 
 
-class Viewer3DView(View):
-
-    def __init__(self, master, **kw):
-        super().__init__(master, **kw)
-        self._title = None
-        self.data = None
-        self.master = master
-        self.__canvas_image: Optional[CanvasImage] = None
-        self.__canvas_3d: Optional[Viewer3DGl] = None
-        self.__placeholder = ttk.Frame(self)
-
-    def update_language(self):
-        logger.debug("update language in Viewer3D view")
-
-    def create_view(self):
-        logger.debug("create_view in Viewer3D view")
-        self.rowconfigure(0, weight=1)  # make grid cell expandable
-        self.columnconfigure(0, weight=1)
-        self.__placeholder.grid(row=0, column=0, sticky='nswe')
-        self.__placeholder.rowconfigure(0, weight=1)  # make grid cell expandable
-        self.__placeholder.columnconfigure(0, weight=1)
-
-    def __update_view(self, type_of_file):
-        logger.debug("update view in selected Viewer3D view")
-        if self.__canvas_3d:
-            self.__canvas_3d.destroy()
-        for widget in self.__placeholder.winfo_children():
-            widget.destroy()
-        path = Path(self.data[P_PATH])
-        if type_of_file == "image":
-            logger.debug("show image in Viewer3D view")
-            self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path,
-                                              can_grab_focus=self.master.can_grab_focus())
-            self.__canvas_image.grid(row=0, column=0, sticky='nswe')
-        elif type_of_file == "obj":
-            logger.debug("show mesh in Viewer3D view")
-            # Create a new OpenGL window
-            self.__canvas_3d = Viewer3DGl(placeholder=self.__placeholder, obj_file_path=path)
-            self.__canvas_3d.grid(row=0, column=0, sticky='nswe')
-            self.__canvas_3d.animate = 1
-        else:
-            logger.debug("no file")
-            # no file
-
-    def update_selected_file(self, data: Optional[dict] = None):
-        logger.debug("update selected file in selected file view")
-        if data and data != self.data:
-            path = Path(data[P_PATH])
-            # is image
-            if path.suffix in (".png", ".bmp", ".jpg"):
-                self.data = data
-                self.__update_view(type_of_file="image")
-            # is obj
-            if path.suffix == ".obj":
-                self.data = data
-                self.__update_view(type_of_file="obj")
-
-
 class SelectedFileView(View):
     def __init__(self, master=None):
         super().__init__(master)
@@ -472,6 +417,67 @@ class SelectedFileView(View):
                     str(path.suffix), i18n.selected_file_view[FV_TYPE][FV_U])) if path.is_file() else
                 i18n.selected_file_view[FV_TYPE][FV_F])
         self.__update_view()
+
+
+class Viewer3DView(View):
+
+    def __init__(self, master, **kw):
+        super().__init__(master, **kw)
+        self._title = None
+        self.data = None
+        self.master = master
+        self.__canvas_image: Optional[CanvasImage] = None
+        self.__canvas_3d: Optional[Viewer3DGl] = None
+        self.__placeholder = ttk.Frame(self)
+
+    def update_language(self):
+        logger.debug("update language in Viewer3D view")
+        if self.__canvas_3d:
+            self.__canvas_3d.update_language()
+
+    def create_view(self):
+        logger.debug("create_view in Viewer3D view")
+        self.rowconfigure(0, weight=1)  # make grid cell expandable
+        self.columnconfigure(0, weight=1)
+        self.__placeholder.grid(row=0, column=0, sticky='nswe')
+        self.__placeholder.rowconfigure(0, weight=1)  # make grid cell expandable
+        self.__placeholder.columnconfigure(0, weight=1)
+
+    def __update_view(self, type_of_file):
+        logger.debug("update view in selected Viewer3D view")
+        if self.__canvas_3d:
+            self.__canvas_3d.display(animate=0)
+        for widget in self.__placeholder.winfo_children():
+            widget.destroy()
+        path = Path(self.data[P_PATH])
+        if type_of_file == "image":
+            logger.debug("show image in Viewer3D view")
+            self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path,
+                                              can_grab_focus=self.master.can_grab_focus())
+            self.__canvas_image.grid(row=0, column=0, sticky='nswe')
+        elif type_of_file == "obj":
+            logger.debug("show mesh in Viewer3D view")
+            # Create a new OpenGL window
+            self.__canvas_3d = Viewer3DGl(master=self.master,placeholder=self.__placeholder, obj_file_path=path)
+            self.__canvas_3d.create_view()
+            self.__canvas_3d.pack(fill=tk.BOTH, expand=True)
+            self.__canvas_3d.display(animate=1)
+        else:
+            logger.debug("no file")
+            # no file
+
+    def update_selected_file(self, data: Optional[dict] = None):
+        logger.debug("update selected file in selected file view")
+        if data and data != self.data:
+            path = Path(data[P_PATH])
+            # is image
+            if path.suffix in (".png", ".bmp", ".jpg"):
+                self.data = data
+                self.__update_view(type_of_file="image")
+            # is obj
+            if path.suffix == ".obj":
+                self.data = data
+                self.__update_view(type_of_file="obj")
 
 
 class ProjectInfoView(View):

@@ -7,6 +7,7 @@ from enum import Enum, auto
 from math import floor
 from pathlib import Path
 from tkinter import filedialog, colorchooser
+from typing import Optional
 
 from PIL import ImageTk
 from PIL import Image
@@ -252,6 +253,28 @@ class ToolTip:
             old_tw.destroy()
 
 
+class IconButton(View):
+    def __init__(self, master=None, asset_name="", tooltip="", command=..., **kwargs):
+        super().__init__(master, **kwargs)
+        self.master = master
+        # Load icon
+        self.icon = Image.open(asset(asset_name))
+        self.icon = self.icon.resize((24, 24))
+        self.icon = ImageTk.PhotoImage(self.icon)
+        self.icon_button = tk.Button(self, image=self.icon, command=command, bd=0)
+        self.tooltip = tooltip
+        if self.tooltip:
+            self.tooltip_wid = ToolTip(widget=self.icon_button, text=i18n.tooltips[self.tooltip])
+
+    def create_view(self):
+        # Create a button with the folder icon
+        self.icon_button.grid(row=0, column=0, sticky="nsew")
+
+    def update_language(self):
+        if self.tooltip:
+            self.tooltip_wid = ToolTip(widget=self.icon_button, text=i18n.tooltips[self.tooltip])
+
+
 class EntryButton(View):
     def __init__(self, master=None, label_text="general", entry_text="", **kwargs):
         super().__init__(master, **kwargs)
@@ -291,13 +314,13 @@ class EntryButton(View):
 
 
 class ComboLabel(View):
-    def __init__(self, master=None, label_text="no_text", values="", selected="", state="readonly", **kwargs):
+    def __init__(self, master=None, label_text="no_text", values=None, selected="", state="readonly", **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
         self.label_text = label_text
         self._path_label_info = tk.StringVar(value=i18n.entry_buttons[label_text])
         self.update_language()
-        self.languages_combobox = None
+        self.combobox = None
         self.combo_values = values
         self.selected = selected
         self.state = state
@@ -306,15 +329,23 @@ class ComboLabel(View):
         ttk.Label(self, textvariable=self._path_label_info).pack(side=tk.LEFT)
         combo_frame = tk.Frame(self)
         combo_frame.pack(side=tk.LEFT, expand=True, fill=tk.X)
-        self.languages_combobox = ttk.Combobox(combo_frame, values=self.combo_values, state=self.state)
-        self.languages_combobox.pack(side=tk.LEFT, expand=True, fill=tk.X)
-        self.languages_combobox.set(self.selected)
+        self.combobox = ttk.Combobox(combo_frame, values=self.combo_values, state=self.state)
+        self.combobox.pack(side=tk.LEFT, expand=True, fill=tk.X)
+        self.combobox.set(self.selected)
 
     def get_value(self):
-        return self.languages_combobox.get()
+        return self.combobox.get()
 
-    def update_language(self):
+    def update_language(self, values=None, sel=None):
         self._path_label_info.set(i18n.entry_buttons[self.label_text])
+        if values is not None:
+            self.combo_values = values
+            self.combobox['values'] = values
+            if sel is not None:
+                self.selected = sel
+            else:
+                self.selected = self.combo_values[0]
+            self.combobox.set(self.selected)  # Set to first item by default
 
 
 class CheckLabel(View):
@@ -324,7 +355,7 @@ class CheckLabel(View):
         self.label_text = label_text
         self._path_label_info = tk.StringVar(value=i18n.entry_buttons[label_text])
         self.value = tk.BooleanVar(value=default)
-        self.command=command
+        self.command = command
         self.update_language()
 
     def create_view(self):
@@ -437,7 +468,8 @@ class IntPicker(View):
 
 
 class FloatPicker(View):
-    def __init__(self, master=None, label_text="no_text", default=0.0, min_value=0.01, max_value=1, increment=0.01, **kwargs):
+    def __init__(self, master=None, label_text="no_text", default=0.0, min_value=0.01, max_value=1, increment=0.01,
+                 **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
         self.label_text = label_text
@@ -465,7 +497,8 @@ class FloatPicker(View):
 
 
 class ScaleLabel(View):
-    def __init__(self, master=None, label_text="no_text", from_=1.1, to=1000.0, initial_value=1.1, increment=0.1,orient=tk.HORIZONTAL,
+    def __init__(self, master=None, label_text="no_text", from_=1.1, to=1000.0, initial_value=1.1, increment=0.1,
+                 orient=tk.HORIZONTAL,
                  command=None, **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
@@ -474,7 +507,7 @@ class ScaleLabel(View):
         self._scale_slider = None
         self.from_ = from_
         self.to = to
-        self.increment=increment
+        self.increment = increment
         self.value = tk.DoubleVar(value=initial_value)
         self.orient = orient
         self.command = command

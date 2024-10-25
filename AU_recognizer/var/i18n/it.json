@@ -60,6 +60,17 @@
     "detail": "Dettagliato",
     "coarse": "Grossolano"
   },
+  "gl_viewer": {
+    "combo": {
+      "solid": "Solida",
+      "wireframe": "Reticolo",
+      "points": "Punti"
+    }
+  },
+    "tooltips": {
+    "reset_view": "ripristina camera" ,
+    "open_set": "apri impostazioni"
+  },
   "entry_buttons": {
     "no_text": "",
     "general": "Percorso:",
@@ -70,6 +81,9 @@
     "path_to_model": "percorso modelli 3dmm:",
     "l_combo": "Linguaggio:",
     "m_combo": "Modello:",
+    "gl_combo": "Rappresentazione:",
+    "gl_texture": "Texture",
+    "gl_lightning": "Luce",
     "mode_radio": "Modalità:",
     "c_simages": "Salva immagini",
     "c_scodes": "Salva Codici FLAME",

@@ -60,6 +60,17 @@
     "detail": "Detail",
     "coarse": "Coarse"
   },
+  "gl_viewer": {
+    "combo": {
+      "solid": "Solid",
+      "wireframe": "Wireframe",
+      "points": "Points"
+    }
+  },
+  "tooltips": {
+    "reset_view": "reset camera" ,
+    "open_set": "open settings"
+  },
   "entry_buttons": {
     "no_text": "",
     "general": "Path:",
@@ -70,6 +81,9 @@
     "path_to_model": "3dmm model path:",
     "l_combo": "Language:",
     "m_combo": "Model:",
+    "gl_combo": "Representation:",
+    "gl_texture": "Texture",
+    "gl_lightning": "Lightning",
     "mode_radio": "Mode:",
     "c_simages": "Save images",
     "c_scodes": "Save FLAME codes",

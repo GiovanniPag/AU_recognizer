@@ -192,3 +192,9 @@ up_arrow = '\u2191'
 down_arrow = '\u2193'
 left_arrow = '\u2190'
 right_arrow = '\u2192'
+
+
+# viewer 3d GL strings
+GL_SOLID = "solid"
+GL_WIREFRAME = "wireframe"
+GL_POINTS = "points"

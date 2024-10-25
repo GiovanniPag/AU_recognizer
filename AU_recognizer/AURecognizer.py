@@ -89,11 +89,7 @@ class AURecognizer(tk.Tk):
         # Create style used by default for all Frames
         s.configure('TFrame', background='green')
         # Create style for the first frame
-        s.configure('Right.TFrame', background='red')
-        s.configure('Left.TFrame', background='purple')
-
-        s.configure('Image.TFrame', background='blue')
-        s.configure('Viewer3DView.TFrame', background='yellow')
+        s.configure('Control.TFrame', background='yellow')
 
     # create all view classes
     def __create_gui(self):
@@ -106,9 +102,9 @@ class AURecognizer(tk.Tk):
         mainframe = ttk.PanedWindow(self, orient=HORIZONTAL)
         mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
         logger.debug("left frame initialization")
-        left_frame = ttk.PanedWindow(self, orient=VERTICAL, style="Left.TFrame")
+        left_frame = ttk.PanedWindow(self, orient=VERTICAL)
         logger.debug("right frame initialization")
-        right_frame = ttk.PanedWindow(self, orient=VERTICAL, style="Right.TFrame")
+        right_frame = ttk.PanedWindow(self, orient=VERTICAL)
         logger.debug("center frame initialization")
         center_frame = ttk.PanedWindow(self, orient=VERTICAL)
         # create views
@@ -127,12 +123,12 @@ class AURecognizer(tk.Tk):
         center_frame.add(self.project_actions, weight=5)
 
         # right views
-        self.viewer = Viewer3DView(self, style="Viewer3DView.TFrame")
+        self.viewer = Viewer3DView(self)
         right_frame.add(self.viewer, weight=5)
 
-        mainframe.add(left_frame, weight=1)
-        mainframe.add(center_frame, weight=5)
-        mainframe.add(right_frame, weight=10)
+        mainframe.add(left_frame, weight=2)
+        mainframe.add(center_frame, weight=3)
+        mainframe.add(right_frame, weight=15)
         # create context menu
         self.tree_menu = TreeViewMenu(self.project_tree_view)
 
