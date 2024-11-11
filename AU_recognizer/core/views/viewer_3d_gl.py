@@ -1,4 +1,5 @@
 import platform as pf
+from builtins import object
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
@@ -12,10 +13,11 @@ from PIL import Image
 from pyopengltk import OpenGLFrame
 
 from AU_recognizer import VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_COLOR, POINT_SIZE, MOVING_STEP, GL_SOLID, \
-    i18n, logger
-from AU_recognizer.core.util import hex_to_float_rgba, nect_config, hex_to_float_rgb, \
-    prepare_data_for_opengl
-from AU_recognizer.core.util.geometry_3d import quaternion_to_matrix, axis_angle_to_quaternion, quaternion_multiply
+    i18n, logger, GL_U_VALUE, GL_U_POINTER, SKY_COLOR, GROUND_COLOR, GL_U_TYPE
+from AU_recognizer.core.util import nect_config, hex_to_float_rgb, hex_to_float_rgba
+from AU_recognizer.core.util.OBJ import OBJ
+from AU_recognizer.core.util.geometry_3d import quaternion_to_matrix, axis_angle_to_quaternion, quaternion_multiply, \
+    perspective, look_at
 from AU_recognizer.core.views import View, ComboLabel, CheckLabel, IconButton
 
 
@@ -23,10 +25,10 @@ class Viewer3DGl(View):
     def __init__(self, master, placeholder, obj_file_path=None):
         super().__init__(placeholder)
         self.master = master
-        self.obj_file_path = obj_file_path
+        self.obj = OBJ(filepath=obj_file_path)
         self.viewer_frame = ttk.Frame(self)
         self.control_frame = ttk.Frame(self, style='Control.TFrame')
-        self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj_file_path=obj_file_path)
+        self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj)
         self.model_combobox = ComboLabel(master=self.control_frame, label_text="gl_combo",
                                          selected=i18n.gl_viewer["combo"][GL_SOLID],
                                          values=list(i18n.gl_viewer['combo'].values()), state="readonly")
@@ -81,19 +83,87 @@ class Viewer3DGl(View):
 
 
 class Frame3DGl(OpenGLFrame):
-    def __init__(self, placeholder, obj_file_path=None):
+    def __init__(self, placeholder, obj: OBJ = None):
         super().__init__(placeholder)
-        self._fill_color = hex_to_float_rgba(str(nect_config[VIEWER][FILL_COLOR]))
-        self._line_color = hex_to_float_rgba(str(nect_config[VIEWER][LINE_COLOR]))
         self._canvas_color = hex_to_float_rgba(str(nect_config[VIEWER][CANVAS_COLOR]))
         self._moving_step = float(nect_config[VIEWER][MOVING_STEP])
         self._point_size = int(nect_config[VIEWER][POINT_SIZE])
-        self._point_color = hex_to_float_rgb(str(nect_config[VIEWER][POINT_COLOR]))
+        self.shader_uniform = {
+            "model": {
+                GL_U_TYPE: "mat4",
+                GL_U_POINTER: None,
+                GL_U_VALUE: None,
+            },
+            "view": {
+                GL_U_TYPE: "mat4",
+                GL_U_POINTER: None,
+                GL_U_VALUE: None,
+            },
+            "proj": {
+                GL_U_TYPE: "mat4",
+                GL_U_POINTER: None,
+                GL_U_VALUE: None,
+            },
+            "solidColor": {
+                GL_U_TYPE: "vec3",
+                GL_U_POINTER: None,
+                GL_U_VALUE: hex_to_float_rgb(str(nect_config[VIEWER][FILL_COLOR])),
+            },
+            "wireframeColor": {
+                GL_U_TYPE: "vec3",
+                GL_U_POINTER: None,
+                GL_U_VALUE: hex_to_float_rgb(str(nect_config[VIEWER][LINE_COLOR])),
+            },
+            "pointsColor": {
+                GL_U_TYPE: "vec3",
+                GL_U_POINTER: None,
+                GL_U_VALUE: hex_to_float_rgb(str(nect_config[VIEWER][POINT_COLOR])),
+            },
+            "useTexture": {
+                GL_U_TYPE: "bool",
+                GL_U_POINTER: None,
+                GL_U_VALUE: False,
+            },
+            "useNormalMap": {
+                GL_U_TYPE: "bool",
+                GL_U_POINTER: None,
+                GL_U_VALUE: False,
+            },
+            "useLight": {
+                GL_U_TYPE: "bool",
+                GL_U_POINTER: None,
+                GL_U_VALUE: False,
+            },
+            "isPoints": {
+                GL_U_TYPE: "bool",
+                GL_U_POINTER: None,
+                GL_U_VALUE: False,
+            },
+            "isWireframe": {
+                GL_U_TYPE: "bool",
+                GL_U_POINTER: None,
+                GL_U_VALUE: False,
+            },
+            "useVertexColor": {
+                GL_U_TYPE: "bool",
+                GL_U_POINTER: None,
+                GL_U_VALUE: False,
+            },
+            "skyColor": {
+                GL_U_TYPE: "vec3",
+                GL_U_POINTER: None,
+                GL_U_VALUE: hex_to_float_rgb(str(nect_config[VIEWER][SKY_COLOR])),
+            },
+            "groundColor": {
+                GL_U_TYPE: "vec3",
+                GL_U_POINTER: None,
+                GL_U_VALUE: hex_to_float_rgb(str(nect_config[VIEWER][GROUND_COLOR])),
+            },
+        }
         self._canvas_w = 800
         self._canvas_h = 400
-        self._zoom = -5
         self._rotation = np.array([0, 0, 0, 1])  # Quaternion [x, y, z, w]
-        self._position = [0, 0]  # x, y
+        self.camera_position = [0, 0, 5]
         # mouse drag
         self._last_mouse_x = 0
         self._last_mouse_y = 0
@@ -103,19 +173,60 @@ class Frame3DGl(OpenGLFrame):
         self._last_mouse_y_pan = 0
         self._is_right_mouse_button_down = False
         # Placeholder for loaded model data
-        self.model = None
         self.shader = None
         # default shader
         self.render_mode = 'solid'  # Default mode: 'solid', 'wireframe', or 'points'
         self.vertex_array_object = None
-        self.proj = None
         self.textures = {}
-        self._obj_file_path = Path(obj_file_path)
+        self.normal_maps = {}
         # open obj file
-        if obj_file_path:
-            self.__set_file(self._obj_file_path)
+        self.obj = obj
+        batched_data, materials = self.obj.prepare_opengl_data()
+        self.model = {'batched_data': batched_data, 'materials': materials}
         # bind events for mouse and keys
         self.bind_events()
+
+    def update_shader_uniforms(self, uniform_list):
+        if self.shader is not None:
+            for uniform_name, uniform_value in uniform_list:
+                if uniform_value is not None:
+                    self.set_uniform_value(uniform_name, uniform_value)
+                self.update_shader_uniform(uniform_name)
+        else:
+            logger.error("No shader program available")
+
+    def update_shader_uniform(self, uniform_name):
+        if uniform_name not in self.shader_uniform:
+            logger.error(f"No uniform with name '{uniform_name}'")
+            return
+
+        uniform = self.shader_uniform[uniform_name]
+        if uniform[GL_U_POINTER] is None:
+            uniform[GL_U_POINTER] = glGetUniformLocation(self.shader, bytestr(uniform_name))
+            if uniform[GL_U_POINTER] == -1:
+                logger.error(f"Uniform '{uniform_name}' not found in shader.")
+                return
+        # Get the value and type
+        value = uniform[GL_U_VALUE]
+        uniform_type = uniform[GL_U_TYPE]
+
+        # Call the appropriate OpenGL function based on the type
+        if uniform_type == "mat4":
+            glUniformMatrix4fv(uniform[GL_U_POINTER], 1, GL_FALSE, value)
+        elif uniform_type == "vec3":
+            glUniform3fv(uniform[GL_U_POINTER], 1, value)
+        elif uniform_type == "bool":
+            glUniform1i(uniform[GL_U_POINTER], int(value))
+        else:
+            logger.error(f"Uniform type '{uniform_type}' for '{uniform_name}' is not supported.")
+
+    def set_uniform_value(self, uniform_name, new_value):
+        if uniform_name not in self.shader_uniform:
+            logger.error(f"No uniform with name '{uniform_name}'")
+            return
+
+        # Update the uniform value
+        self.shader_uniform[uniform_name][GL_U_VALUE] = new_value
 
     def bind_events(self):
         # Catch the canvas resize event
@@ -142,10 +253,6 @@ class Frame3DGl(OpenGLFrame):
         self.bind("<ButtonRelease-1>", self.__end_rotate)
         self.bind("<ButtonRelease-3>", self.__end_pan)
 
-        self.bind_all('<KeyPress-3>', lambda e: self.switch_render_mode('solid'))
-        self.bind_all('<KeyPress-4>', lambda e: self.switch_render_mode('wireframe'))
-        self.bind_all('<KeyPress-5>', lambda e: self.switch_render_mode('points'))
-
     def create_object(self, shader):
         vao_dict = {}
         for material, data in self.model['batched_data'].items():
@@ -157,28 +264,28 @@ class Frame3DGl(OpenGLFrame):
             vertex_array = data['vertex_data']
             glBufferData(GL_ARRAY_BUFFER, vertex_array.nbytes, vertex_array, GL_STATIC_DRAW)
 
-            # Set shader uniforms based on mode
-            shader.set_uniform("isWireframe", self.render_mode == 'wireframe')
-            shader.set_uniform("isPoints", self.render_mode == 'points')
+            stride = (3 + 3 + 2 + 3 + 3 + 3) * ctypes.sizeof(
+                ctypes.c_float)  # Position + Color + TexCoord + Normal + tangent + bitangent
+            # Enable and define the vertex position attribute (location = 0)
+            glEnableVertexAttribArray(0)
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(0))
 
-            # Handle textures, normal maps, or vertex color
-            shader.set_uniform("useTexture", self.use_texture)
-            shader.set_uniform("useNormalMap", self.use_normal_map)
-            shader.set_uniform("useVertexColor", self.use_vertex_color)
+            # Enable and define the vertex color attribute (location = 1)
+            glEnableVertexAttribArray(1)
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(3 * ctypes.sizeof(ctypes.c_float)))
 
-            # Set colors from settings
-            shader.set_uniform("solidColor", self.solid_color)
-            shader.set_uniform("wireframeColor", self.wireframe_color)
-            shader.set_uniform("pointsColor", self.points_color)
+            # Enable and define the texture coordinate attribute (location = 2)
+            glEnableVertexAttribArray(2)
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(6 * ctypes.sizeof(ctypes.c_float)))
 
-            # Set up position attribute
-            position = glGetAttribLocation(shader, bytestr('position'))
-            glEnableVertexAttribArray(position)
-            glVertexAttribPointer(position, 3, GL_FLOAT, False, 5 * 4, ctypes.c_void_p(0))
-            # Set up texture coordinate attribute
-            texcoord = glGetAttribLocation(shader, bytestr('texcoord'))
-            glEnableVertexAttribArray(texcoord)
-            glVertexAttribPointer(texcoord, 2, GL_FLOAT, False, 5 * 4, ctypes.c_void_p(12))
+            # Enable and define the normal attribute (location = 3)
+            glEnableVertexAttribArray(3)
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(8 * ctypes.sizeof(ctypes.c_float)))
+
+            # Enable and define the tangent attribute (location = 4)
+            glEnableVertexAttribArray(4)
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(11 * ctypes.sizeof(ctypes.c_float)))
+
             # Generate index buffer
             if data['index_data'].size > 0:
                 element_buffer = glGenBuffers(1)
@@ -188,9 +295,12 @@ class Frame3DGl(OpenGLFrame):
             # Store the VAO per material
             vao_dict[material] = vertex_array_object
             # Unbind the VAO and buffers
+            glDisableVertexAttribArray(0)
+            glDisableVertexAttribArray(1)
+            glDisableVertexAttribArray(2)
+            glDisableVertexAttribArray(3)
+            glDisableVertexAttribArray(4)
             glBindVertexArray(0)
-            glDisableVertexAttribArray(position)
-            glDisableVertexAttribArray(texcoord)
             glBindBuffer(GL_ARRAY_BUFFER, 0)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
         return vao_dict
@@ -201,20 +311,16 @@ class Frame3DGl(OpenGLFrame):
             compileShader(fragment_shader_code, GL_FRAGMENT_SHADER)
         )
         self.vertex_array_object = self.create_object(self.shader)
-        self.proj = glGetUniformLocation(self.shader, bytestr('proj'))
         # Set up OpenGL settings here
         glClearColor(*self._canvas_color)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
         glFrontFace(GL_CW)  # Assuming the faces are counter-clockwise in your model
-
         glEnable(GL_PROGRAM_POINT_SIZE)
-        glColor3fv(self._point_color)
         glPointSize(self._point_size)
-
         # Load and bind textures
-        self.load_textures()
+        self.load_asset()
 
     def switch_render_mode(self, mode):
         if mode in ['solid', 'wireframe', 'points']:
@@ -222,15 +328,17 @@ class Frame3DGl(OpenGLFrame):
         else:
             logger.error("Invalid render mode. Choose 'solid', 'wireframe', or 'points'.")
 
-    def load_textures(self):
+    def load_asset(self):
         texture_unit = GL_TEXTURE0
         glActiveTexture(texture_unit)
 
-        for material_name, material in self.model['materials'].items():
-            if 'texture' in material:
-                texture_path = Path(material['texture'])
-                texture_id = load_texture(texture_path)
+        for material_name, material in self.model['materials']:
+            if material.texture_map is not None:
+                texture_id = load_texture(material.texture_map)
                 self.textures[material_name] = texture_id
+            if material.normal_map is not None:
+                texture_id = load_texture(material.normal_map)
+                self.normal_maps[material_name] = texture_id
 
     def redraw(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -244,24 +352,36 @@ class Frame3DGl(OpenGLFrame):
         elif self.render_mode == 'points':
             glPolygonMode(GL_FRONT_AND_BACK, GL_POINT)
 
-        rotation_matrix = quaternion_to_matrix(self._rotation)
-        model_matrix = np.identity(4)
-        model_matrix[:3, :3] = rotation_matrix
+        # Set up the projection matrix (perspective projection)
+        aspect_ratio = self._canvas_w / self._canvas_h
+        proj = perspective(45.0, aspect_ratio, 0.1, 100.0)
 
-        zoom_matrix = np.identity(4)
-        zoom_matrix[3, 3] = 1 / (1 - self._zoom)
+        # View matrix (camera)
+        view = look_at(self.camera_position, np.array([0.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0]))
 
-        translation_matrix = np.identity(4)
-        translation_matrix[0, 3] = -self._position[0]
-        translation_matrix[1, 3] = -self._position[1]
+        # Model matrix (rotation)
+        model = np.eye(4)
+        rot_matrix = quaternion_to_matrix(self._rotation)
+        model[:3, :3] = rot_matrix[:3, :3]
+        model = np.dot(model, np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ]))
 
-        projection_matrix = np.dot(zoom_matrix, np.dot(translation_matrix, model_matrix))
-
-        glUniformMatrix4fv(self.proj, 1, GL_FALSE, projection_matrix.T)
+        self.update_shader_uniforms({"view": view.T,
+                                     "proj": proj.T,
+                                     "model": model.T})
 
         for material, vao in self.vertex_array_object.items():
             # Bind the VAO
             glBindVertexArray(vao)
+
+            # Bind the normal map texture (if available)
+            if self.normal_map_texture:
+                glActiveTexture(GL_TEXTURE1)  # Assuming normal map uses texture unit 1
+                glBindTexture(GL_TEXTURE_2D, self.normal_map_texture)
 
             # Bind the appropriate texture for the material
             if material in self.textures and self.current_shader == "texture":
@@ -276,19 +396,15 @@ class Frame3DGl(OpenGLFrame):
         glBindVertexArray(0)  # Unbind the VAO when done
         glUseProgram(0)
 
-    def __set_file(self, obj_file_path):
-        batched_data, materials = prepare_data_for_opengl(*extract_data(obj_file_path))
-        self.model = {'batched_data': batched_data, 'materials': materials}
-
     def key_handler(self, event):
         if event.keysym == 'Up' or event.keysym == 'w':
-            self._position[1] -= self._moving_step
+            self.camera_position[1] -= self._moving_step
         elif event.keysym == 'Down' or event.keysym == 's':
-            self._position[1] += self._moving_step
+            self.camera_position[1] += self._moving_step
         elif event.keysym == 'Left' or event.keysym == 'a':
-            self._position[0] += self._moving_step
+            self.camera_position[0] += self._moving_step
         elif event.keysym == 'Right' or event.keysym == 'd':
-            self._position[0] -= self._moving_step
+            self.camera_position[0] -= self._moving_step
 
     def mouse_wheel_handler(self, event):
         """Cross-platform mouse wheel scroll event for zooming"""
@@ -305,7 +421,7 @@ class Frame3DGl(OpenGLFrame):
                 delta = 0
         # Adjust the zoom slider based on the scroll direction
         if delta != 0:
-            self._zoom += delta * 0.1
+            self.camera_position[2] += delta * 0.1
 
     def __resized(self, *args):
         """Callback to the window resize events"""
@@ -332,43 +448,47 @@ class Frame3DGl(OpenGLFrame):
     def __on_mouse_move(self, event):
         """Handle both rotation and panning when mouse moves"""
         if self._is_left_mouse_button_down:
-            # Rotation logic (Y-axis and X-axis rotation)
-            """Rotate the object based on mouse movement"""
-            delta_x = -(event.x - self._last_mouse_x) * 0.005  # Adjust this scaling factor as needed
-            delta_y = (event.y - self._last_mouse_y) * 0.005  # Adjust this scaling factor as needed
-            delta_vector = np.array([delta_x, delta_y, 0])
-            # Calculate the rotation angle and axis
-            # np.linalg.norm computes the Euclidean norm sqrt(x^2+y^2+z^2)
-            angle = np.linalg.norm(delta_vector)
-            if angle != 0:
-                # Axis: find axis of the rotation. (0, 0, -1) as fixed camera position.
-                rot_axis = np.cross(np.array([0, 0, -1]), delta_vector)
-                # normalize rot_axis
-                rot_axis = rot_axis / np.linalg.norm(rot_axis) if np.linalg.norm(rot_axis) != 0 else rot_axis
-
-                # Create the rotation quaternion
-                rotation = axis_angle_to_quaternion(rot_axis, angle)
-
-                # Apply the rotation to the previous orientation
-                new_orientation = quaternion_multiply(rotation, self._start_orientation)
-                self._rotation = new_orientation
-
+            self._handle_rotation(event)
         if self._is_right_mouse_button_down:
-            # Panning logic, considering zoom for sensitivity
-            dx = event.x - self._last_mouse_x_pan
-            dy = event.y - self._last_mouse_y_pan
+            self._handle_panning(event)
 
-            # Zoom sensitivity adjustments (more sensitive when zoomed in, less when zoomed out)
-            zoom_sensitivity = 0.005  # Base sensitivity factor
-            zoom_factor = max(1, abs(self._zoom))  # Ensure zoom factor is never too small
-            # Inverse logarithmic scaling to reverse the sensitivity relationship (more sensitive zoomed in)
-            sensitivity = zoom_sensitivity / np.log(zoom_factor + 1)  # Inverse scaling (log(x+1))
-            # Update position with adjusted sensitivity
-            self._position[0] -= dx * sensitivity
-            self._position[1] += dy * sensitivity
-            # Update last mouse position
-            self._last_mouse_x_pan = event.x
-            self._last_mouse_y_pan = event.y
+    def _handle_panning(self, event):
+        # Panning logic, considering zoom for sensitivity
+        dx = event.x - self._last_mouse_x_pan
+        dy = event.y - self._last_mouse_y_pan
+        # Zoom sensitivity adjustments (more sensitive when zoomed in, less when zoomed out)
+        zoom_sensitivity = 0.005  # Base sensitivity factor
+        zoom_factor = max(1, abs(self.camera_position[2]))  # Ensure zoom factor is never too small
+        # Inverse logarithmic scaling to reverse the sensitivity relationship (more sensitive zoomed in)
+        sensitivity = zoom_sensitivity / np.log(zoom_factor + 1)  # Inverse scaling (log(x+1))
+        # Update position with adjusted sensitivity
+        self.camera_position[0] -= dx * sensitivity
+        self.camera_position[1] += dy * sensitivity
+        # Update last mouse position
+        self._last_mouse_x_pan = event.x
+        self._last_mouse_y_pan = event.y
+
+    def _handle_rotation(self, event):
+        # Rotation logic (Y-axis and X-axis rotation)
+        """Rotate the object based on mouse movement"""
+        delta_x = -(event.x - self._last_mouse_x) * 0.005  # Adjust this scaling factor as needed
+        delta_y = (event.y - self._last_mouse_y) * 0.005  # Adjust this scaling factor as needed
+        delta_vector = np.array([delta_x, delta_y, 0])
+        # Calculate the rotation angle and axis
+        # np.linalg.norm computes the Euclidean norm sqrt(x^2+y^2+z^2)
+        angle = np.linalg.norm(delta_vector)
+        if angle != 0:
+            # Axis: find axis of the rotation. (0, 0, -1) as fixed camera position.
+            rot_axis = np.cross(np.array([0, 0, -1]), delta_vector)
+            # normalize rot_axis
+            rot_axis = rot_axis / np.linalg.norm(rot_axis) if np.linalg.norm(rot_axis) != 0 else rot_axis
+
+            # Create the rotation quaternion
+            rotation = axis_angle_to_quaternion(rot_axis, angle)
+
+            # Apply the rotation to the previous orientation
+            new_orientation = quaternion_multiply(rotation, self._start_orientation)
+            self._rotation = new_orientation
 
     def __end_rotate(self, event):
         """End rotation on left-click release"""
@@ -419,11 +539,11 @@ def compileShader(source, shaderType):
 def load_texture(texture_file):
     image = Image.open(texture_file)
     image = image.transpose(Image.FLIP_TOP_BOTTOM)  # Flip image vertically for OpenGL
-    img_data = np.array(image.convert("RGBA"), dtype=np.uint8)
+    img_data = np.array(image.convert("RGB"), dtype=np.uint8)
 
     texture = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, texture)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width, image.height, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
@@ -439,27 +559,34 @@ vertex_shader_code = """
 #version 330 core
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec2 inTexCoords;
-layout(location = 2) in vec3 inVertexColor;
-layout (location = 3) in vec3 aNormal;    // Geometric normal
-layout(location = 4) in vec3 inTangent;  // Tangent vector
-layout(location = 5) in vec3 inBitangent; // Bitangent vector
+layout(location = 1) in vec3 inVertexColor;
+layout(location = 2) in vec2 inTexCoords;
+layout(location = 3) in vec3 aNormal;    // Geometric normal
+layout(location = 4) in vec3 aTangent;  // Tangent vector
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 proj;
 
 out vec2 fragTexCoords;
 out vec3 fragColor;
-out mat3 TBN; // Tangent-Bitangent-Normal matrix to convert normals to world space
-
-
-uniform mat4 projectionMatrix; // Projection matrix (includes rotation, zoom, panning)
-
+out mat3 TBN;
+out vec3 fragNormal;
 
 void main() {
-    gl_Position = projectionMatrix * vec4(inPosition, 1.0);
+    gl_Position = proj * view * model * vec4(inPosition, 1.0);
 
     fragTexCoords = inTexCoords;
     fragColor = inVertexColor;
-    fragTangent = inTangent;
-    fragBitangent = inBitangent;
+    fragNormal = normalize(mat3(transpose(inverse(model))) * aNormal);
+    
+    vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
+    vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
+    // re-orthogonalize T with respect to N
+    T = normalize(T - dot(T, N) * N);
+    // then retrieve perpendicular vector B with the cross product of T and N
+    vec3 B = cross(N, T);
+    TBN = mat3(T, B, N);
 }
 
 """
@@ -470,8 +597,8 @@ fragment_shader_code = """
 
 in vec2 fragTexCoords;
 in vec3 fragColor;
-in vec3 fragTangent;
-in vec3 fragBitangent;
+in mat3 TBN;
+in vec3 fragNormal;
 
 out vec4 FragColor;
 
@@ -484,58 +611,47 @@ uniform vec3 solidColor;        // Default solid color
 uniform vec3 wireframeColor;    // Wireframe color
 uniform vec3 pointsColor;       // Points color
 
+uniform bool useLight;          // Toggle normal mapping
+uniform vec3 skyColor;    // Light color from above 
+uniform vec3 groundColor; // Light color from below
+
 uniform bool isWireframe;
 uniform bool isPoints;
+uniform bool useVertexColor;
+
+vec3 applyLighting(vec3 color, vec3 normal) {
+    float blendFactor = normal.y * 0.5 + 0.5;
+    // Mix between sky color and ground color
+    vec3 hemisphericLight = mix(groundColor, skyColor, blendFactor);
+    return color * hemisphericLight;
+}
+
+vec3 calculateColor() {
+    if (isWireframe) {
+        return useVertexColor ? fragColor : wireframeColor;
+    } else if (isPoints) {
+        return useVertexColor ? fragColor : pointsColor;
+    } else if (useTexture) {
+        return texture(textureMap, fragTexCoords).rgb;
+    } else {
+        return useVertexColor ? fragColor : solidColor;
+    }
+}
 
 void main() {
-    vec3 finalColor;
-
-    if (isWireframe) {
-        if (useVertexColor) {
-            // Use vertex color
-            finalColor = fragColor;
-        } else {
-            // Use wireframe color
-            finalColor = wireframeColor;
-        }
-    } else if (isPoints) {
-        if (useVertexColor) {
-            // Use vertex color
-            finalColor = fragColor;
-        } else {
-            // Use points color
-            finalColor = pointsColor;
-        }
-    } else {
-        if (useTexture) {
-            // Apply texture mapping
-            vec3 texColor = texture(textureMap, fragTexCoords).rgb;
-            if (useNormalMap) {
-                // Apply normal mapping if enabled
-                vec3 normalMapNormal = texture(normalMap, fragTexCoords).rgb * 2.0 - 1.0;
-
-                // Construct TBN matrix (Tangent, Bitangent, and default normal)
-                vec3 N = vec3(0.0, 0.0, 1.0);  // Use default normal pointing up since there's no per-vertex normals
-                mat3 TBN = mat3(normalize(fragTangent), normalize(fragBitangent), N);
-            
-                // Transform normal from tangent space to world space
-                vec3 worldNormal = normalize(TBN * normalMapNormal);
-                
-                
-                // Lighting and shading should go here
-                finalColor = texColor;
-            } else {
-                finalColor = texColor;
-            }
-        } else {
-            if (useVertexColor) {
-                // Use vertex color
-                finalColor = fragColor;
-            } else {
-                // Default to solid color
-                finalColor = solidColor;
-            }
-        }
+    vec3 finalColor = calculateColor();
+    vec3 normal = fragNormal;
+    if (useNormalMap) {
+        // Apply normal mapping if enabled
+        normal = texture(normalMap, fragTexCoords).rgb * 2.0 - 1.0;
+        // Tangent space transformation
+        normal = normalize(TBN * normal);  // Transform to world space
+    }
+    if(useLight){
+        finalColor = applyLighting(finalColor, normal);
+    }else if(useNormalMap){
+        vec3 normalEffect = 0.5 + 0.5 * normal;  // Map normal from [-1,1] to [0,1]
+        finalColor *= normalEffect;               // Blend with base color
     }
     FragColor = vec4(finalColor, 1.0);
 }

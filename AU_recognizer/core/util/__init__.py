@@ -116,18 +116,6 @@ def retrieve_files_from_path(path, file_type):
     return path.glob(file_type)
 
 
-def time_me(f):
-    """Decorator function to time functions' runtime in ms"""
-
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        res = f(*args, **kwargs)
-        logger.debug(f'function: {f.__name__} took {(time.time() - start) * 1000:.4f}ms')
-        return res
-
-    return wrapper
-
-
 def hex_to_float_rgba(hex_c: str, alpha: bool = False):
     h = hex_c.lstrip("#")
     if alpha:

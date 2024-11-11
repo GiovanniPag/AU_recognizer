@@ -33,12 +33,16 @@ CANVAS_COLOR = "canvas_color"
 POINT_COLOR = "point_color"
 POINT_SIZE = "point_size"
 MOVING_STEP = "moving_step"
+SKY_COLOR = "sky_color"
+GROUND_COLOR = "ground_color"
 
 # config file viewer section default values
 FILL_COLOR_DEFAULT = "#000000"
 LINE_COLOR_DEFAULT = "#0000FF"
 CANVAS_COLOR_DEFAULT = "#FFFFFF"
 POINT_COLOR_DEFAULT = "#131313"
+SKY_COLOR_DEFAULT = "#87CEEB"
+GROUND_COLOR_DEFAULT = "#604020"
 POINT_SIZE_DEFAULT = 1
 MOVING_STEP_DEFAULT = 10
 
@@ -193,8 +197,10 @@ down_arrow = '\u2193'
 left_arrow = '\u2190'
 right_arrow = '\u2192'
 
-
 # viewer 3d GL strings
+GL_U_POINTER = "pointer"
+GL_U_TYPE = "type"
+GL_U_VALUE = "value"
 GL_SOLID = "solid"
 GL_WIREFRAME = "wireframe"
 GL_POINTS = "points"

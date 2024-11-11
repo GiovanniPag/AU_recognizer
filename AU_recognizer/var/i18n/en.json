@@ -92,6 +92,8 @@
     "line_color": "Line color:",
     "canvas_color": "Canvas color:",
     "point_color": "Point color:",
+    "sky_color": "Sky color:",
+    "ground_color": "Ground color:",
     "point_size": "Point size:",
     "moving_step": "Move step:",
     "zoom_slider": "Zoom:",

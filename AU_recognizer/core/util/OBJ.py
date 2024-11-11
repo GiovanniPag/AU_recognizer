@@ -12,8 +12,6 @@ from pathlib import Path
 
 import numpy as np
 
-from AU_recognizer import logger
-
 
 class OBJ:
     def __init__(self, filepath=None):
@@ -22,12 +20,17 @@ class OBJ:
         self.normals = []  # 3D normals (nx, ny, nz)
         self.faces = []  # Faces will store vertex indices and texcoord indices and normal indices
         self.tangents = None
-        self.bitangents = None
         self.materials = {}
         self.current_material = None
         self.file = None
         if filepath:
             self.load(filepath)
+
+    def has_texture(self):
+        return bool(self.texcoords)
+
+    def has_color(self):
+        return any(len(vertex) > 3 for vertex in self.vertices)
 
     def load(self, filepath):
         self.file = Path(filepath)
@@ -62,7 +65,7 @@ class OBJ:
                     self.faces.append((face_indices, texcoord_indices, normal_indices, self.current_material))
         if not has_normals:
             self.calculate_normals()
-        self.calculate_tangents_and_bitangents()
+        self.calculate_tangents()
 
     def load_mtl(self, mtl_filepath):
         current_material = None
@@ -113,9 +116,8 @@ class OBJ:
 
         self.faces = updated_faces
 
-    def calculate_tangents_and_bitangents(self):
+    def calculate_tangents(self):
         self.tangents = np.zeros((len(self.vertices), 3), dtype=np.float32)
-        self.bitangents = np.zeros((len(self.vertices), 3), dtype=np.float32)
 
         for face_indices, texcoord_indices, n_idx, mat in self.faces:
             if len(texcoord_indices) < 3 or texcoord_indices[0] == -1:
@@ -131,15 +133,12 @@ class OBJ:
 
             r = 1.0 / (delta_uv1[0] * delta_uv2[1] - delta_uv1[1] * delta_uv2[0])
             tangent = (delta_pos1 * delta_uv2[1] - delta_pos2 * delta_uv1[1]) * r
-            bitangent = (delta_pos2 * delta_uv1[0] - delta_pos1 * delta_uv2[0]) * r
 
             for idx in face_indices:
                 self.tangents[idx] += tangent
-                self.bitangents[idx] += bitangent
 
-        # Normalize tangents and bitangents
+        # Normalize tangents
         self.tangents = [t / np.linalg.norm(t) for t in self.tangents]
-        self.bitangents = [b / np.linalg.norm(b) for b in self.bitangents]
 
     def get_vertices(self):
         return np.array(self.vertices)
@@ -188,13 +187,11 @@ class OBJ:
                     verts.extend([-1, -1])  # Default to no texcoord
                 verts.extend(self.normals[n_idxs[i]])
                 verts.extend(self.tangents[vertex_index].tolist())
-                verts.extend(self.bitangents[vertex_index].tolist())
                 # each verts array is [
                 # position: x, y, z, color: r, g, b,
                 # texture:  u, v,
                 # normals: nx, ny, nz,
-                # tangent: tx, ty, tz,
-                # bittangent: bx, by, bz]
+                # tangent: tx, ty, tz]
                 vertex_data.append(verts)
                 index_data.append(len(vertex_data) - 1)
 

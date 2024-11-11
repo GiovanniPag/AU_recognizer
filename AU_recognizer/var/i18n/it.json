@@ -92,6 +92,8 @@
     "line_color": "Colore linee:",
     "canvas_color": "Colore sfondo:",
     "point_color": "Colore punti:",
+    "sky_color": "Colore cielo:",
+    "ground_color": "Colore suolo:",
     "point_size": "Dimensione punti:",
     "moving_step": "Incremento di movimento:",
     "zoom_slider": "Zoom:",

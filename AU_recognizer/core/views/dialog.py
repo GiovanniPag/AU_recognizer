@@ -180,7 +180,9 @@ class SelectFitImageDialog(Dialog):
         for idx, image in enumerate(image_files):
             tag = 'even' if idx % 2 == 0 else 'odd'
             output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MF_MODEL]
-            fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() and (any(d.is_dir() and d.name.startswith(image.stem) for d in output_folder.iterdir())) else i18n.im_sel_dialog["data"]["not_fitted"]
+            fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() and (
+                any(d.is_dir() and d.name.startswith(image.stem) for d in output_folder.iterdir())) else \
+            i18n.im_sel_dialog["data"]["not_fitted"]
             # Check the state of the checkbox to decide whether to add the image
             if not self.hide_fitted_var.get() or fit_status == i18n.im_sel_dialog["data"]["not_fitted"]:
                 self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
@@ -261,6 +263,10 @@ class SettingsDialog(Dialog):
                                         default=nect_config[VIEWER][POINT_COLOR])
         self._point_size = IntPicker(master=self.viewer_frame, label_text="point_size",
                                      default=nect_config[VIEWER][POINT_SIZE], min_value=1, max_value=20)
+        self._ground_color = ColorPicker(master=self.viewer_frame, label_text="ground_color",
+                                         default=nect_config[VIEWER][GROUND_COLOR])
+        self._sky_color = ColorPicker(master=self.viewer_frame, label_text="sky_color",
+                                      default=nect_config[VIEWER][SKY_COLOR])
         self._moving_step = FloatPicker(master=self.viewer_frame, label_text="moving_step",
                                         default=nect_config[VIEWER][MOVING_STEP], min_value=0.01, max_value=1,
                                         increment=0.01)
@@ -300,6 +306,8 @@ class SettingsDialog(Dialog):
             LINE_COLOR: self._line_color.get_value(),
             CANVAS_COLOR: self._canvas_color.get_value(),
             POINT_COLOR: self._point_color.get_value(),
+            GROUND_COLOR: self._ground_color.get_value(),
+            SKY_COLOR: self._sky_color.get_value(),
             POINT_SIZE: self._point_size.get_value(),
             MOVING_STEP: self._moving_step.get_value()
         }
@@ -341,11 +349,15 @@ class SettingsDialog(Dialog):
         self._line_color.create_view()
         self._canvas_color.grid(row=2, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
         self._canvas_color.create_view()
+        self._ground_color.grid(row=4, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._ground_color.create_view()
+        self._sky_color.grid(row=5, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._sky_color.create_view()
         self._point_color.grid(row=3, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
         self._point_color.create_view()
-        self._point_size.grid(row=4, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._point_size.grid(row=6, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
         self._point_size.create_view()
-        self._moving_step.grid(row=5, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._moving_step.grid(row=7, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
         self._moving_step.create_view()
 
 
