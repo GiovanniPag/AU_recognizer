@@ -138,7 +138,8 @@ class OBJ:
                 self.tangents[idx] += tangent
 
         # Normalize tangents
-        self.tangents = [t / np.linalg.norm(t) for t in self.tangents]
+        self.tangents = [t / np.linalg.norm(t) if np.linalg.norm(t) > 0 else t for t in self.tangents]
+
 
     def get_vertices(self):
         return np.array(self.vertices)
