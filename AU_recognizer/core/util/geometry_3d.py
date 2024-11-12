@@ -71,9 +71,11 @@ def look_at(eye, target, up):
 
     # Create the lookAt matrix
     m = np.eye(4)
-    m[0, :-1] = r
-    m[1, :-1] = u
-    m[2, :-1] = -f
-    m[:3, 3] = -eye @ np.vstack((r, u, -f))  # Translation part
+    m[0, :3] = r
+    m[1, :3] = u
+    m[2, :3] = -f
+    m[0, 3] = -np.dot(r, eye)
+    m[1, 3] = -np.dot(u, eye)
+    m[2, 3] = np.dot(f, eye)
 
     return m

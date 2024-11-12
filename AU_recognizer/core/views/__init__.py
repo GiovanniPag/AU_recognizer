@@ -347,6 +347,9 @@ class ComboLabel(View):
                 self.selected = self.combo_values[0]
             self.combobox.set(self.selected)  # Set to first item by default
 
+    def bind_combobox_event(self, callback):
+        """Bind an external function to the Combobox selection event."""
+        self.combobox.bind("<<ComboboxSelected>>", lambda event: callback(self.combobox.get()))
 
 class CheckLabel(View):
     def __init__(self, master=None, label_text="no_text", default=False, command=None, **kwargs):

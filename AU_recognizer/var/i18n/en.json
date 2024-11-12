@@ -65,6 +65,16 @@
       "solid": "Solid",
       "wireframe": "Wireframe",
       "points": "Points"
+    },
+    "color_combo": {
+      "default": "Default",
+      "v_color": "Vertex color",
+      "texture": "Texture"
+    },
+    "normal_combo": {
+      "no": "None",
+      "normal": "Normal",
+      "normal_map": "Normal Map"
     }
   },
   "tooltips": {
@@ -82,8 +92,9 @@
     "l_combo": "Language:",
     "m_combo": "Model:",
     "gl_combo": "Representation:",
-    "gl_texture": "Texture",
-    "gl_lightning": "Lightning",
+    "gl_color": "Color:",
+    "gl_normal": "Normals:",
+    "gl_light": "Light:",
     "mode_radio": "Mode:",
     "c_simages": "Save images",
     "c_scodes": "Save FLAME codes",

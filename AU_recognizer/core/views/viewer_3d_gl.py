@@ -12,10 +12,12 @@ from PIL import Image
 from pyopengltk import OpenGLFrame
 
 from AU_recognizer import VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_COLOR, POINT_SIZE, MOVING_STEP, GL_SOLID, \
-    i18n, logger, GL_U_VALUE, GL_U_POINTER, SKY_COLOR, GROUND_COLOR, GL_U_TYPE
+    i18n, logger, GL_U_VALUE, GL_U_POINTER, SKY_COLOR, GROUND_COLOR, GL_U_TYPE, GL_DEFAULT, GL_NO, GL_WIREFRAME, \
+    GL_V_COLOR, GL_NORMAL, GL_C_POINTS, GL_C_TEXTURE, GL_C_NORMAL_MAP
 from AU_recognizer.core.util import nect_config, hex_to_float_rgb, hex_to_float_rgba
 from AU_recognizer.core.util.OBJ import OBJ
-from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quaternion_multiply, look_at, perspective
+from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quaternion_multiply, look_at, perspective, \
+    quaternion_to_matrix
 from AU_recognizer.core.views import View, ComboLabel, CheckLabel, IconButton
 
 
@@ -27,18 +29,57 @@ class Viewer3DGl(View):
         self.viewer_frame = ttk.Frame(self)
         self.control_frame = ttk.Frame(self, style='Control.TFrame')
         self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj)
-        self.model_combobox = ComboLabel(master=self.control_frame, label_text="gl_combo",
-                                         selected=i18n.gl_viewer["combo"][GL_SOLID],
-                                         values=list(i18n.gl_viewer['combo'].values()), state="readonly")
-
-        self.texture_checkbox = CheckLabel(master=self.control_frame, label_text="gl_texture", default=True,
-                                           command=...)
-        self.lighting_checkbox = CheckLabel(master=self.control_frame, label_text="gl_lightning", default=False,
-                                            command=...)
+        self.render_combobox = ComboLabel(master=self.control_frame, label_text="gl_combo",
+                                          selected=i18n.gl_viewer["combo"][GL_SOLID],
+                                          values=list(i18n.gl_viewer['combo'].values()), state="readonly")
+        self.color_combobox = ComboLabel(master=self.control_frame, label_text="gl_color",
+                                         selected=i18n.gl_viewer["color_combo"][GL_DEFAULT],
+                                         values=list(i18n.gl_viewer['color_combo'].values()), state="readonly")
+        self.normal_combobox = ComboLabel(master=self.control_frame, label_text="gl_normal",
+                                          selected=i18n.gl_viewer["normal_combo"][GL_NO],
+                                          values=list(i18n.gl_viewer['normal_combo'].values()), state="readonly")
+        self.lighting_checkbox = CheckLabel(master=self.control_frame, label_text="gl_light", default=False,
+                                            command=self._toggle_light)
         self.reset_button = IconButton(master=self.control_frame, asset_name="reset_view.png", tooltip="reset_view",
-                                       command=...)
+                                       command=self.canvas_3d.reset_view)
         self.settings_button = IconButton(master=self.control_frame, asset_name="settings.png", tooltip="open_set",
                                           command=...)
+
+    def _toggle_light(self):
+        self.canvas_3d.update_shader_uniforms([("useLight", self.lighting_checkbox.get_value())], start_shader=True)
+
+    def _change_normal_mode(self, new_mode):
+        if new_mode == i18n.gl_viewer["normal_combo"][GL_NO]:
+            self.canvas_3d.update_shader_uniforms([("useNormalMap", False),
+                                                   ("useNormal", False)], start_shader=True)
+        if new_mode == i18n.gl_viewer["normal_combo"][GL_NORMAL]:
+            self.canvas_3d.update_shader_uniforms([("useNormalMap", False),
+                                                   ("useNormal", True)], start_shader=True)
+        if new_mode == i18n.gl_viewer["normal_combo"][GL_C_NORMAL_MAP]:
+            self.canvas_3d.update_shader_uniforms([("useNormalMap", True),
+                                                   ("useNormal", False)], start_shader=True)
+
+    def _change_color_mode(self, new_mode):
+        if new_mode == i18n.gl_viewer["color_combo"][GL_DEFAULT]:
+            self.canvas_3d.update_shader_uniforms([("useTexture", False),
+                                                   ("useVertexColor", False)], start_shader=True)
+        if new_mode == i18n.gl_viewer["color_combo"][GL_V_COLOR]:
+            self.canvas_3d.update_shader_uniforms([("useTexture", False),
+                                                   ("useVertexColor", True)], start_shader=True)
+        if new_mode == i18n.gl_viewer["color_combo"][GL_C_TEXTURE]:
+            self.canvas_3d.update_shader_uniforms([("useTexture", True),
+                                                   ("useVertexColor", False)], start_shader=True)
+
+    def _change_render_mode(self, new_mode):
+        if new_mode == i18n.gl_viewer["combo"][GL_SOLID]:
+            self.canvas_3d.update_shader_uniforms([("isPoints", False),
+                                                   ("isWireframe", False), ], start_shader=True)
+        if new_mode == i18n.gl_viewer["combo"][GL_WIREFRAME]:
+            self.canvas_3d.update_shader_uniforms([("isPoints", False),
+                                                   ("isWireframe", True), ], start_shader=True)
+        if new_mode == i18n.gl_viewer["combo"][GL_C_POINTS]:
+            self.canvas_3d.update_shader_uniforms([("isPoints", True),
+                                                   ("isWireframe", False), ], start_shader=True)
 
     def create_view(self):
         self.rowconfigure(0, weight=7)  # make grid cell expandable
@@ -50,28 +91,39 @@ class Viewer3DGl(View):
         # grid canvas 3d
         self.canvas_3d.pack(fill=tk.BOTH, expand=True)
         # Modal box for view modes
-        self.model_combobox.create_view()
-        self.model_combobox.grid(row=1, column=0, columnspan=3, sticky='e')
-        # Checkbox for texture
-        self.texture_checkbox.create_view()
-        self.texture_checkbox.grid(row=2, column=0, columnspan=3, sticky='e')
+        self.render_combobox.create_view()
+        self.render_combobox.grid(row=1, column=0, columnspan=3, sticky='e')
+        # Modal box for color
+        self.color_combobox.create_view()
+        self.color_combobox.grid(row=2, column=0, columnspan=3, sticky='e')
+        # Modal box for normals
+        self.normal_combobox.create_view()
+        self.normal_combobox.grid(row=3, column=0, columnspan=3, sticky='e')
         # Checkbox for lighting
         self.lighting_checkbox.create_view()
-        self.lighting_checkbox.grid(row=3, column=0, columnspan=3, sticky='e')
+        self.lighting_checkbox.grid(row=4, column=0, columnspan=3, sticky='e')
         # Button to reset view
         self.reset_button.create_view()
-        self.reset_button.grid(row=4, column=1, sticky='e')
+        self.reset_button.grid(row=5, column=1, sticky='e')
         # Button to open settings
         self.settings_button.create_view()
-        self.settings_button.grid(row=4, column=2, sticky='e')
+        self.settings_button.grid(row=5, column=2, sticky='e')
+
+        self.render_combobox.bind_combobox_event(self._change_render_mode)
+        self.color_combobox.bind_combobox_event(self._change_color_mode)
+        self.normal_combobox.bind_combobox_event(self._change_normal_mode)
+
         # FPS counter TODO: MOVE INSIDE VIEWER
         # self.fps_label = ttk.Label(self, text="FPS: 0")
         # self.fps_label.pack(side=tk.BOTTOM, anchor='se', padx=5, pady=5)
 
     def update_language(self):
-        self.model_combobox.update_language(sel=i18n.gl_viewer["combo"][GL_SOLID],
-                                            values=list(i18n.gl_viewer['combo'].values()))
-        self.texture_checkbox.update_language()
+        self.render_combobox.update_language(sel=i18n.gl_viewer["combo"][GL_SOLID],
+                                             values=list(i18n.gl_viewer['combo'].values()))
+        self.color_combobox.update_language(sel=i18n.gl_viewer["color_combo"][GL_DEFAULT],
+                                            values=list(i18n.gl_viewer['color_combo'].values()))
+        self.normal_combobox.update_language(sel=i18n.gl_viewer["normal_combo"][GL_NO],
+                                             values=list(i18n.gl_viewer['normal_combo'].values()))
         self.lighting_checkbox.update_language()
         self.reset_button.update_language()
         self.settings_button.update_language()
@@ -127,6 +179,11 @@ class Frame3DGl(OpenGLFrame):
                 GL_U_POINTER: None,
                 GL_U_VALUE: False,
             },
+            "useNormal": {
+                GL_U_TYPE: "bool",
+                GL_U_POINTER: None,
+                GL_U_VALUE: False,
+            },
             "useLight": {
                 GL_U_TYPE: "bool",
                 GL_U_POINTER: None,
@@ -162,6 +219,8 @@ class Frame3DGl(OpenGLFrame):
         self._canvas_h = 400
         self._rotation = np.array([0.0, 0.0, 0.0, 1.0])  # Quaternion [x, y, z, w]
         self.camera_position = np.array([0.0, 0.0, 10.0])
+        self.panning = np.array([0.0, 0.0])
+        self.scale = 1.0
         # mouse drag
         self._last_mouse_x = 0
         self._last_mouse_y = 0
@@ -172,8 +231,6 @@ class Frame3DGl(OpenGLFrame):
         self._is_right_mouse_button_down = False
         # Placeholder for loaded model data
         self.shader = None
-        # default shader
-        self.render_mode = 'solid'  # Default mode: 'solid', 'wireframe', or 'points'
         self.vertex_array_object = None
         self.textures = {}
         self.normal_maps = {}
@@ -184,8 +241,16 @@ class Frame3DGl(OpenGLFrame):
         # bind events for mouse and keys
         self.bind_events()
 
-    def update_shader_uniforms(self, uniform_list):
+    def reset_view(self):
+        self._rotation = np.array([0.0, 0.0, 0.0, 1.0])  # Quaternion [x, y, z, w]
+        self.camera_position = np.array([0.0, 0.0, 10.0])
+        self.panning = np.array([0.0, 0.0])
+        self.scale = 1.0
+
+    def update_shader_uniforms(self, uniform_list, start_shader=False):
         if self.shader is not None:
+            if start_shader:
+                glUseProgram(self.shader)  # Activate the shader program
             for uniform in uniform_list:
                 if isinstance(uniform, tuple) and len(uniform) == 2:
                     uniform_name, uniform_value = uniform
@@ -194,6 +259,8 @@ class Frame3DGl(OpenGLFrame):
                 elif isinstance(uniform, str):
                     uniform_name = uniform
                     self.update_shader_uniform(uniform_name)
+            if start_shader:
+                glUseProgram(0)  # Deactivate the shader program
         else:
             logger.error("No shader program available")
 
@@ -321,6 +388,7 @@ class Frame3DGl(OpenGLFrame):
                                      "pointsColor",
                                      "useTexture",
                                      "useNormalMap",
+                                     "useNormal",
                                      "useLight",
                                      "isPoints",
                                      "isWireframe",
@@ -341,12 +409,6 @@ class Frame3DGl(OpenGLFrame):
         # Load and bind textures
         self.load_asset()
 
-    def switch_render_mode(self, mode):
-        if mode in ['solid', 'wireframe', 'points']:
-            self.render_mode = mode
-        else:
-            logger.error("Invalid render mode. Choose 'solid', 'wireframe', or 'points'.")
-
     def load_asset(self):
         for material_name, material in self.model['materials'].items():
             if material.texture_map is not None:
@@ -363,12 +425,12 @@ class Frame3DGl(OpenGLFrame):
         glUseProgram(self.shader)
 
         # Set rendering mode: solid, wireframe, or points
-        if self.render_mode == 'solid':
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-        elif self.render_mode == 'wireframe':
+        if self.shader_uniform['isWireframe'][GL_U_VALUE]:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-        elif self.render_mode == 'points':
+        elif self.shader_uniform['isPoints'][GL_U_VALUE]:
             glPolygonMode(GL_FRONT_AND_BACK, GL_POINT)
+        else:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
         # Set up the projection matrix (perspective projection)
         aspect_ratio = self._canvas_w / self._canvas_h
@@ -378,14 +440,21 @@ class Frame3DGl(OpenGLFrame):
 
         # Model matrix (rotation)
         model = np.eye(4)
-        # rot_matrix = quaternion_to_matrix(self._rotation)
-        # model[:3, :3] = rot_matrix[:3, :3]
-        # model = np.dot(model, np.array([
-        #    [1, 0, 0, 0],
-        #    [0, 1, 0, 0],
-        #    [0, 0, 1, 0],
-        #    [0, 0, 0, 1]
-        # ]))
+        rot_matrix = quaternion_to_matrix(self._rotation)
+        model[:3, :3] = rot_matrix[:3, :3]
+        model = np.dot(np.array([
+            [1, 0, 0, self.panning[0]],
+            [0, 1, 0, self.panning[1]],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ]), model)
+        # Apply scaling last
+        scale_matrix = np.eye(4)
+        scale_matrix[0, 0] = self.scale  # Uniform scale factor for x-axis
+        scale_matrix[1, 1] = self.scale  # Uniform scale factor for y-axis
+        scale_matrix[2, 2] = self.scale  # Uniform scale factor for z-axis
+        # Apply scaling to the model
+        model = np.dot(scale_matrix, model)
 
         self.update_shader_uniforms([("view", view.T),
                                      ("proj", proj.T),
@@ -418,13 +487,13 @@ class Frame3DGl(OpenGLFrame):
 
     def key_handler(self, event):
         if event.keysym == 'Up' or event.keysym == 'w':
-            self.camera_position[1] -= self._moving_step
+            self.panning[1] += self._moving_step
         elif event.keysym == 'Down' or event.keysym == 's':
-            self.camera_position[1] += self._moving_step
+            self.panning[1] -= self._moving_step
         elif event.keysym == 'Left' or event.keysym == 'a':
-            self.camera_position[0] += self._moving_step
+            self.panning[0] += self._moving_step
         elif event.keysym == 'Right' or event.keysym == 'd':
-            self.camera_position[0] -= self._moving_step
+            self.panning[0] -= self._moving_step
 
     def mouse_wheel_handler(self, event):
         """Cross-platform mouse wheel scroll event for zooming"""
@@ -441,7 +510,7 @@ class Frame3DGl(OpenGLFrame):
                 delta = 0
         # Adjust the zoom slider based on the scroll direction
         if delta != 0:
-            self.camera_position[2] += delta
+            self.camera_position[2] += delta * 0.1
 
     def __resized(self, *args):
         """Callback to the window resize events"""
@@ -473,17 +542,13 @@ class Frame3DGl(OpenGLFrame):
             self._handle_panning(event)
 
     def _handle_panning(self, event):
-        # Panning logic, considering zoom for sensitivity
+        # Panning logic
         dx = event.x - self._last_mouse_x_pan
         dy = event.y - self._last_mouse_y_pan
-        # Zoom sensitivity adjustments (more sensitive when zoomed in, less when zoomed out)
-        zoom_sensitivity = 0.005  # Base sensitivity factor
-        zoom_factor = max(1, abs(self.camera_position[2]))  # Ensure zoom factor is never too small
-        # Inverse logarithmic scaling to reverse the sensitivity relationship (more sensitive zoomed in)
-        sensitivity = zoom_sensitivity / np.log(zoom_factor + 1)  # Inverse scaling (log(x+1))
+        sensitivity = 0.01
         # Update position with adjusted sensitivity
-        self.camera_position[0] -= dx * sensitivity
-        self.camera_position[1] += dy * sensitivity
+        self.panning[0] -= dx * sensitivity
+        self.panning[1] -= dy * sensitivity
         # Update last mouse position
         self._last_mouse_x_pan = event.x
         self._last_mouse_y_pan = event.y
@@ -638,6 +703,7 @@ uniform vec3 groundColor; // Light color from below
 uniform bool isWireframe;
 uniform bool isPoints;
 uniform bool useVertexColor;
+uniform bool useNormal;      // Toggle normal mapping
 
 vec3 applyLighting(vec3 color, vec3 normal) {
     float blendFactor = normal.y * 0.5 + 0.5;
@@ -669,7 +735,7 @@ void main() {
     }
     if(useLight){
         finalColor = applyLighting(finalColor, normal);
-    }else if(useNormalMap){
+    }else if(useNormal){
         vec3 normalEffect = 0.5 + 0.5 * normal;  // Map normal from [-1,1] to [0,1]
         finalColor *= normalEffect;               // Blend with base color
     }

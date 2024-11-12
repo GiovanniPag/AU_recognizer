@@ -65,6 +65,16 @@
       "solid": "Solida",
       "wireframe": "Reticolo",
       "points": "Punti"
+    },
+    "color_combo": {
+      "default": "Default",
+      "v_color": "Colore vertici",
+      "texture": "Texture"
+    },
+    "normal_combo": {
+      "no": "No",
+      "normal": "Normali",
+      "normal_map": "Mappa normale"
     }
   },
     "tooltips": {
@@ -82,8 +92,9 @@
     "l_combo": "Linguaggio:",
     "m_combo": "Modello:",
     "gl_combo": "Rappresentazione:",
-    "gl_texture": "Texture",
-    "gl_lightning": "Luce",
+    "gl_color": "Colore:",
+    "gl_normal": "Normali:",
+    "gl_light": "Luce:",
     "mode_radio": "Modalità:",
     "c_simages": "Salva immagini",
     "c_scodes": "Salva Codici FLAME",

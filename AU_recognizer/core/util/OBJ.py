@@ -159,6 +159,13 @@ class OBJ:
     def get_material(self, material_name):
         return self.materials.get(material_name)
 
+    def compute_mesh_size(self):
+        # Assuming vertices is a numpy array of shape (n, 3)
+        min_bound = np.min(self.vertices, axis=0)
+        max_bound = np.max(self.vertices, axis=0)
+        mesh_size = max_bound - min_bound
+        return mesh_size
+
     def prepare_opengl_data(self):
         """
         Prepare data to be sent to OpenGL for rendering.
