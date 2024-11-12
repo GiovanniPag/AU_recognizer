@@ -10,6 +10,7 @@ from AU_recognizer.core.util.language_resource import i18n
 from AU_recognizer.core.controllers.controller import MenuController, TreeController, \
     Viewer3DController, SelectedFileController, SelectedProjectController, ProjectActionController, \
     TreeViewMenuController
+from AU_recognizer.core.views.dialog import SettingsDialog
 from AU_recognizer.core.views.view import MenuBar, View, ProjectTreeView, Viewer3DView, ScrollWrapperView, \
     SelectedFileView, ProjectInfoView, ProjectActionView, TreeViewMenu
 
@@ -67,6 +68,9 @@ class AURecognizer(tk.Tk):
                     purge = True
             if purge:  # purge not found
                 purge_option_config(option)
+
+    def open_settings(self, page=""):
+        SettingsDialog(master=self, page=page).show()
 
     def add_project(self, project_data, project_name):
         logger.debug(f"add {project_data} from {project_data[project_name][P_PATH]} to open projects")

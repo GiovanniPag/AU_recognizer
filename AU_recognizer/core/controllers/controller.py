@@ -131,9 +131,9 @@ class MenuController(Controller):
             logger.debug("menu_bar <<LanguageChange>> event generation")
             self.master.event_generate("<<LanguageChange>>")
 
-    def open_settings_dialog(self):
+    def open_settings_dialog(self, page=""):
         logger.debug("open settings dialog")
-        SettingsDialog(master=self.master).show()
+        SettingsDialog(master=self.master, page=page).show()
 
 
 class TreeViewMenuController(Controller):

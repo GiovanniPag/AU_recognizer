@@ -458,7 +458,7 @@ class Viewer3DView(View):
         elif type_of_file == "obj":
             logger.debug("show mesh in Viewer3D view")
             # Create a new OpenGL window
-            self.__canvas_3d = Viewer3DGl(master=self.master,placeholder=self.__placeholder, obj_file_path=path)
+            self.__canvas_3d = Viewer3DGl(master=self.master ,placeholder=self.__placeholder, obj_file_path=path)
             self.__canvas_3d.create_view()
             self.__canvas_3d.pack(fill=tk.BOTH, expand=True)
             self.__canvas_3d.display(animate=1)

@@ -43,10 +43,16 @@ class Viewer3DGl(View):
         self.reset_button = IconButton(master=self.control_frame, asset_name="reset_view.png", tooltip="reset_view",
                                        command=self.canvas_3d.reset_view)
         self.settings_button = IconButton(master=self.control_frame, asset_name="settings.png", tooltip="open_set",
-                                          command=...)
+                                          command=self.open_settings)
+
+        # TODO: add controls on the combobox list if avaible
 
     def _toggle_light(self):
         self.canvas_3d.update_shader_uniforms([("useLight", self.lighting_checkbox.get_value())], start_shader=True)
+
+    def open_settings(self):
+        self.master.open_settings(page="viewer")
+        # TODO: automatically update viewer after settings update
 
     def _change_normal_mode(self, new_mode):
         if new_mode == i18n.gl_viewer["normal_combo"][GL_NO]:
@@ -131,7 +137,7 @@ class Viewer3DGl(View):
     def display(self, animate):
         self.canvas_3d.animate = animate
 
-
+# TODO: scale obj relative to canvas area
 class Frame3DGl(OpenGLFrame):
     def __init__(self, placeholder, obj: OBJ = None):
         super().__init__(placeholder)

@@ -108,6 +108,7 @@ class BaseDialog(Dialog):
             self.close()
 
 
+#TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
 class SelectFitImageDialog(Dialog):
     def __init__(self, master, data, project):
         super().__init__(master)
@@ -129,6 +130,14 @@ class SelectFitImageDialog(Dialog):
             variable=self.hide_fitted_var,
             command=self.populate_image_treeview  # Refresh the Treeview when toggled
         )
+        # Entry widget for filter text
+        self.filter_var = tk.StringVar()  # StringVar to hold the filter input
+        self.filter_entry = ttk.Entry(
+            self.main_frame,
+            textvariable=self.filter_var,
+            validate="key"
+        )
+        self.filter_entry.bind("<KeyRelease>", self.filter_images)
 
     def create_view(self):
         logger.debug(f"{self.__class__.__name__} create view")
@@ -136,8 +145,10 @@ class SelectFitImageDialog(Dialog):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         self.scroll_frame.pack(fill=tk.BOTH, expand=True)
         self.scroll_frame.add(self.image_treeview)
+        self.filter_entry.pack(fill=tk.X, padx=5, pady=5)  # Filter text box
         # Add the checkbox above the Treeview
         self.hide_fitted_checkbox.pack(anchor='w')
+        # Treeview for images
         # Treeview for images
         self.image_treeview[T_COLUMNS] = (TD_IMAGES, TD_FITTED)
         self.image_treeview.column(TD_IMAGES, anchor=T_CENTER, minwidth=300, width=300)
@@ -164,6 +175,10 @@ class SelectFitImageDialog(Dialog):
         # Populate the treeview with images
         self.populate_image_treeview()
 
+    def filter_images(self, event):
+        """This method will be triggered every time the user types in the filter Entry widget."""
+        self.populate_image_treeview()  # Repopulate treeview with filter applied
+
     def populate_image_treeview(self):
         logger.debug(f"{self.__class__.__name__} populate image treeview")
         # Clear existing entries in the Treeview
@@ -177,14 +192,17 @@ class SelectFitImageDialog(Dialog):
         image_files = [file for file in images_path.iterdir() if file.suffix.lower() in image_suffixes]
         # Sort images by name (alphabetically)
         image_files.sort(key=lambda x: x.name.lower())
+        # Get the filter value from the Entry widget
+        filter_text = self.filter_var.get().lower()
         for idx, image in enumerate(image_files):
             tag = 'even' if idx % 2 == 0 else 'odd'
             output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MF_MODEL]
             fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() and (
                 any(d.is_dir() and d.name.startswith(image.stem) for d in output_folder.iterdir())) else \
-            i18n.im_sel_dialog["data"]["not_fitted"]
+                i18n.im_sel_dialog["data"]["not_fitted"]
             # Check the state of the checkbox to decide whether to add the image
-            if not self.hide_fitted_var.get() or fit_status == i18n.im_sel_dialog["data"]["not_fitted"]:
+            if (not self.hide_fitted_var.get() or fit_status == i18n.im_sel_dialog["data"]["not_fitted"]) and \
+               (filter_text in image.name.lower()):
                 self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
         # Define tags and styles for alternating row colors
         self.image_treeview.tag_configure('even', background='#f0f0ff')
@@ -227,7 +245,7 @@ class SelectFitImageDialog(Dialog):
 
 
 class SettingsDialog(Dialog):
-    def __init__(self, master):
+    def __init__(self, master, page=""):
         super().__init__(master)
         self.master = master
         # Create the notebook
@@ -236,6 +254,7 @@ class SettingsDialog(Dialog):
         # Create frames for the tabs
         self.general_frame = ttk.Frame(self.notebook)
         self.viewer_frame = ttk.Frame(self.notebook)
+        self.startpage=page
         # Create the main frame
         self._i18n_path = EntryButton(master=self.general_frame, label_text="i18n_path",
                                       entry_text=nect_config[CONFIG][I18N_PATH])
@@ -282,6 +301,8 @@ class SettingsDialog(Dialog):
         save_button.grid(row=1, column=0, sticky=tk.E, padx=10, pady=10)
         close_button = tk.Button(self, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
         close_button.grid(row=1, column=1, sticky=tk.EW, padx=10, pady=10)
+        if self.startpage == "viewer":
+            self.notebook.select(self.viewer_frame)
 
     def save_config(self):
         logger.debug(f"{self.__class__.__name__} save config")
