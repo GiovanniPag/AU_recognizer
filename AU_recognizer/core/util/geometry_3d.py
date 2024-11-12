@@ -41,34 +41,39 @@ def quaternion_multiply(q1, q2):
 def quaternion_to_matrix(q):
     x, y, z, w = q
     return np.array([
-        [1 - 2 * (y**2 + z**2), 2 * (x * y - z * w), 2 * (x * z + y * w)],
-        [2 * (x * y + z * w), 1 - 2 * (x**2 + z**2), 2 * (y * z - x * w)],
-        [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x**2 + y**2)]
+        [1 - 2 * (y ** 2 + z ** 2), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+        [2 * (x * y + z * w), 1 - 2 * (x ** 2 + z ** 2), 2 * (y * z - x * w)],
+        [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x ** 2 + y ** 2)]
     ])
 
 
-# Function for perspective projection matrix
-@numba.njit(nogil=True, cache=True, fastmath=True)
 def perspective(fov, aspect, near, far):
-    tan_half_fov = np.tan(np.radians(fov) / 2.0)
-    return np.array([
-        [1.0 / (aspect * tan_half_fov), 0, 0, 0],
-        [0, 1.0 / tan_half_fov, 0, 0],
-        [0, 0, -(far + near) / (far - near), -1],
-        [0, 0, -(2.0 * far * near) / (far - near), 0]
-    ])
+    tan_half_fov = np.tan(np.radians(fov) / 2)
+    m = np.zeros((4, 4))
+
+    m[0, 0] = 1 / (aspect * tan_half_fov)
+    m[1, 1] = 1 / tan_half_fov
+    m[2, 2] = -(far + near) / (far - near)
+    m[2, 3] = -(2 * far * near) / (far - near)
+    m[3, 2] = -1
+
+    return m
 
 
-# Function to create the view matrix (lookAt)
-@numba.njit(nogil=True, cache=True, fastmath=True)
 def look_at(eye, target, up):
-    z = np.linalg.norm(eye - target)  # Eye-to-target direction
-    x = np.cross(up, z)
-    y = np.cross(z, x)
-    return np.array([
-        [x[0], y[0], z[0], eye[0]],
-        [x[1], y[1], z[1], eye[1]],
-        [x[2], y[2], z[2], eye[2]],
-        [0, 0, 0, 1]
-    ])
+    # Normalize the forward, right, and up vectors
+    f = (target - eye)
+    f /= np.linalg.norm(f) if np.linalg.norm(f) != 0 else 1
+    r = np.cross(up, f)
+    r /= np.linalg.norm(r) if np.linalg.norm(r) != 0 else 1
+    u = np.cross(f, r)
+    u /= np.linalg.norm(u) if np.linalg.norm(u) != 0 else 1
 
+    # Create the lookAt matrix
+    m = np.eye(4)
+    m[0, :-1] = r
+    m[1, :-1] = u
+    m[2, :-1] = -f
+    m[:3, 3] = -eye @ np.vstack((r, u, -f))  # Translation part
+
+    return m

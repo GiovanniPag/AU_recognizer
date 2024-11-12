@@ -1,7 +1,6 @@
 import platform as pf
-from builtins import object
-from pathlib import Path
 import tkinter as tk
+from pprint import pprint
 from tkinter import ttk
 
 import numpy as np
@@ -16,8 +15,7 @@ from AU_recognizer import VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_CO
     i18n, logger, GL_U_VALUE, GL_U_POINTER, SKY_COLOR, GROUND_COLOR, GL_U_TYPE
 from AU_recognizer.core.util import nect_config, hex_to_float_rgb, hex_to_float_rgba
 from AU_recognizer.core.util.OBJ import OBJ
-from AU_recognizer.core.util.geometry_3d import quaternion_to_matrix, axis_angle_to_quaternion, quaternion_multiply, \
-    perspective, look_at
+from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quaternion_multiply, look_at, perspective
 from AU_recognizer.core.views import View, ComboLabel, CheckLabel, IconButton
 
 
@@ -162,8 +160,8 @@ class Frame3DGl(OpenGLFrame):
         }
         self._canvas_w = 800
         self._canvas_h = 400
-        self._rotation = np.array([0, 0, 0, 1])  # Quaternion [x, y, z, w]
-        self.camera_position = [0, 0, 5]
+        self._rotation = np.array([0.0, 0.0, 0.0, 1.0])  # Quaternion [x, y, z, w]
+        self.camera_position = np.array([0.0, 0.0, 10.0])
         # mouse drag
         self._last_mouse_x = 0
         self._last_mouse_y = 0
@@ -188,10 +186,14 @@ class Frame3DGl(OpenGLFrame):
 
     def update_shader_uniforms(self, uniform_list):
         if self.shader is not None:
-            for uniform_name, uniform_value in uniform_list:
-                if uniform_value is not None:
+            for uniform in uniform_list:
+                if isinstance(uniform, tuple) and len(uniform) == 2:
+                    uniform_name, uniform_value = uniform
                     self.set_uniform_value(uniform_name, uniform_value)
-                self.update_shader_uniform(uniform_name)
+                    self.update_shader_uniform(uniform_name)
+                elif isinstance(uniform, str):
+                    uniform_name = uniform
+                    self.update_shader_uniform(uniform_name)
         else:
             logger.error("No shader program available")
 
@@ -253,9 +255,9 @@ class Frame3DGl(OpenGLFrame):
         self.bind("<ButtonRelease-1>", self.__end_rotate)
         self.bind("<ButtonRelease-3>", self.__end_pan)
 
-    def create_object(self, shader):
+    def create_object(self):
         vao_dict = {}
-        for material, data in self.model['batched_data'].items():
+        for material_name, data in self.model['batched_data'].items():
             vertex_array_object = glGenVertexArrays(1)
             glBindVertexArray(vertex_array_object)
             # Generate vertex buffer
@@ -264,43 +266,43 @@ class Frame3DGl(OpenGLFrame):
             vertex_array = data['vertex_data']
             glBufferData(GL_ARRAY_BUFFER, vertex_array.nbytes, vertex_array, GL_STATIC_DRAW)
 
-            stride = (3 + 3 + 2 + 3 + 3 + 3) * ctypes.sizeof(
-                ctypes.c_float)  # Position + Color + TexCoord + Normal + tangent + bitangent
+            stride = (3 + 3 + 2 + 3 + 3) * ctypes.sizeof(
+                ctypes.c_float)  # Position + Color + TexCoord + Normal + tangent +
             # Enable and define the vertex position attribute (location = 0)
             glEnableVertexAttribArray(0)
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(0))
+            glVertexAttribPointer(0, 3, GL_FLOAT, False, stride, ctypes.c_void_p(0))
 
             # Enable and define the vertex color attribute (location = 1)
             glEnableVertexAttribArray(1)
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(3 * ctypes.sizeof(ctypes.c_float)))
+            glVertexAttribPointer(1, 3, GL_FLOAT, False, stride, ctypes.c_void_p(3 * ctypes.sizeof(ctypes.c_float)))
 
             # Enable and define the texture coordinate attribute (location = 2)
             glEnableVertexAttribArray(2)
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(6 * ctypes.sizeof(ctypes.c_float)))
+            glVertexAttribPointer(2, 2, GL_FLOAT, False, stride, ctypes.c_void_p(6 * ctypes.sizeof(ctypes.c_float)))
 
             # Enable and define the normal attribute (location = 3)
             glEnableVertexAttribArray(3)
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(8 * ctypes.sizeof(ctypes.c_float)))
+            glVertexAttribPointer(3, 3, GL_FLOAT, False, stride, ctypes.c_void_p(8 * ctypes.sizeof(ctypes.c_float)))
 
             # Enable and define the tangent attribute (location = 4)
             glEnableVertexAttribArray(4)
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(11 * ctypes.sizeof(ctypes.c_float)))
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, stride, ctypes.c_void_p(11 * ctypes.sizeof(ctypes.c_float)))
 
             # Generate index buffer
-            if data['index_data'].size > 0:
+            if data['index_data'] is not None and data['index_data'].size > 0:
                 element_buffer = glGenBuffers(1)
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer)
                 faces_array = data['index_data']
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces_array.nbytes, faces_array, GL_STATIC_DRAW)
             # Store the VAO per material
-            vao_dict[material] = vertex_array_object
+            vao_dict[material_name] = vertex_array_object
             # Unbind the VAO and buffers
+            glBindVertexArray(0)
             glDisableVertexAttribArray(0)
             glDisableVertexAttribArray(1)
             glDisableVertexAttribArray(2)
             glDisableVertexAttribArray(3)
             glDisableVertexAttribArray(4)
-            glBindVertexArray(0)
             glBindBuffer(GL_ARRAY_BUFFER, 0)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
         return vao_dict
@@ -310,13 +312,30 @@ class Frame3DGl(OpenGLFrame):
             compileShader(vertex_shader_code, GL_VERTEX_SHADER),
             compileShader(fragment_shader_code, GL_FRAGMENT_SHADER)
         )
-        self.vertex_array_object = self.create_object(self.shader)
+
+        glUseProgram(self.shader)  # Activate the shader program
+        glUniform1i(glGetUniformLocation(self.shader, bytestr("textureMap")), 0)  # GL_TEXTURE0
+        glUniform1i(glGetUniformLocation(self.shader, bytestr("normalMap")), 1)  # GL_TEXTURE1
+        self.update_shader_uniforms(["solidColor",
+                                     "wireframeColor",
+                                     "pointsColor",
+                                     "useTexture",
+                                     "useNormalMap",
+                                     "useLight",
+                                     "isPoints",
+                                     "isWireframe",
+                                     "useVertexColor",
+                                     "skyColor",
+                                     "groundColor"
+                                     ])
+        glUseProgram(0)  # Deactivate the shader program
+        self.vertex_array_object = self.create_object()
         # Set up OpenGL settings here
         glClearColor(*self._canvas_color)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
-        glFrontFace(GL_CW)  # Assuming the faces are counter-clockwise in your model
+        glFrontFace(GL_CW)  # Assuming the faces are counter-clockwise
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(self._point_size)
         # Load and bind textures
@@ -329,14 +348,13 @@ class Frame3DGl(OpenGLFrame):
             logger.error("Invalid render mode. Choose 'solid', 'wireframe', or 'points'.")
 
     def load_asset(self):
-        texture_unit = GL_TEXTURE0
-        glActiveTexture(texture_unit)
-
-        for material_name, material in self.model['materials']:
+        for material_name, material in self.model['materials'].items():
             if material.texture_map is not None:
+                glActiveTexture(GL_TEXTURE0)
                 texture_id = load_texture(material.texture_map)
                 self.textures[material_name] = texture_id
             if material.normal_map is not None:
+                glActiveTexture(GL_TEXTURE1)
                 texture_id = load_texture(material.normal_map)
                 self.normal_maps[material_name] = texture_id
 
@@ -355,43 +373,45 @@ class Frame3DGl(OpenGLFrame):
         # Set up the projection matrix (perspective projection)
         aspect_ratio = self._canvas_w / self._canvas_h
         proj = perspective(45.0, aspect_ratio, 0.1, 100.0)
-
         # View matrix (camera)
-        view = look_at(self.camera_position, np.array([0.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0]))
+        view = look_at(eye=self.camera_position, target=np.array([0.0, 0.0, 0.0]), up=np.array([0.0, 1.0, 0.0]))
 
         # Model matrix (rotation)
         model = np.eye(4)
-        rot_matrix = quaternion_to_matrix(self._rotation)
-        model[:3, :3] = rot_matrix[:3, :3]
-        model = np.dot(model, np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ]))
+        # rot_matrix = quaternion_to_matrix(self._rotation)
+        # model[:3, :3] = rot_matrix[:3, :3]
+        # model = np.dot(model, np.array([
+        #    [1, 0, 0, 0],
+        #    [0, 1, 0, 0],
+        #    [0, 0, 1, 0],
+        #    [0, 0, 0, 1]
+        # ]))
 
-        self.update_shader_uniforms({"view": view.T,
-                                     "proj": proj.T,
-                                     "model": model.T})
+        self.update_shader_uniforms([("view", view.T),
+                                     ("proj", proj.T),
+                                     ("model", model.T)])
 
-        for material, vao in self.vertex_array_object.items():
+        for material_name, vao in self.vertex_array_object.items():
             # Bind the VAO
             glBindVertexArray(vao)
 
-            # Bind the normal map texture (if available)
-            if self.normal_map_texture:
-                glActiveTexture(GL_TEXTURE1)  # Assuming normal map uses texture unit 1
-                glBindTexture(GL_TEXTURE_2D, self.normal_map_texture)
+            # Bind the appropriate texture for the material
+            if material_name in self.normal_maps and self.shader_uniform["useNormalMap"][GL_U_VALUE] is True:
+                glActiveTexture(GL_TEXTURE1)  # Set to use texture unit 1 for the normal map
+                glBindTexture(GL_TEXTURE_2D, self.normal_maps[material_name])
 
             # Bind the appropriate texture for the material
-            if material in self.textures and self.current_shader == "texture":
-                glBindTexture(GL_TEXTURE_2D, self.textures[material])
+            if material_name in self.textures and self.shader_uniform["useTexture"][GL_U_VALUE] is True:
+                glActiveTexture(GL_TEXTURE0)  # Set to use texture unit 0 for the diffuse texture
+                glBindTexture(GL_TEXTURE_2D, self.textures[material_name])
 
-            if 'index_data' in self.model['batched_data'][material]:
-                glDrawElements(GL_TRIANGLES, len(self.model['batched_data'][material]['index_data']), GL_UNSIGNED_INT,
+            if 'index_data' in self.model['batched_data'][material_name] and self.model['batched_data'][material_name][
+                'index_data'] is not None:
+                glDrawElements(GL_TRIANGLES, len(self.model['batched_data'][material_name]['index_data']),
+                               GL_UNSIGNED_INT,
                                None)
             else:
-                glDrawArrays(GL_POINTS, 0, len(self.model['batched_data'][material]['vertex_data']))
+                glDrawArrays(GL_POINTS, 0, len(self.model['batched_data'][material_name]['vertex_data']))
             glBindTexture(GL_TEXTURE_2D, 0)
         glBindVertexArray(0)  # Unbind the VAO when done
         glUseProgram(0)
@@ -421,7 +441,7 @@ class Frame3DGl(OpenGLFrame):
                 delta = 0
         # Adjust the zoom slider based on the scroll direction
         if delta != 0:
-            self.camera_position[2] += delta * 0.1
+            self.camera_position[2] += delta
 
     def __resized(self, *args):
         """Callback to the window resize events"""
