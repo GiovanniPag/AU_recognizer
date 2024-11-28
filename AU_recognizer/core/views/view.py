@@ -5,6 +5,7 @@ from pprint import pprint
 from tkinter import ttk, VERTICAL
 from typing import Optional
 
+import numpy as np
 from OpenGL.GL import GL_NO_ERROR, glGetError
 
 from AU_recognizer.core.controllers import Controller
@@ -428,6 +429,7 @@ class Viewer3DView(View):
         self.master = master
         self.__canvas_image: Optional[CanvasImage] = None
         self.__canvas_3d: Optional[Viewer3DGl] = None
+        self.__npy_v: Optional[ScrollWrapperView] = None
         self.__placeholder = ttk.Frame(self)
 
     def update_language(self):
@@ -462,6 +464,17 @@ class Viewer3DView(View):
             self.__canvas_3d.create_view()
             self.__canvas_3d.pack(fill=tk.BOTH, expand=True)
             self.__canvas_3d.display(animate=1)
+        elif type_of_file == "npy":
+            logger.debug("show npy contents in npy_view")
+            # Create a new OpenGL window
+            self.__npy_v=ScrollWrapperView(master=self.__placeholder)
+            canvas = tk.Canvas(self.__npy_v)
+            npv = NpyViewwer(master=canvas, path=path)
+            self.__npy_v.add(canvas)
+            npv.create_view()
+            self.__npy_v.grid(row=0, column=0, sticky='nswe')
+            canvas.grid(row=0, column=0, sticky='nswe')
+            npv.grid(row=0, column=0, sticky='nswe')
         else:
             logger.debug("no file")
             # no file
@@ -478,6 +491,10 @@ class Viewer3DView(View):
             if path.suffix == ".obj":
                 self.data = data
                 self.__update_view(type_of_file="obj")
+            # is npy array
+            if path.suffix == ".npy":
+                self.data = data
+                self.__update_view(type_of_file="npy")
 
 
 class ProjectInfoView(View):
@@ -668,3 +685,24 @@ class ProjectActionView(ttk.Notebook, View):
         logger.debug(f"update selected project in project action view")
         self._project_info = data
         self.__update_view()
+
+
+# TODO: refactor npyViewer class
+class NpyViewwer(View):
+    def __init__(self, master=None, path=None, **kwargs):
+        super().__init__(master, **kwargs)
+        self.master = master
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.path=path
+
+    def create_view(self):
+        # Text widget for displaying the data
+        text_widget = tk.Text(self, wrap=tk.WORD, width=50, height=20)
+        text_widget.pack()
+        data = np.load(self.path)
+        text_widget.delete("1.0", tk.END)  # Clear any previous content
+        text_widget.insert(tk.END, str(data))  # Insert the data as text
+
+    def update_language(self):
+        pass

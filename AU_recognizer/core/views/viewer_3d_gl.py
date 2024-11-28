@@ -1,4 +1,5 @@
 import platform as pf
+import time
 import tkinter as tk
 from pprint import pprint
 from tkinter import ttk
@@ -18,7 +19,7 @@ from AU_recognizer.core.util import nect_config, hex_to_float_rgb, hex_to_float_
 from AU_recognizer.core.util.OBJ import OBJ
 from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quaternion_multiply, look_at, perspective, \
     quaternion_to_matrix
-from AU_recognizer.core.views import View, ComboLabel, CheckLabel, IconButton
+from AU_recognizer.core.views import View, ComboLabel, CheckLabel, IconButton, FPSCounter
 
 
 class Viewer3DGl(View):
@@ -63,7 +64,7 @@ class Viewer3DGl(View):
                                                    ("useNormal", True)], start_shader=True)
         if new_mode == i18n.gl_viewer["normal_combo"][GL_C_NORMAL_MAP]:
             self.canvas_3d.update_shader_uniforms([("useNormalMap", True),
-                                                   ("useNormal", False)], start_shader=True)
+                                                   ("useNormal", True)], start_shader=True)
 
     def _change_color_mode(self, new_mode):
         if new_mode == i18n.gl_viewer["color_combo"][GL_DEFAULT]:
@@ -119,10 +120,6 @@ class Viewer3DGl(View):
         self.color_combobox.bind_combobox_event(self._change_color_mode)
         self.normal_combobox.bind_combobox_event(self._change_normal_mode)
 
-        # FPS counter TODO: MOVE INSIDE VIEWER
-        # self.fps_label = ttk.Label(self, text="FPS: 0")
-        # self.fps_label.pack(side=tk.BOTTOM, anchor='se', padx=5, pady=5)
-
     def update_language(self):
         self.render_combobox.update_language(sel=i18n.gl_viewer["combo"][GL_SOLID],
                                              values=list(i18n.gl_viewer['combo'].values()))
@@ -137,10 +134,12 @@ class Viewer3DGl(View):
     def display(self, animate):
         self.canvas_3d.animate = animate
 
+
 # TODO: scale obj relative to canvas area
 class Frame3DGl(OpenGLFrame):
     def __init__(self, placeholder, obj: OBJ = None):
-        super().__init__(placeholder)
+        super().__init__(placeholder)  # FPS counter
+        self.fps_counter = FPSCounter(self)
         self._canvas_color = hex_to_float_rgba(str(nect_config[VIEWER][CANVAS_COLOR]))
         self._moving_step = float(nect_config[VIEWER][MOVING_STEP])
         self._point_size = int(nect_config[VIEWER][POINT_SIZE])
@@ -221,6 +220,9 @@ class Frame3DGl(OpenGLFrame):
                 GL_U_VALUE: hex_to_float_rgb(str(nect_config[VIEWER][GROUND_COLOR])),
             },
         }
+        self.start_time = None
+        self.fps_accumulated_time = 0.0
+        self.frame_count = 0
         self._canvas_w = 800
         self._canvas_h = 400
         self._rotation = np.array([0.0, 0.0, 0.0, 1.0])  # Quaternion [x, y, z, w]
@@ -316,6 +318,8 @@ class Frame3DGl(OpenGLFrame):
         self.bind_all('<KeyPress-s>', self.key_handler)
         self.bind_all('<KeyPress-a>', self.key_handler)
         self.bind_all('<KeyPress-d>', self.key_handler)
+        self.bind_all('<KeyPress-r>', lambda _: self.reset_view())
+        self.bind_all('<KeyPress-f>', lambda _: self.fps_counter.toggle())
         self.bind_all('<KeyPress-Up>', self.key_handler)
         self.bind_all('<KeyPress-Down>', self.key_handler)
         self.bind_all('<KeyPress-Left>', self.key_handler)
@@ -412,6 +416,7 @@ class Frame3DGl(OpenGLFrame):
         glFrontFace(GL_CW)  # Assuming the faces are counter-clockwise
         glEnable(GL_PROGRAM_POINT_SIZE)
         glPointSize(self._point_size)
+        self.start_time = time.time()
         # Load and bind textures
         self.load_asset()
 
@@ -427,6 +432,13 @@ class Frame3DGl(OpenGLFrame):
                 self.normal_maps[material_name] = texture_id
 
     def redraw(self):
+        if not self.fps_counter.hidden:
+            # Start measuring the time for the frame
+            current_time = time.time()
+            self.frame_count += 1
+            self.fps_accumulated_time += current_time - self.start_time  # Accumulate elapsed time
+            self.start_time = current_time  # Update start time
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glUseProgram(self.shader)
 
@@ -490,6 +502,13 @@ class Frame3DGl(OpenGLFrame):
             glBindTexture(GL_TEXTURE_2D, 0)
         glBindVertexArray(0)  # Unbind the VAO when done
         glUseProgram(0)
+
+        if not self.fps_counter.hidden:
+            if self.fps_accumulated_time >= 0.5:
+                fps = self.frame_count / self.fps_accumulated_time
+                self.fps_counter.update(fps)
+                self.frame_count = 0
+                self.fps_accumulated_time = 0.0
 
     def key_handler(self, event):
         if event.keysym == 'Up' or event.keysym == 'w':
