@@ -460,20 +460,19 @@ class Viewer3DView(View):
         elif type_of_file == "obj":
             logger.debug("show mesh in Viewer3D view")
             # Create a new OpenGL window
-            self.__canvas_3d = Viewer3DGl(master=self.master ,placeholder=self.__placeholder, obj_file_path=path)
+            self.__canvas_3d = Viewer3DGl(master=self.master, placeholder=self.__placeholder, obj_file_path=path)
             self.__canvas_3d.create_view()
             self.__canvas_3d.pack(fill=tk.BOTH, expand=True)
             self.__canvas_3d.display(animate=1)
         elif type_of_file == "npy":
             logger.debug("show npy contents in npy_view")
             # Create a new OpenGL window
-            self.__npy_v=ScrollWrapperView(master=self.__placeholder)
-            canvas = tk.Canvas(self.__npy_v)
-            npv = NpyViewwer(master=canvas, path=path)
-            self.__npy_v.add(canvas)
+            self.__npy_v = ScrollFrame(master=self.__placeholder)
+            self.__npy_v.viewPort.rowconfigure(0, weight=1)
+            self.__npy_v.viewPort.columnconfigure(0, weight=1)
+            npv = NpyViewer(master=self.__npy_v.viewPort, path=path)
             npv.create_view()
             self.__npy_v.grid(row=0, column=0, sticky='nswe')
-            canvas.grid(row=0, column=0, sticky='nswe')
             npv.grid(row=0, column=0, sticky='nswe')
         else:
             logger.debug("no file")
@@ -687,19 +686,18 @@ class ProjectActionView(ttk.Notebook, View):
         self.__update_view()
 
 
-# TODO: refactor npyViewer class
-class NpyViewwer(View):
+class NpyViewer(View):
     def __init__(self, master=None, path=None, **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.path=path
+        self.path = path
 
     def create_view(self):
         # Text widget for displaying the data
         text_widget = tk.Text(self, wrap=tk.WORD, width=50, height=20)
-        text_widget.pack()
+        text_widget.grid(column=0, row=0, sticky="nsew")
         data = np.load(self.path)
         text_widget.delete("1.0", tk.END)  # Clear any previous content
         text_widget.insert(tk.END, str(data))  # Insert the data as text
