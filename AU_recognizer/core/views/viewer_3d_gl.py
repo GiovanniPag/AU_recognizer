@@ -1,7 +1,6 @@
 import platform as pf
 import time
 import tkinter as tk
-from pprint import pprint
 from tkinter import ttk
 
 import numpy as np
@@ -53,7 +52,16 @@ class Viewer3DGl(View):
 
     def open_settings(self):
         self.master.open_settings(page="viewer")
-        # TODO: automatically update viewer after settings update
+
+    def settings_update(self):
+        self.canvas_3d._canvas_color = hex_to_float_rgba(str(nect_config[VIEWER][CANVAS_COLOR]))
+        self.canvas_3d._moving_step = float(nect_config[VIEWER][MOVING_STEP])
+        self.canvas_3d._point_size = int(nect_config[VIEWER][POINT_SIZE])
+        self.canvas_3d.update_shader_uniforms([("solidColor", hex_to_float_rgb(str(nect_config[VIEWER][FILL_COLOR]))),
+                                               ("wireframeColor", hex_to_float_rgb(str(nect_config[VIEWER][LINE_COLOR]))),
+                                               ("pointsColor",  hex_to_float_rgb(str(nect_config[VIEWER][POINT_COLOR]))),
+                                               ("skyColor", hex_to_float_rgb(str(nect_config[VIEWER][SKY_COLOR]))),
+                                               ("groundColor",  hex_to_float_rgb(str(nect_config[VIEWER][GROUND_COLOR])))], start_shader=True)
 
     def _change_normal_mode(self, new_mode):
         if new_mode == i18n.gl_viewer["normal_combo"][GL_NO]:
@@ -504,7 +512,7 @@ class Frame3DGl(OpenGLFrame):
         glUseProgram(0)
 
         if not self.fps_counter.hidden:
-            if self.fps_accumulated_time >= 0.5:
+            if self.fps_accumulated_time >= 1.0:
                 fps = self.frame_count / self.fps_accumulated_time
                 self.fps_counter.update(fps)
                 self.frame_count = 0

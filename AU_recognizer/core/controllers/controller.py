@@ -1,9 +1,7 @@
 import ast
 import re
 import shutil
-from collections import namedtuple
-import tkinter as tk
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from tkinter import filedialog
 from typing import Optional
 
@@ -15,11 +13,11 @@ from AU_recognizer.core.controllers import Controller
 from AU_recognizer.core.projects import store_open_project, add_to_open_projects, create_project_folder, rename_project
 from AU_recognizer.core.util import open_guide, open_log_folder, check_if_folder_exist, check_if_is_project, \
     open_path_by_os, check_if_file_exist, get_desktop_path
-from AU_recognizer.core.util.config import logger, nect_config, purge_option_config
+from AU_recognizer.core.util.config import logger, nect_config
 from AU_recognizer.core.util.constants import *
 from AU_recognizer.core.util.language_resource import i18n
 from AU_recognizer.core.views import sizeof_fmt
-from AU_recognizer.core.views.dialog import DialogProjectOptions, SettingsDialog, SelectFitImageDialog
+from AU_recognizer.core.views.dialog import DialogProjectOptions, SelectFitImageDialog
 from AU_recognizer.core.views.view import MenuBar, ProjectTreeView, Viewer3DView, SelectedFileView, ProjectInfoView, \
     ProjectActionView, ModelFitView, AURecognitionView, TreeViewMenu
 
@@ -133,7 +131,7 @@ class MenuController(Controller):
 
     def open_settings_dialog(self, page=""):
         logger.debug("open settings dialog")
-        SettingsDialog(master=self.master, page=page).show()
+        self.master.open_settings()
 
 
 class TreeViewMenuController(Controller):

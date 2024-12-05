@@ -495,6 +495,10 @@ class Viewer3DView(View):
                 self.data = data
                 self.__update_view(type_of_file="npy")
 
+    def update_3d(self):
+        if self.__canvas_3d:
+            self.__canvas_3d.settings_update()
+
 
 class ProjectInfoView(View):
     def __init__(self, master=None):

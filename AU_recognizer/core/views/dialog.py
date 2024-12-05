@@ -108,7 +108,7 @@ class BaseDialog(Dialog):
             self.close()
 
 
-#TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
+# TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
 class SelectFitImageDialog(Dialog):
     def __init__(self, master, data, project):
         super().__init__(master)
@@ -202,7 +202,7 @@ class SelectFitImageDialog(Dialog):
                 i18n.im_sel_dialog["data"]["not_fitted"]
             # Check the state of the checkbox to decide whether to add the image
             if (not self.hide_fitted_var.get() or fit_status == i18n.im_sel_dialog["data"]["not_fitted"]) and \
-               (filter_text in image.name.lower()):
+                    (filter_text in image.name.lower()):
                 self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
         # Define tags and styles for alternating row colors
         self.image_treeview.tag_configure('even', background='#f0f0ff')
@@ -254,7 +254,7 @@ class SettingsDialog(Dialog):
         # Create frames for the tabs
         self.general_frame = ttk.Frame(self.notebook)
         self.viewer_frame = ttk.Frame(self.notebook)
-        self.startpage=page
+        self.startpage = page
         # Create the main frame
         self._i18n_path = EntryButton(master=self.general_frame, label_text="i18n_path",
                                       entry_text=nect_config[CONFIG][I18N_PATH])
@@ -333,13 +333,16 @@ class SettingsDialog(Dialog):
             MOVING_STEP: self._moving_step.get_value()
         }
         for key, value in new_viewer_value.items():
-            nect_config[VIEWER][key] = str(value)
+            if str(nect_config[VIEWER][key]) != str(value):
+                nect_config[VIEWER][key] = str(value)
+                changed=True
+        if changed:
+            self.master.event_generate("<<ViewerChange>>")
         write_config()
         self.close()
 
     def ask_value(self):
         logger.debug(f"{self.__class__.__name__} ask value")
-        pass
 
     def dismiss_method(self):
         logger.debug(f"{self.__class__.__name__} dismiss method")

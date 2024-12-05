@@ -165,6 +165,8 @@ class AURecognizer(tk.Tk):
         # attach virtual event controllers
         logger.debug("attach virtual event controllers for <<LanguageChange>>")
         self.bind("<<LanguageChange>>", lambda event: self.update_app_language())
+        logger.debug("attach virtual event controllers for <<ViewerChange>>")
+        self.bind("<<ViewerChange>>", lambda event: self.update_3d_viewer())
         logger.debug("attach virtual event controllers for <<UpdateTree>>")
         self.bind("<<UpdateTree>>",
                   lambda event: self.tree_controller.update_tree_view(populate_root=True, sort_tree=True))
@@ -219,3 +221,7 @@ class AURecognizer(tk.Tk):
 
     def can_grab_focus(self):
         return not self.tree_menu.is_open
+
+    def update_3d_viewer(self):
+        self.viewer.update_3d()
+
