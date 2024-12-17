@@ -1,10 +1,7 @@
 import configparser
 import os
 import subprocess
-import time
 from pathlib import Path
-
-import numpy as np
 
 from AU_recognizer.core.util import config as c
 from AU_recognizer.core.util.config import logger, nect_config
