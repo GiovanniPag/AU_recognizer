@@ -58,10 +58,13 @@ class Viewer3DGl(View):
         self.canvas_3d._moving_step = float(nect_config[VIEWER][MOVING_STEP])
         self.canvas_3d._point_size = int(nect_config[VIEWER][POINT_SIZE])
         self.canvas_3d.update_shader_uniforms([("solidColor", hex_to_float_rgb(str(nect_config[VIEWER][FILL_COLOR]))),
-                                               ("wireframeColor", hex_to_float_rgb(str(nect_config[VIEWER][LINE_COLOR]))),
-                                               ("pointsColor",  hex_to_float_rgb(str(nect_config[VIEWER][POINT_COLOR]))),
+                                               ("wireframeColor",
+                                                hex_to_float_rgb(str(nect_config[VIEWER][LINE_COLOR]))),
+                                               ("pointsColor", hex_to_float_rgb(str(nect_config[VIEWER][POINT_COLOR]))),
                                                ("skyColor", hex_to_float_rgb(str(nect_config[VIEWER][SKY_COLOR]))),
-                                               ("groundColor",  hex_to_float_rgb(str(nect_config[VIEWER][GROUND_COLOR])))], start_shader=True)
+                                               ("groundColor",
+                                                hex_to_float_rgb(str(nect_config[VIEWER][GROUND_COLOR])))],
+                                              start_shader=True)
 
     def _change_normal_mode(self, new_mode):
         if new_mode == i18n.gl_viewer["normal_combo"][GL_NO]:
@@ -142,8 +145,6 @@ class Viewer3DGl(View):
     def display(self, animate):
         self.canvas_3d.animate = animate
 
-
-# TODO: scale obj relative to canvas area
 class Frame3DGl(OpenGLFrame):
     def __init__(self, placeholder, obj: OBJ = None):
         super().__init__(placeholder)  # FPS counter
@@ -261,7 +262,6 @@ class Frame3DGl(OpenGLFrame):
         self._rotation = np.array([0.0, 0.0, 0.0, 1.0])  # Quaternion [x, y, z, w]
         self.camera_position = np.array([0.0, 0.0, 10.0])
         self.panning = np.array([0.0, 0.0])
-        self.scale = 1.0
 
     def update_shader_uniforms(self, uniform_list, start_shader=False):
         if self.shader is not None:
@@ -543,7 +543,7 @@ class Frame3DGl(OpenGLFrame):
                 delta = 0
         # Adjust the zoom slider based on the scroll direction
         if delta != 0:
-            self.camera_position[2] += delta * 0.1
+            self.camera_position[2] += delta * 0.5
 
     def __resized(self, *args):
         """Callback to the window resize events"""
@@ -553,8 +553,12 @@ class Frame3DGl(OpenGLFrame):
             self._canvas_w = w
             self._canvas_h = h
             glViewport(0, 0, w, h)
+            mesh_size = self.obj.get_bounding_box_diagonal()
+            distance_to_camera = np.linalg.norm(self.camera_position)  # Distance from camera to origin
+            # Calculate scaling factor
+            self.scale = (distance_to_camera * np.tan(np.radians(45 / 2))) / (mesh_size / 2.0)
 
-    def __start_rotate(self, event):
+    def __start_rotate(self, event): 
         """Start capturing the initial mouse click position for rotation"""
         self._is_left_mouse_button_down = True
         self._start_orientation = self._rotation
@@ -578,7 +582,9 @@ class Frame3DGl(OpenGLFrame):
         # Panning logic
         dx = event.x - self._last_mouse_x_pan
         dy = event.y - self._last_mouse_y_pan
-        sensitivity = 0.01
+        zoom_factor = abs(self.camera_position[2])  # Use zoom value directly
+        sensitivity = 0.001 * np.log(10 * zoom_factor + 1) / np.log(100)  # Logarithmic increase
+
         # Update position with adjusted sensitivity
         self.panning[0] -= dx * sensitivity
         self.panning[1] -= dy * sensitivity
@@ -589,7 +595,7 @@ class Frame3DGl(OpenGLFrame):
     def _handle_rotation(self, event):
         # Rotation logic (Y-axis and X-axis rotation)
         """Rotate the object based on mouse movement"""
-        delta_x = -(event.x - self._last_mouse_x) * 0.005  # Adjust this scaling factor as needed
+        delta_x = (event.x - self._last_mouse_x) * 0.005  # Adjust this scaling factor as needed
         delta_y = (event.y - self._last_mouse_y) * 0.005  # Adjust this scaling factor as needed
         delta_vector = np.array([delta_x, delta_y, 0])
         # Calculate the rotation angle and axis

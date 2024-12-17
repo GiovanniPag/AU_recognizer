@@ -140,7 +140,6 @@ class OBJ:
         # Normalize tangents
         self.tangents = [t / np.linalg.norm(t) if np.linalg.norm(t) > 0 else t for t in self.tangents]
 
-
     def get_vertices(self):
         return np.array(self.vertices)
 
@@ -165,6 +164,10 @@ class OBJ:
         max_bound = np.max(self.vertices, axis=0)
         mesh_size = max_bound - min_bound
         return mesh_size
+
+    def get_bounding_box_diagonal(self):
+        mesh_size = self.compute_mesh_size()
+        return np.linalg.norm(mesh_size)
 
     def prepare_opengl_data(self):
         """
