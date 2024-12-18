@@ -2,17 +2,6 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk, HORIZONTAL, VERTICAL
 
-from AU_recognizer.core.controllers import Controller
-from AU_recognizer.core.util import call_by_ws, config as c, check_if_folder_exist, check_if_is_project
-from AU_recognizer.core.util.config import logger, nect_config, purge_option_config
-from AU_recognizer.core.util.constants import OPEN_PROJECTS, P_PATH
-from AU_recognizer.core.util.language_resource import i18n
-from AU_recognizer.core.controllers.controller import MenuController, TreeController, \
-    Viewer3DController, SelectedFileController, SelectedProjectController, ProjectActionController, \
-    TreeViewMenuController
-from AU_recognizer.core.views.dialog import SettingsDialog
-from AU_recognizer.core.views.view import MenuBar, View, ProjectTreeView, Viewer3DView, ScrollWrapperView, \
-    SelectedFileView, ProjectInfoView, ProjectActionView, TreeViewMenu
 
 
 # main window of AU_rec MVC app
@@ -23,8 +12,9 @@ class AURecognizer(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.title(i18n.title)
-        c.windowing_system = self.tk.call('tk', 'windowingsystem')
-        logger.debug("windowing system: " + c.windowing_system)
+        print(windowing_system)
+        windowing_system = self.tk.call('tk', 'windowingsystem')
+        logger.debug("windowing system: " + config.windowing_system)
 
         self.devices = []
         self.open_projects = {}
@@ -224,4 +214,3 @@ class AURecognizer(tk.Tk):
 
     def update_3d_viewer(self):
         self.viewer.update_3d()
-

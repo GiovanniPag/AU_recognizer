@@ -17,7 +17,7 @@ from AU_recognizer.core.util.config import logger, nect_config
 from AU_recognizer.core.util.constants import *
 from AU_recognizer.core.util.language_resource import i18n
 from AU_recognizer.core.views import sizeof_fmt
-from AU_recognizer.core.views.dialog import DialogProjectOptions, SelectFitImageDialog
+from AU_recognizer.core.views.dialogs.dialog import DialogProjectOptions, SelectFitImageDialog
 from AU_recognizer.core.views.view import MenuBar, ProjectTreeView, Viewer3DView, SelectedFileView, ProjectInfoView, \
     ProjectActionView, ModelFitView, AURecognitionView, TreeViewMenu
 

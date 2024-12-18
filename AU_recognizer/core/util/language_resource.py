@@ -1,7 +1,7 @@
 import json
 
-from AU_recognizer.core.util.config import write_config, nect_config, logger
-from AU_recognizer.core.util.constants import *
+from . import nect_config, logger, write_config
+from .constants import *
 
 
 class I18N:

@@ -1,7 +1,7 @@
 """
 @brief: Extracts vertices, faces, texture coordinates, and material information from an .obj file.
 
-@param file_path: Path of a .obj file
+@param filepath: Path of a .obj file
 
 @ret  : vertices (a numpy array of shape (n, 3) where n is the number of vertices)
 @ret  : faces (a list of tuples, each containing face indices, texture coordinate indices, and material name)

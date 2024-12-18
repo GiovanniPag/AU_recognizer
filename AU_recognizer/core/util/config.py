@@ -3,7 +3,7 @@ import logging.config
 import platform
 from datetime import date
 
-from AU_recognizer.core.util.constants import *
+from .constants import *
 
 
 def __get_log_name():

@@ -335,14 +335,12 @@ class SettingsDialog(Dialog):
         for key, value in new_viewer_value.items():
             if str(nect_config[VIEWER][key]) != str(value):
                 nect_config[VIEWER][key] = str(value)
-                changed=True
-        if changed:
-            self.master.event_generate("<<ViewerChange>>")
         write_config()
         self.close()
 
     def ask_value(self):
         logger.debug(f"{self.__class__.__name__} ask value")
+        self.master.event_generate("<<ViewerChange>>")
 
     def dismiss_method(self):
         logger.debug(f"{self.__class__.__name__} dismiss method")
