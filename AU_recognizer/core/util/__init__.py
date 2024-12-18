@@ -2,6 +2,7 @@ import configparser
 import os
 import subprocess
 from pathlib import Path
+from typing import Union
 
 from AU_recognizer.core.util import config as c
 from AU_recognizer.core.util.config import logger, nect_config
@@ -90,7 +91,7 @@ def call_by_os(windows_func, darwin_func, else_func):
             logger.exception("call_by_ws exception in else_func", e)
 
 
-def asset(asset_name):
+def asset(asset_name: Union[str, Path]) -> Path:
     return Path(__file__).parent / ".." / ".." / "var" / "asset" / asset_name
 
 
