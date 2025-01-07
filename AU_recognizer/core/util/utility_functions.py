@@ -1,5 +1,6 @@
 import configparser
 import os
+import re
 import subprocess
 from pathlib import Path
 from typing import Union
@@ -224,3 +225,27 @@ def rename_section(cp: ConfigParser, section_from, section_to):
     for item in items:
         cp.set(section_to, item[0], item[1])
     cp.remove_section(section_from)
+
+
+def check_name(new_val):
+    logger.debug(f"validate project name {new_val}")
+    return re.match('^[a-zA-Z0-9-_]*$', new_val) is not None and len(new_val) <= 50
+
+
+def check_file_name(new_val):
+    logger.debug(f"validate file name {new_val}")
+    return re.match(r'^[a-zA-Z0-9-_\\.]*$', new_val) is not None
+
+
+def check_num(new_val):
+    logger.warning(f"validate only int {new_val}")
+    return re.match('^[0-9]*$', new_val) is not None and len(new_val) <= 3
+
+
+def sizeof_fmt(num, suffix="B"):
+    logger.debug(f"format {num} in bytes")
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f} {unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f} Yi{suffix}"
