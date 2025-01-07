@@ -3,8 +3,6 @@
 # 1) load an image and make a fitting with a 3dmm
 # 2) take the fitted mesh and recognize activated AU
 from AU_recognizer.AURecognizer import AURecognizer
-import tkinter as tk
-from AU_recognizer.core.views.viewer_3d_gl import Viewer3DGl
 
 # if __name__ == "__main__":
 #

@@ -2,18 +2,21 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk, HORIZONTAL, VERTICAL
 
+from AU_recognizer.core.controllers import Controller
+from AU_recognizer.core.util import i18n, logger, config, call_by_ws
+from AU_recognizer.core.views import CustomTk
+from AU_recognizer.core.views.views.view import View
 
 
 # main window of AU_rec MVC app
-class AURecognizer(tk.Tk):
+class AURecognizer(CustomTk):
     def __init__(self):
         super().__init__()
         self.option_add('*tearOff', tk.FALSE)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.title(i18n.title)
-        print(windowing_system)
-        windowing_system = self.tk.call('tk', 'windowingsystem')
+        config.windowing_system = self.tk.call('tk', 'windowingsystem')
         logger.debug("windowing system: " + config.windowing_system)
 
         self.devices = []
