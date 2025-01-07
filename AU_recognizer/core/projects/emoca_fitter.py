@@ -1,12 +1,12 @@
-import torch
-
-from AU_recognizer import CONFIG, MODEL_FOLDER, P_PATH, F_OUTPUT, MF_MODEL, MF_FIT_MODE, MF_SAVE_IMAGES, MF_SAVE_MESH, \
-    MF_SAVE_CODES, logger
-from AU_recognizer.core.util import nect_config
-from emoca.gdl_apps.EMOCA.utils.load import load_model
-from emoca.gdl.datasets.ImageTestDataset import TestData
 from pathlib import Path
 from tqdm import auto
+
+import torch
+
+from ..util import logger, P_PATH, nect_config, CONFIG, MODEL_FOLDER, MF_MODEL, F_OUTPUT, MF_FIT_MODE, MF_SAVE_MESH, \
+    MF_SAVE_IMAGES, MF_SAVE_CODES
+from emoca.gdl_apps.EMOCA.utils.load import load_model
+from emoca.gdl.datasets.ImageTestDataset import TestData
 from emoca.gdl_apps.EMOCA.utils.io import save_obj, save_images, save_codes, test
 
 
