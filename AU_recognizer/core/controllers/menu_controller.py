@@ -8,7 +8,7 @@ from ..util import logger, nect_config, CONFIG, LANGUAGE, M_ABOUT, M_COMMAND, M_
     store_open_project
 from ..views.dialogs.dialog import DialogProjectOptions
 from ..views.dialogs.dialog_util import open_message_dialog
-from ..views.view import MenuBar
+from AU_recognizer.core.views.views.view import MenuBar
 
 
 class MenuController(Controller):

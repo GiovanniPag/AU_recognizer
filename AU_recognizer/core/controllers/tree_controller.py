@@ -17,7 +17,7 @@ from AU_recognizer.core.views import sizeof_fmt
 from AU_recognizer.core.views.dialogs.dialog import DialogProjectOptions
 from AU_recognizer.core.views.dialogs.dialog_util import open_confirmation_dialogue, delete_path, open_message_dialog, \
     confirm_rename_path
-from AU_recognizer.core.views.view import ProjectTreeView, TreeViewMenu
+from AU_recognizer.core.views.views.view import ProjectTreeView, TreeViewMenu
 
 
 class TreeController(Controller):
