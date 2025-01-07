@@ -13,11 +13,11 @@ from AU_recognizer.core.util import logger, T_VALUES, TM_FILE, TM_PROJECT, T_TEX
     P_PATH, T_SIZE, T_MODIFIED, T_NAME, T_DATA, T_FILE_TYPE, T_END, MT_ADD_IMAGES, M_COMMAND, MT_SELECT_P, MT_CLOSE_P, \
     MT_DELETE_P, MT_OPEN_F, MT_DELETE_F, MT_RENAME_F, get_desktop_path, i18n, I18N_TITLE, F_INPUT, I18N_YES_BUTTON, \
     check_if_is_project, ERROR_ICON, check_if_folder_exist, check_if_file_exist, rename_path, rename_project
-from AU_recognizer.core.views import sizeof_fmt
-from AU_recognizer.core.views.dialogs.dialog import DialogProjectOptions
-from AU_recognizer.core.views.dialogs.dialog_util import open_confirmation_dialogue, delete_path, open_message_dialog, \
+from AU_recognizer.core.util.utility_functions import sizeof_fmt
+from AU_recognizer.core.views import DialogProjectOptions
+from AU_recognizer.core.views import open_confirmation_dialogue, delete_path, open_message_dialog, \
     confirm_rename_path
-from AU_recognizer.core.views.views.view import ProjectTreeView, TreeViewMenu
+from AU_recognizer.core.views import ProjectTreeView, TreeViewMenu
 
 
 class TreeController(Controller):

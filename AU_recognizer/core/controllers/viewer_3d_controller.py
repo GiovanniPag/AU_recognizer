@@ -2,7 +2,7 @@ from typing import Optional
 
 from AU_recognizer.core.controllers.base_controller import Controller
 from AU_recognizer.core.util import logger
-from AU_recognizer.core.views.views.view import Viewer3DView
+from AU_recognizer.core.views import Viewer3DView
 
 
 class Viewer3DController(Controller):

@@ -2,7 +2,7 @@ from AU_recognizer.core.controllers.base_controller import Controller
 from AU_recognizer.core.controllers.model_fit_controller import ModelFitController
 from AU_recognizer.core.controllers.au_recognition_controller import AURecognitionController
 from AU_recognizer.core.util import logger
-from AU_recognizer.core.views.views.view import ProjectActionView
+from AU_recognizer.core.views import ProjectActionView
 
 
 class ProjectActionController(Controller):

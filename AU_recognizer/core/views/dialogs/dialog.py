@@ -1,5 +1,4 @@
 import tkinter as tk
-from pprint import pprint
 from tkinter import ttk
 from abc import abstractmethod
 
@@ -8,9 +7,13 @@ from AU_recognizer.core.util import retrieve_files_from_path
 from AU_recognizer.core.util.config import logger, nect_config, write_config
 from AU_recognizer.core.util.constants import *
 from AU_recognizer.core.util.language_resource import i18n
-from AU_recognizer.core.views import check_name, check_file_name, EntryButton, ComboLabel, ColorPicker, IntPicker, \
-    FloatPicker
-from AU_recognizer.core.views.view import ScrollWrapperView
+from AU_recognizer.core.views import FloatPicker
+from AU_recognizer.core.views import IntPicker
+from AU_recognizer.core.views import ColorPicker
+from AU_recognizer.core.views import ComboLabel
+from AU_recognizer.core.views import EntryButton
+from AU_recognizer.core.util.utility_functions import check_name, check_file_name
+from AU_recognizer.core.views import ScrollWrapperView
 
 
 class Dialog(tk.Toplevel):

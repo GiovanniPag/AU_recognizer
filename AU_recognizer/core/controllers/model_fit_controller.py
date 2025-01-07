@@ -1,7 +1,7 @@
 from AU_recognizer.core.controllers.base_controller import Controller
 from AU_recognizer.core.util import logger
-from AU_recognizer.core.views.dialogs.dialog import SelectFitImageDialog
-from AU_recognizer.core.views.views.view import ModelFitView
+from AU_recognizer.core.views import SelectFitImageDialog
+from AU_recognizer.core.views import ModelFitView
 
 
 class ModelFitController(Controller):

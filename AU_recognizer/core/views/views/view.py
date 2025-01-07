@@ -1,21 +1,34 @@
 import tkinter as tk
+from abc import abstractmethod
 from configparser import ConfigParser
-from pprint import pprint
 
-from tkinter import ttk, VERTICAL
+from tkinter import VERTICAL, ttk as ttk
 from typing import Optional
 
 import numpy as np
-from OpenGL.GL import GL_NO_ERROR, glGetError
 
 from AU_recognizer.core.controllers import Controller
 from AU_recognizer.core.util import config
 from AU_recognizer.core.util.config import logger, nect_config
 from AU_recognizer.core.util.constants import *
 from AU_recognizer.core.util.language_resource import i18n
-from AU_recognizer.core.views import View, AutoScrollbar, ScrollFrame, ComboLabel, CheckLabel, RadioList
-from AU_recognizer.core.views.image_viewer import CanvasImage
-from AU_recognizer.core.views.viewer_3d_gl import Viewer3DGl
+from AU_recognizer.core.views import AutoScrollbar
+from AU_recognizer.core.views.widgets.radio_list import RadioList
+from AU_recognizer.core.views.widgets.check_label import CheckLabel
+from AU_recognizer.core.views.widgets.combo_label import ComboLabel
+from AU_recognizer.core.views.widgets.scroll_frame import ScrollFrame
+from AU_recognizer.core.views.views.image_viewer import CanvasImage
+from AU_recognizer.core.views.views.viewer_3d_gl import Viewer3DGl
+
+
+class View(ttk.Frame):
+    @abstractmethod
+    def create_view(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_language(self):
+        raise NotImplementedError
 
 
 class ScrollWrapperView(View):

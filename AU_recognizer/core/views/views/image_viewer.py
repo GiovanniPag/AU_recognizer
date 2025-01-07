@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 
-from AU_recognizer import logger
+from AU_recognizer.core.util import logger
 from AU_recognizer.core.views import AutoScrollbar
 
 MAX_IMAGE_PIXELS = 1500000000  # maximum pixels in the image, use it carefully
@@ -38,10 +38,10 @@ class CanvasImage:
         # Bind events to the Canvas
         self.canvas.bind('<Configure>', lambda event: self.__show_image())  # canvas is resized
         self.canvas.bind('<ButtonPress-3>', self.__move_from)  # remember canvas position
-        self.canvas.bind('<B3-Motion>',     self.__move_to)  # move canvas to the new position
+        self.canvas.bind('<B3-Motion>', self.__move_to)  # move canvas to the new position
         self.canvas.bind('<MouseWheel>', self.__wheel)  # zoom for Windows and MacOS, but not Linux
-        self.canvas.bind('<Button-5>',   self.__wheel)  # zoom for Linux, wheel scroll down
-        self.canvas.bind('<Button-4>',   self.__wheel)  # zoom for Linux, wheel scroll up
+        self.canvas.bind('<Button-5>', self.__wheel)  # zoom for Linux, wheel scroll down
+        self.canvas.bind('<Button-4>', self.__wheel)  # zoom for Linux, wheel scroll up
         # Handle keystrokes in idle mode, because program slows down on a weak computers,
         # when too many key stroke events in the same time
         self.canvas.bind('<Key>', lambda event: self.canvas.after_idle(self.__keystroke, event))
@@ -57,7 +57,7 @@ class CanvasImage:
             self.__image = Image.open(self.path)  # open image, but down't load it into RAM
         self.imwidth, self.imheight = self.__image.size  # public for outer classes
         if self.imwidth * self.imheight > self.__huge_size * self.__huge_size and \
-                        self.__image.tile[0][0] == 'raw':  # only raw images could be tiled
+                self.__image.tile[0][0] == 'raw':  # only raw images could be tiled
             self.__huge = True  # image is huge
             self.__offset = self.__image.tile[0][2]  # initial tile offset
             self.__tile = [self.__image.tile[0][0],  # it have to be 'raw'
@@ -116,7 +116,7 @@ class CanvasImage:
             self.__image.size = (self.imwidth, band)  # set size of the tile band
             self.__image.tile = [self.__tile]  # set tile
             cropped = self.__image.crop((0, 0, self.imwidth, band))  # crop tile band
-            image.paste(cropped.resize((w, int(band * k)+1), self.__filter), (0, int(i * k)))
+            image.paste(cropped.resize((w, int(band * k) + 1), self.__filter), (0, int(i * k)))
             i += band
         return image
 
@@ -176,8 +176,8 @@ class CanvasImage:
                 image = self.__image.crop((int(x1 / self.imscale), 0, int(x2 / self.imscale), h))
             else:  # show normal image
                 image = self.__pyramid[max(0, self.__curr_img)].crop(  # crop current img from pyramid
-                                    (int(x1 / self.__scale), int(y1 / self.__scale),
-                                     int(x2 / self.__scale), int(y2 / self.__scale)))
+                    (int(x1 / self.__scale), int(y1 / self.__scale),
+                     int(x2 / self.__scale), int(y2 / self.__scale)))
             #
             imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1), int(y2 - y1)), self.__filter))
             imageid = self.canvas.create_image(max(box_canvas[0], box_img_int[0]),
@@ -215,12 +215,12 @@ class CanvasImage:
         if event.num == 5 or event.delta == -120:  # scroll down, zoom out, smaller
             if round(self.__min_side * self.imscale) < 30: return  # image is less than 30 pixels
             self.imscale /= self.__delta
-            scale        /= self.__delta
+            scale /= self.__delta
         if event.num == 4 or event.delta == 120:  # scroll up, zoom in, bigger
             i = float(min(self.canvas.winfo_width(), self.canvas.winfo_height()) >> 1)
             if i < self.imscale: return  # 1 pixel is bigger than the visible area
             self.imscale *= self.__delta
-            scale        *= self.__delta
+            scale *= self.__delta
         # Take appropriate image from the pyramid
         k = self.imscale * self.__ratio  # temporary coefficient
         self.__curr_img = min((-1) * int(math.log(k, self.__reduction)), len(self.__pyramid) - 1)
@@ -244,7 +244,7 @@ class CanvasImage:
                     'd': [68, 39, 102],
                     'a': [65, 37, 100],
                     'w': [87, 38, 104],
-                    's': [83, 40,  98],
+                    's': [83, 40, 98],
                 }
             else:  # Linux OS
                 self.keycodes = {
@@ -254,13 +254,13 @@ class CanvasImage:
                     's': [39, 116, 88],
                 }
             if event.keycode in self.keycodes['d']:  # scroll right, keys 'd' or 'Right'
-                self.__scroll_x('scroll',  1, 'unit', event=event)
+                self.__scroll_x('scroll', 1, 'unit', event=event)
             elif event.keycode in self.keycodes['a']:  # scroll left, keys 'a' or 'Left'
                 self.__scroll_x('scroll', -1, 'unit', event=event)
             elif event.keycode in self.keycodes['w']:  # scroll up, keys 'w' or 'Up'
                 self.__scroll_y('scroll', -1, 'unit', event=event)
             elif event.keycode in self.keycodes['s']:  # scroll down, keys 's' or 'Down'
-                self.__scroll_y('scroll',  1, 'unit', event=event)
+                self.__scroll_y('scroll', 1, 'unit', event=event)
 
     def crop(self, bbox):
         """ Crop rectangle from the image and return it """

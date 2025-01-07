@@ -6,9 +6,9 @@ from ..util import logger, nect_config, CONFIG, LANGUAGE, M_ABOUT, M_COMMAND, M_
     M_GUIDE, open_guide, M_IT, M_EN, M_NEW, M_OPEN, M_SETTINGS, M_EXIT, check_if_is_project, ERROR_ICON, i18n, \
     I18N_BACK_BUTTON, check_if_folder_exist, PROJECTS_FOLDER, I18N_TITLE, add_to_open_projects, create_project_folder, \
     store_open_project
-from ..views.dialogs.dialog import DialogProjectOptions
-from ..views.dialogs.dialog_util import open_message_dialog
-from AU_recognizer.core.views.views.view import MenuBar
+from AU_recognizer.core.views import DialogProjectOptions
+from AU_recognizer.core.views import open_message_dialog
+from AU_recognizer.core.views import MenuBar
 
 
 class MenuController(Controller):
