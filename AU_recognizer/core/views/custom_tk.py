@@ -46,7 +46,7 @@ class CustomTk(tk.Tk, CustomAppearanceModeBaseClass, CustomScalingBaseClass):
         self._max_width: int = 1_000_000
         self._max_height: int = 1_000_000
         self._last_resizable_args: Union[Tuple[list, dict], None] = None  # (args, kwargs)
-        self._fg_color = ThemeManager.theme["CTk"]["fg_color"] if fg_color is None else self._check_color_type(fg_color)
+        self._fg_color = ThemeManager.theme["CustomTk"]["fg_color"] if fg_color is None else self._check_color_type(fg_color)
         # set bg of tkinter.Tk
         super().configure(bg=self._apply_appearance_mode(self._fg_color))
         # set title
