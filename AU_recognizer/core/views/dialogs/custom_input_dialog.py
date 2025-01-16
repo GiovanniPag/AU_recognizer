@@ -4,11 +4,11 @@ from AU_recognizer.core.views.widgets import CTkLabel
 from AU_recognizer.core.views.widgets import CTkEntry
 from AU_recognizer.core.views.widgets import CTkButton
 from AU_recognizer.core.views.widgets.theme import ThemeManager
-from .ctk_toplevel import CTkToplevel
+from .. import CustomToplevel
 from AU_recognizer.core.views.widgets.font import CTkFont
 
 
-class CustomInputDialog(CTkToplevel):
+class CustomInputDialog(CustomToplevel):
     """
     Dialog with extra window, message, entry widget, cancel and ok button.
     For detailed information check out the documentation.

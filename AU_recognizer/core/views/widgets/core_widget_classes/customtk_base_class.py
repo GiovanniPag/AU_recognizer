@@ -5,7 +5,7 @@ from typing import Union, Callable, Tuple, Any
 from AU_recognizer.core.util import pop_from_dict_by_set, check_kwargs_empty
 from external.spectre.external.av_hubert.avhubert import logger
 from .... import views
-
+from .. import core_widget_classes
 try:
     from typing import TypedDict
 except ImportError:
@@ -74,11 +74,11 @@ class CustomTKBaseClass(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScal
                 ttk.Notebook)) and not isinstance(self.master, (CustomTKBaseClass, CustomAppearanceModeBaseClass)):
             master_old_configure = self.master.config
 
-            def new_configure(*args, **kwargs):
-                if "bg" in kwargs:
-                    self.configure(bg_color=kwargs["bg"])
-                elif "background" in kwargs:
-                    self.configure(bg_color=kwargs["background"])
+            def new_configure(*args, **inner_kwargs):
+                if "bg" in inner_kwargs:
+                    self.configure(bg_color=inner_kwargs["bg"])
+                elif "background" in inner_kwargs:
+                    self.configure(bg_color=inner_kwargs["background"])
 
                 # args[0] is dict when attribute gets changed by widget[<attribute>] syntax
                 elif len(args) > 0 and type(args[0]) is dict:
@@ -86,7 +86,7 @@ class CustomTKBaseClass(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScal
                         self.configure(bg_color=args[0]["bg"])
                     elif "background" in args[0]:
                         self.configure(bg_color=args[0]["background"])
-                master_old_configure(*args, **kwargs)
+                master_old_configure(*args, **inner_kwargs)
 
             self.master.config = new_configure
             self.master.configure = new_configure
@@ -198,10 +198,10 @@ class CustomTKBaseClass(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScal
 
         if isinstance(master_widget, (
                 CustomTKBaseClass, views.CustomTk, views.CustomToplevel,
-                views.widgets.ctk_scrollable_frame.CTkScrollableFrame)):
+                core_widget_classes.scrollable_frame.ScrollableFrame)):
             if master_widget.cget("fg_color") is not None and master_widget.cget("fg_color") != "transparent":
                 return master_widget.cget("fg_color")
-            elif isinstance(master_widget, views.widgets.ctk_scrollable_frame.CTkScrollableFrame):
+            elif isinstance(master_widget, core_widget_classes.scrollable_frame.ScrollableFrame):
                 return self._detect_color_of_master(master_widget.master.master.master)
             # if fg_color of master is None, try to retrieve fg_color from master of master
             elif hasattr(master_widget, "master"):

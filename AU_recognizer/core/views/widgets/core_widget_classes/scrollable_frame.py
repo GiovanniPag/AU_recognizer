@@ -203,7 +203,7 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
         else:
             return self._parent_frame.cget(attribute_name)
 
-    def _fit_frame_dimensions_to_canvas(self, event):
+    def _fit_frame_dimensions_to_canvas(self, _):
         if self._orientation == "horizontal":
             self._parent_canvas.itemconfigure(self._create_window_id, height=self._parent_canvas.winfo_height())
         elif self._orientation == "vertical":
@@ -239,10 +239,10 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
                     if self._parent_canvas.yview() != (0.0, 1.0):
                         self._parent_canvas.yview("scroll", -event.delta, "units")
 
-    def _keyboard_shift_press_all(self, event):
+    def _keyboard_shift_press_all(self, _):
         self._shift_pressed = True
 
-    def _keyboard_shift_release_all(self, event):
+    def _keyboard_shift_release_all(self, _):
         self._shift_pressed = False
 
     def check_if_master_is_canvas(self, widget):
@@ -280,8 +280,8 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
     def grid_info(self, **kwargs):
         return self._parent_frame.grid_info()
 
-    def lift(self, aboveThis=None):
-        self._parent_frame.lift(aboveThis)
+    def lift(self, above_this=None):
+        self._parent_frame.lift(above_this)
 
-    def lower(self, belowThis=None):
-        self._parent_frame.lower(belowThis)
+    def lower(self, below_this=None):
+        self._parent_frame.lower(below_this)

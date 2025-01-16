@@ -58,7 +58,7 @@ class CustomFrame(CustomTKBaseClass):
 
     def winfo_children(self) -> List[any]:
         """
-        winfo_children of CustomFrame without self.canvas widget,
+        winfo_children of CustomFrame without self.Canvas widget,
         because it's not a child but part of the CustomFrame itself
         """
         child_widgets = super().winfo_children()
