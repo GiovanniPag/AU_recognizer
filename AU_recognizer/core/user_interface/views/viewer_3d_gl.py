@@ -19,10 +19,10 @@ from AU_recognizer.core.util.OBJ import OBJ
 from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quaternion_multiply, look_at, perspective, \
     quaternion_to_matrix
 from AU_recognizer.core.views import View
-from AU_recognizer.core.views.widgets.check_label import CheckLabel
-from AU_recognizer.core.views.widgets.combo_label import ComboLabel
-from AU_recognizer.core.views.widgets.icon_button import IconButton
-from AU_recognizer.core.views.widgets.fps_counter import FPSCounter
+from AU_recognizer.core.views.widgets.complex_widget.check_label import CheckLabel
+from AU_recognizer.core.views.widgets.complex_widget.combo_label import ComboLabel
+from AU_recognizer.core.views.widgets.complex_widget.icon_button import IconButton
+from AU_recognizer.core.views.widgets.complex_widget.fps_counter import FPSCounter
 
 
 class Viewer3DGl(View):
