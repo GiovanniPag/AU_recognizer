@@ -2,8 +2,7 @@ import tkinter
 import tkinter.ttk as ttk
 from typing import Union, Callable, Tuple, Any
 
-from AU_recognizer.core.util import pop_from_dict_by_set, check_kwargs_empty
-from external.spectre.external.av_hubert.avhubert import logger
+from AU_recognizer.core.util import pop_from_dict_by_set, check_kwargs_empty, logger
 from .... import views
 from .. import core_widget_classes
 try:

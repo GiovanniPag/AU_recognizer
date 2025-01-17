@@ -1,8 +1,8 @@
 import tkinter
 import sys
-from typing import Union, Tuple, TypeAlias, Literal
+from typing import Union, Tuple, Literal
 
-_Anchor: TypeAlias = Literal["nw", "n", "ne", "w", "center", "e", "sw", "s", "se"]
+_Anchor = Literal["nw", "n", "ne", "w", "center", "e", "sw", "s", "se"]
 
 
 class CustomCanvas(tkinter.Canvas):

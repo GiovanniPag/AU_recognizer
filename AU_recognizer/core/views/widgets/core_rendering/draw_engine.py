@@ -39,6 +39,8 @@ class DrawEngine:
         if self.preferred_drawing_method == "polygon_shapes":
             if sys.platform == "darwin":
                 return user_corner_radius
+            elif sys.platform.startswith("linux"):
+                return round(user_corner_radius * 1.25) / 1.25  # Fine-tuned rounding for smoother rendering on Linux
             else:
                 return round(user_corner_radius)
         # optimize for drawing with antialiased font shapes
@@ -46,7 +48,12 @@ class DrawEngine:
             return round(user_corner_radius)
         # optimize for drawing with circles and rects
         elif self.preferred_drawing_method == "circle_shapes":
-            user_corner_radius = 0.5 * round(user_corner_radius / 0.5)  # round to 0.5 steps
+            if sys.platform.startswith("linux"):
+                # Allow finer increments for smoother Linux rendering
+                user_corner_radius = 0.25 * round(user_corner_radius / 0.25)
+            else:
+                # Default behavior for other platforms
+                user_corner_radius = 0.5 * round(user_corner_radius / 0.5)
             # make sure the value is always with .5 at the end for smoother corners
             if user_corner_radius == 0:
                 return 0
@@ -379,7 +386,10 @@ class DrawEngine:
     def __draw_rounded_rect_with_border_circle_shapes(self, width: int, height: int, corner_radius: int,
                                                       border_width: int, inner_corner_radius: int) -> bool:
         requires_recoloring = False
-
+        # Adjust shapes for Linux rendering
+        if sys.platform.startswith("linux"):
+            corner_radius = max(corner_radius - 0.5, 0)
+            border_width = max(border_width - 0.2, 0)
         # border button parts
         if border_width > 0:
             if corner_radius > 0:
