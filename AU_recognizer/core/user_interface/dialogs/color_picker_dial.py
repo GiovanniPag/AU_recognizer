@@ -6,35 +6,48 @@ from PIL import Image
 import math
 
 from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomTkImage, CustomSlider, CustomEntry, \
-    CustomButton, CustomLabel
+    CustomButton, CustomLabel, CustomToplevel
 from AU_recognizer.core.util import asset
 from AU_recognizer.core.util.geometry_3d import projection_on_circle
 
 
-class CustomColorPicker(CustomFrame):
+class AskColor(CustomToplevel):
 
     def __init__(self,
                  master: any = None,
                  width: int = 300,
+                 title: str = "Choose Color",
                  initial_color: str = None,
+                 bg_color: str = None,
                  fg_color: str = None,
                  button_color: str = None,
                  button_hover_color: str = None,
                  text: str = "OK",
                  corner_radius: int = 24,
                  slider_border: int = 1,
-                 command=None,
                  **button_kwargs):
 
-        super().__init__(master=master, corner_radius=corner_radius)
+        super().__init__(master=master)
+        self.title(title)
         width = max(width, 200)
-        self.image_dimension = int(self._apply_widget_scaling(width - 100))
-        self.target_dimension = int(self._apply_widget_scaling(20))
-        self.lift()
+        height = width + 250
+        self.image_dimension = self._apply_window_scaling(width - 100)
+        self.target_dimension = self._apply_window_scaling(20)
+
+        self.maxsize(width, height)
+        self.minsize(width, height)
+        self.resizable(width=False, height=False)
+        self.transient(self.master)
+        self.after(100, self.lift)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.after(10)
+        self.protocol("WM_DELETE_WINDOW", self._on_closing)
         self.default_hex_color = "#ffffff"
         self.default_rgb = [255, 255, 255]
-        self.target_x = self.target_y = 0
         self.rgb_color = self.default_rgb[:]
+        self.bg_color = self._apply_appearance_mode(
+            ThemeManager.theme["CustomFrame"]["fg_color"]) if bg_color is None else bg_color
         self.fg_color = self._apply_appearance_mode(
             ThemeManager.theme["CustomFrame"]["top_fg_color"]) if fg_color is None else fg_color
         self.button_color = self._apply_appearance_mode(
@@ -44,13 +57,9 @@ class CustomColorPicker(CustomFrame):
         self.button_text = text
         self.corner_radius = corner_radius
         self.slider_border = min(10, slider_border)
-        self.configure(fg_color=self.fg_color)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self.after(10)
-        self.command = command
-        self.frame = CustomFrame(master=self, fg_color=self.fg_color)
-        self.frame.pack(padx=20, pady=20, fill="both", expand=True)
+        self.config(bg=self.bg_color)
+        self.frame = CustomFrame(master=self, fg_color=self.fg_color, bg_color=self.bg_color)
+        self.frame.grid(padx=20, pady=20, sticky="nswe")
         self.canvas = tk.Canvas(self.frame, height=self.image_dimension, width=self.image_dimension,
                                 highlightthickness=0,
                                 bg=self.fg_color)
@@ -75,9 +84,8 @@ class CustomColorPicker(CustomFrame):
                                    variable=self.brightness_slider_value, number_of_steps=256,
                                    button_corner_radius=self.corner_radius, corner_radius=self.corner_radius,
                                    button_color=self.button_color, button_hover_color=self.button_hover_color,
-                                   command=lambda event: self.update_colors())
+                                   command=lambda x: self.update_colors())
         self.slider.pack(fill="both", pady=(0, 15), padx=20 - self.slider_border)
-
         self.label = CustomEntry(master=self.frame, text_color="#000000", height=50, fg_color=self.default_hex_color,
                                  corner_radius=self.corner_radius,
                                  textvariable=tk.StringVar(value=self.default_hex_color))
@@ -89,14 +97,28 @@ class CustomColorPicker(CustomFrame):
                                    fg_color=self.button_color,
                                    hover_color=self.button_hover_color, command=self._ok_event, **button_kwargs)
         self.button.pack(fill="both", padx=10, pady=20)
+        self.after(150, lambda: self.label.focus())
+        self.grab_set()
         self.updating = False  # Flag to prevent recursive updates
 
     def get(self):
-        return self.label.get()
+        self._color = self.label.get()
+        self.master.wait_window(self)
+        return self._color
 
     def _ok_event(self, _=None):
-        if self.command:
-            self.command(self.get())
+        self._color = self.label.get()
+        self.grab_release()
+        self.destroy()
+        del self.wheel
+        del self.target
+
+    def _on_closing(self):
+        self._color = None
+        self.grab_release()
+        self.destroy()
+        del self.wheel
+        del self.target
 
     def on_mouse_drag(self, event):
         x = event.x
@@ -112,8 +134,8 @@ class CustomColorPicker(CustomFrame):
             self.target_x, self.target_y = x, y
         else:
             self.target_x, self.target_y = projection_on_circle(x, y, self.image_dimension / 2,
-                                                                self.image_dimension / 2,
-                                                                self.image_dimension / 2 - 1)
+                                                                     self.image_dimension / 2,
+                                                                     self.image_dimension / 2 - 1)
 
         self.canvas.create_image(self.target_x, self.target_y,
                                  image=self.target.create_scaled_photo_image(self._get_widget_scaling(),
@@ -135,7 +157,9 @@ class CustomColorPicker(CustomFrame):
     def update_colors(self, from_entry: Literal["hex", "rgb", ""] = ""):
         if self.updating:
             return
+
         self.updating = True
+
         if from_entry == "hex":
             try:
                 hex_color = self.label.get()
@@ -157,19 +181,26 @@ class CustomColorPicker(CustomFrame):
         else:
             try:
                 brightness = self.brightness_slider_value.get()
+
                 self.get_target_color()
+
                 r = int(self.rgb_color[0] * (brightness / 255))
                 g = int(self.rgb_color[1] * (brightness / 255))
                 b = int(self.rgb_color[2] * (brightness / 255))
+
                 self.rgb_color = [r, g, b]
+
                 self.default_hex_color = f"#{r:02x}{g:02x}{b:02x}"
             except Exception:
                 pass
+
         try:
             self.slider.configure(progress_color=self.default_hex_color)
             self.label.configure(fg_color=self.default_hex_color)
+
             self.label.delete(0, END)
             self.label.insert(0, self.default_hex_color)
+
             self.r_entry.delete(0, END)
             self.r_entry.insert(0, str(self.rgb_color[0]))
             self.g_entry.delete(0, END)
@@ -178,16 +209,19 @@ class CustomColorPicker(CustomFrame):
             self.b_entry.insert(0, str(self.rgb_color[2]))
         except Exception:
             pass
+
         if self.brightness_slider_value.get() < 70:
             self.label.configure(text_color="white")
         else:
             self.label.configure(text_color="black")
+
         if str(self.label.get()) == "#000000":
             self.label.configure(text_color="white")
+
         self.updating = False
 
     def create_rgb_entries(self):
-        rgb_frame = CustomFrame(master=self.frame, fg_color=self.fg_color)
+        rgb_frame = CustomFrame(master=self.frame, fg_color=self.fg_color, bg_color=self.bg_color)
         rgb_frame.pack(fill="both", padx=10, pady=(5, 0))
 
         self.r_label = CustomLabel(master=rgb_frame, text="R", width=60)
@@ -218,11 +252,13 @@ class CustomColorPicker(CustomFrame):
 
     def set_initial_color(self, initial_color):
         # set_initial_color is in beta stage, cannot seek all colors accurately
+
         if initial_color and initial_color.startswith("#"):
             try:
                 r, g, b = tuple(int(initial_color.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
             except ValueError:
                 return
+
             self.default_hex_color = initial_color
             for i in range(0, self.image_dimension):
                 for j in range(0, self.image_dimension):
@@ -236,4 +272,5 @@ class CustomColorPicker(CustomFrame):
                         self.target_x = i
                         self.target_y = j
                         return
+
         self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2, image=self.target)
