@@ -1,5 +1,6 @@
-from typing import Tuple, Dict, Callable, List
+from typing import Tuple, Dict, Callable, List, Union
 from PIL import Image, ImageTk
+from torchaudio.functional import resample
 
 
 class CustomTkImage:
@@ -16,11 +17,13 @@ class CustomTkImage:
     def __init__(self,
                  light_image: Image.Image = None,
                  dark_image: Image.Image = None,
-                 size: Tuple[int, int] = (20, 20)):
+                 size: Tuple[int, int] = (20, 20),
+                 resampling: Union[int, None] = None):
         self._light_image = light_image
         self._dark_image = dark_image
         self._check_images()
         self._size = size
+        self._resampling = resampling
         self._configure_callback_list: List[Callable] = []
         self._scaled_light_photo_images: Dict[Tuple[int, int], ImageTk.PhotoImage] = {}
         self._scaled_dark_photo_images: Dict[Tuple[int, int], ImageTk.PhotoImage] = {}
@@ -83,14 +86,16 @@ class CustomTkImage:
         if scaled_size in self._scaled_light_photo_images:
             return self._scaled_light_photo_images[scaled_size]
         else:
-            self._scaled_light_photo_images[scaled_size] = ImageTk.PhotoImage(self._light_image.resize(scaled_size))
+            self._scaled_light_photo_images[scaled_size] = ImageTk.PhotoImage(
+                self._light_image.resize(scaled_size, resample=self._resampling))
             return self._scaled_light_photo_images[scaled_size]
 
     def _get_scaled_dark_photo_image(self, scaled_size: Tuple[int, int]) -> ImageTk.PhotoImage:
         if scaled_size in self._scaled_dark_photo_images:
             return self._scaled_dark_photo_images[scaled_size]
         else:
-            self._scaled_dark_photo_images[scaled_size] = ImageTk.PhotoImage(self._dark_image.resize(scaled_size))
+            self._scaled_dark_photo_images[scaled_size] = ImageTk.PhotoImage(
+                self._dark_image.resize(scaled_size, resample=self._resampling))
             return self._scaled_dark_photo_images[scaled_size]
 
     def create_scaled_photo_image(self, widget_scaling: float, appearance_mode: str) -> ImageTk.PhotoImage:

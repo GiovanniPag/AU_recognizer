@@ -4,6 +4,7 @@ from typing import Union, Tuple, Callable, Optional, Any
 
 from PIL import ImageTk
 
+from AU_recognizer.core.util import i18n
 from ..core_rendering import CustomCanvas
 from ..theme import ThemeManager
 from ..core_rendering import DrawEngine
@@ -75,6 +76,7 @@ class CustomButton(CustomTKBaseClass):
         self._text = text
         self._text_label: Union[tkinter.Label, None] = None
         self._textvariable: tkinter.Variable = textvariable
+        self._textvariable.set(i18n.custom_button[self._text])
         self._font: Union[tuple, CustomFont] = CustomFont() if font is None else self._check_font_type(font)
         if isinstance(self._font, CustomFont):
             self._font.add_size_configure_callback(self._update_font)
@@ -124,6 +126,9 @@ class CustomButton(CustomTKBaseClass):
                 self._text_label.bind("<Button-1>", self._clicked)
             if self._image_label is not None:
                 self._image_label.bind("<Button-1>", self._clicked)
+
+    def update_language(self):
+        self._textvariable.set(i18n.custom_button[self._text])
 
     def _set_scaling(self, *args, **kwargs):
         super()._set_scaling(*args, **kwargs)

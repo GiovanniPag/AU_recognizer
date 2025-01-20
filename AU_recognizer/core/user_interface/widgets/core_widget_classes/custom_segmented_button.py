@@ -183,6 +183,7 @@ class CustomSegmentedButton(CustomFrame):
                                   text_color=self._sb_text_color,
                                   text_color_disabled=self._sb_text_color_disabled,
                                   text=value,
+                                  textvariable=tkinter.StringVar(value=value),
                                   font=self._font,
                                   state=self._state,
                                   command=lambda v=value: self.set(v, from_button_callback=True),

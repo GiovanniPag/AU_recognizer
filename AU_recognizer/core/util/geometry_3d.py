@@ -1,5 +1,14 @@
+import math
+
 import numpy as np
 import numba
+
+
+def projection_on_circle(point_x, point_y, circle_x, circle_y, radius):
+    angle = math.atan2(point_y - circle_y, point_x - circle_x)
+    projection_x = circle_x + radius * math.cos(angle)
+    projection_y = circle_y + radius * math.sin(angle)
+    return projection_x, projection_y
 
 
 @numba.njit(nogil=True, cache=True, fastmath=True)

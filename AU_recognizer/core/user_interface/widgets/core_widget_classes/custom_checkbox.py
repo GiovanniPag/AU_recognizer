@@ -2,6 +2,7 @@ import tkinter
 import sys
 from typing import Union, Tuple, Callable, Optional, Any
 
+from AU_recognizer.core.util import i18n
 from ..core_rendering import CustomCanvas
 from ..theme import ThemeManager
 from ..core_rendering import DrawEngine
@@ -90,6 +91,7 @@ class CustomCheckBox(CustomTKBaseClass):
         self._variable: tkinter.Variable = variable
         self._variable_callback_blocked = False
         self._textvariable: tkinter.Variable = textvariable
+        self._textvariable.set(i18n.custom_checkbox[self._text])
         self._variable_callback_name = None
 
         # configure grid system (1x3)
@@ -130,6 +132,9 @@ class CustomCheckBox(CustomTKBaseClass):
         self._create_bindings()
         self._set_cursor()
         self._draw()
+
+    def update_language(self):
+        self._textvariable.set(i18n.custom_checkbox[self._text])
 
     def _create_bindings(self, sequence: Optional[str] = None):
         """ set necessary bindings for functionality of widget, will overwrite other bindings """

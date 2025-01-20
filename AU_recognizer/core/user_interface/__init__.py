@@ -26,6 +26,8 @@ from .widgets.core_widget_classes import CustomSwitch
 from .widgets.core_widget_classes import CustomTabview
 from .widgets.core_widget_classes import CustomTextbox
 from .widgets.core_widget_classes import ScrollableFrame
+from .widgets.core_widget_classes import CustomTooltip
+from .widgets.core_widget_classes import CustomSpinbox
 
 # import windows
 from .custom_tk import CustomTk

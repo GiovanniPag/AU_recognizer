@@ -17,3 +17,5 @@ from .custom_slider import CustomSlider
 from .custom_switch import CustomSwitch
 from .custom_tabview import CustomTabview
 from .custom_textbox import CustomTextbox
+from .custom_tooltip import CustomTooltip
+from .custom_spinbox import CustomSpinbox

@@ -2,6 +2,7 @@ import tkinter
 import sys
 from typing import Union, Tuple, Callable, Optional, Any
 
+from AU_recognizer.core.util import i18n
 from ..core_rendering import CustomCanvas
 from ..theme import ThemeManager
 from ..core_rendering import DrawEngine
@@ -96,6 +97,7 @@ class CustomSwitch(CustomTKBaseClass):
         self._variable_callback_blocked = False
         self._variable_callback_name = None
         self._textvariable = textvariable
+        self._textvariable.set(i18n.custom_switch[self._text])
 
         # configure grid system (3x1)
         self.grid_columnconfigure(0, weight=0)
@@ -134,6 +136,9 @@ class CustomSwitch(CustomTKBaseClass):
         self._create_bindings()
         self._set_cursor()
         self._draw()  # initial draw
+
+    def update_language(self):
+        self._textvariable.set(i18n.custom_switch[self._text])
 
     def _create_bindings(self, sequence: Optional[str] = None):
         """ set necessary bindings for functionality of widget, will overwrite other bindings """
