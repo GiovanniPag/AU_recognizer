@@ -7,10 +7,10 @@ from PIL import ImageTk
 from AU_recognizer.core.util import i18n
 from ..core_rendering import CustomCanvas
 from ..core_rendering import DrawEngine
-from ..core_widget_classes import CustomTKBaseClass
 from ..font import CustomFont
 from ..image import CustomTkImage
 from ..theme import ThemeManager
+from . import CustomTKBaseClass
 
 
 class CustomButton(CustomTKBaseClass):

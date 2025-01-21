@@ -1,5 +1,7 @@
+from .customtk_base_class import CustomTKBaseClass
 from .custom_button import CustomButton
 from .custom_checkbox import CustomCheckBox
+from .dropdown_menu import DropdownMenu
 from .custom_combobox import CustomComboBox
 from .custom_entry import CustomEntry
 from .custom_frame import CustomFrame
@@ -16,6 +18,4 @@ from .custom_switch import CustomSwitch
 from .custom_tabview import CustomTabview
 from .custom_textbox import CustomTextbox
 from .custom_tooltip import CustomTooltip
-from .customtk_base_class import CustomTKBaseClass
-from .dropdown_menu import DropdownMenu
 from .scrollable_frame import ScrollableFrame

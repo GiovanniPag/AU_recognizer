@@ -1,7 +1,8 @@
 import sys
 from typing import Union, Tuple
 
-from AU_recognizer.core.user_interface import CustomToplevel, AppearanceModeTracker, CustomLabel
+from . import CustomLabel
+from ... import CustomToplevel, AppearanceModeTracker
 
 
 class CustomTooltip(CustomToplevel):

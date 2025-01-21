@@ -1,6 +1,6 @@
 from typing import Callable
 
-from AU_recognizer.core.user_interface import CustomFrame, CustomButton, CustomEntry
+from . import CustomFrame, CustomButton, CustomEntry
 
 
 class CustomSpinbox(CustomFrame):

@@ -1,7 +1,5 @@
 from tkinter import StringVar, Menu
-from typing import Union
 
-from AU_recognizer.AURecognizer import AURecognizer
 from AU_recognizer.core.user_interface import AppearanceModeTracker, ThemeManager
 from AU_recognizer.core.user_interface.views.view import View
 from AU_recognizer.core.util import M_HELP, M_MASTER, M_FILE, M_INDEX, M_EDIT, M_NEW, M_OPEN, M_SETTINGS, \
@@ -13,7 +11,7 @@ class MenuBar(Menu, View):
 
     def __init__(self, master=None):
         super().__init__(master)
-        self.master: Union[AURecognizer, None] = master
+        self.master = master
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.menu_file = Menu(self)

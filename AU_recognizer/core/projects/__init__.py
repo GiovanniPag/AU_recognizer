@@ -1,1 +1,1 @@
-from emoca_fitter import emoca_fit
+from .emoca_fitter import emoca_fit
