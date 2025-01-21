@@ -8,3 +8,6 @@ results/
 *.wandb_auth
 assets/
 /external/
+/build/lib/gdl/__init__.py
+/build/lib/gdl_apps/__init__.py
+/dist/GDL-0.0.3-py3.12.egg

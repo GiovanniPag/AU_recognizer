@@ -10,7 +10,6 @@ from OpenGL.GLUT import *
 from PIL import Image
 from pyopengltk import OpenGLFrame
 
-from AU_recognizer.AURecognizer import AURecognizer
 from AU_recognizer.core.user_interface import CustomFrame, CustomCheckBox, CustomButton, CustomTkImage, CustomTooltip
 from AU_recognizer.core.user_interface.views import View
 from AU_recognizer.core.user_interface.widgets.complex_widget import ComboLabel, FPSCounter
@@ -27,7 +26,7 @@ from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quater
 class Viewer3DGl(View):
     def __init__(self, master, placeholder, obj_file_path=None):
         super().__init__(placeholder)
-        self.master: AURecognizer = master
+        self.master = master
         self.obj = OBJ(filepath=obj_file_path)
         self.viewer_frame = CustomFrame(self)
         self.control_frame = CustomFrame(self, style='Control.TFrame')

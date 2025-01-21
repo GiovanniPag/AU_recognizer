@@ -7,7 +7,8 @@ from AU_recognizer.core.util import logger, T_COLUMNS, T_SIZE, T_MODIFIED, T_NAM
 
 class ProjectTreeView(ttk.Treeview, View):
     def __init__(self, master=None):
-        super().__init__(master)
+        View.__init__(self, master=master)
+        ttk.Treeview.__init__(self, master)
         self.tree_style = None
         self.master = master
         self.rowconfigure(0, weight=1)

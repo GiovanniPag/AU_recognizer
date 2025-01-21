@@ -1,5 +1,5 @@
-from .au_recognition_controller import AURecognitionController
 from .base_controller import Controller
+from .au_recognition_controller import AURecognitionController
 from .menu_controller import MenuController
 from .model_fit_controller import ModelFitController
 from .project_action_controller import ProjectActionController

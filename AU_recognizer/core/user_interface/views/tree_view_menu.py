@@ -9,7 +9,8 @@ from AU_recognizer.core.util import (MT_SEL_P, M_MASTER, M_INDEX, MT_ADD_IMAGES,
 class TreeViewMenu(Menu, View):
 
     def __init__(self, master=None):
-        super().__init__(master, tearoff=0)
+        View.__init__(self, master)
+        Menu.__init__(self, master, tearoff=0)
         self.master = master
         self.data = None
         self.is_open = False

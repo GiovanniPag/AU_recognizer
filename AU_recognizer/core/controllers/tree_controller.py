@@ -8,7 +8,6 @@ from typing import Optional
 
 from PIL import Image
 
-from AU_recognizer.AURecognizer import AURecognizer
 from AU_recognizer.core.controllers.base_controller import Controller
 from AU_recognizer.core.user_interface.dialogs.dialog import DialogProjectOptions
 from AU_recognizer.core.user_interface.dialogs.dialog_util import open_confirmation_dialogue, delete_path, \
@@ -253,7 +252,7 @@ class TreeController(Controller):
 class TreeViewMenuController(Controller):
     def __init__(self, master=None) -> None:
         super().__init__()
-        self.master: AURecognizer = master
+        self.master = master
         self.controller: Optional[TreeController] = None
         self.view = None
         self.after_id = None

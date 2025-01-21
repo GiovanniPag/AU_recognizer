@@ -10,8 +10,9 @@ from AU_recognizer.core.util import M_HELP, M_MASTER, M_FILE, M_INDEX, M_EDIT, M
 class MenuBar(Menu, View):
 
     def __init__(self, master=None):
-        super().__init__(master)
         self.master = master
+        View.__init__(self, master=self.master)
+        Menu.__init__(self, master=self.master)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.menu_file = Menu(self)
@@ -163,8 +164,6 @@ class MenuBar(Menu, View):
     def update_style(self, _="dark"):
         bg_color = self._apply_appearance_mode(ThemeManager.theme["DropdownMenu"]["fg_color"])
         fg_color = self._apply_appearance_mode(ThemeManager.theme["DropdownMenu"]["text_color"])
-        hover_color = self._apply_appearance_mode(ThemeManager.theme["DropdownMenu"]["hover_color"])
-        self.configure(background=bg_color)
-        self.configure(foreground=fg_color)
-        self.configure(borderwidth=0)
-        self.configure(activebackground=hover_color)
+        super(View, self).configure(bg_color=bg_color)
+        super(View, self).configure(fg_color=fg_color)
+        super(View, self).configure(border_width=0)

@@ -1,4 +1,3 @@
-from AU_recognizer.core.controllers import Controller
 from AU_recognizer.core.user_interface import CustomTabview
 from AU_recognizer.core.user_interface.views.au_recognition_view import AURecognitionView
 from AU_recognizer.core.user_interface.views.model_fit_view import ModelFitView
@@ -43,13 +42,13 @@ class ProjectActionView(CustomTabview, View):
             self.__tabs_change_state(PA_NORMAL)
             self.set(i18n.project_actions_fit[PA_NAME])
 
-    def bind_controllers(self, model_fit_controller: Controller, au_recognition_controller: Controller):
+    def bind_controllers(self, model_fit_controller, au_recognition_controller):
         logger.debug(f"bind controllers in project action view")
         self.__bind_controller(controller=model_fit_controller, view=self._model_fit_frame)
         self.__bind_controller(controller=au_recognition_controller, view=self._au_recognition_frame)
 
     @staticmethod
-    def __bind_controller(controller: Controller, view: View):
+    def __bind_controller(controller, view: View):
         logger.debug(f"project action bind {controller.__class__} to {view.__class__}")
         controller.bind(view)
 

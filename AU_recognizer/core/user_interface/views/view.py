@@ -4,6 +4,7 @@ from ..widgets.core_widget_classes import CustomFrame
 
 
 class View(CustomFrame):
+
     @abstractmethod
     def create_view(self):
         raise NotImplementedError

@@ -11,6 +11,9 @@ from AU_recognizer.core.controllers import Controller, MenuController, TreeViewM
     Viewer3DController, SelectedFileController, SelectedProjectController, ProjectActionController
 from AU_recognizer.core.user_interface.views.selected_file_view import SelectedFileView
 
+set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
+set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
 
 # main window of AU_rec MVC app
 class AURecognizer(CustomTk):
@@ -97,10 +100,11 @@ class AURecognizer(CustomTk):
         center_frame = ttk.PanedWindow(self, orient=VERTICAL)
         # create views
         # left views
-        scroll_wrapper = ScrollableFrame(master=left_frame)
+        custom_frame = CustomFrame(self)
+        scroll_wrapper = ScrollableFrame(master=custom_frame)
         self.project_tree_view = ProjectTreeView(master=scroll_wrapper)
         self.selected_file = SelectedFileView(self)
-        left_frame.add(scroll_wrapper, weight=3)
+        left_frame.add(custom_frame, weight=3)
         left_frame.add(self.selected_file, weight=2)
 
         # center views

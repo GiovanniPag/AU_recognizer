@@ -2,7 +2,6 @@ from pathlib import Path
 from tkinter import BOTH
 from typing import Optional
 
-from AU_recognizer.AURecognizer import AURecognizer
 from AU_recognizer.core.user_interface import CustomFrame
 from AU_recognizer.core.user_interface.views import CanvasImage, Viewer3DGl
 from AU_recognizer.core.user_interface.views.npy_viewer import NpyViewer
@@ -16,7 +15,7 @@ class Viewer3DView(View):
         super().__init__(master, **kw)
         self._title = None
         self.data = None
-        self.master: AURecognizer = master
+        self.master = master
         self.__canvas_image: Optional[CanvasImage] = None
         self.__canvas_3d: Optional[Viewer3DGl] = None
         self.__npy_v: Optional[NpyViewer] = None
