@@ -19,6 +19,8 @@ class ProjectActionView(CustomTabview, View):
         logger.debug(f"update language in project action view")
         self.rename(old_name=self._mf_frame_name, new_name=i18n.project_actions_fit[PA_NAME])
         self.rename(old_name=self._aur_frame_name, new_name=i18n.project_actions_au_rec[PA_NAME])
+        self._aur_frame_name = i18n.project_actions_au_rec[PA_NAME]
+        self._mf_frame_name = i18n.project_actions_fit[PA_NAME]
         self._model_fit_frame.update_language()
         self._au_recognition_frame.update_language()
 

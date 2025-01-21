@@ -3,9 +3,9 @@ import tkinter as tk
 from tkinter import END
 from typing import Literal
 
-from PIL import Image
+from PIL import Image, ImageTk
 
-from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomTkImage, CustomSlider, CustomEntry, \
+from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomSlider, CustomEntry, \
     CustomButton, CustomLabel
 from AU_recognizer.core.util import asset
 from AU_recognizer.core.util.geometry_3d import projection_on_circle
@@ -15,7 +15,7 @@ class CustomColorPicker(CustomFrame):
 
     def __init__(self,
                  master: any = None,
-                 width: int = 300,
+                 width: int = 350,
                  initial_color: str = None,
                  fg_color: str = None,
                  button_color: str = None,
@@ -62,17 +62,16 @@ class CustomColorPicker(CustomFrame):
                                 bg=self.fg_color)
         self.canvas.pack(pady=20)
         self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
-        self.wheel = CustomTkImage(light_image=Image.open(asset('color_wheel.png')),
-                                   dark_image=Image.open(asset('color_wheel.png')),
-                                   size=(self.image_dimension, self.image_dimension),
-                                   resampling=Image.Resampling.LANCZOS)
-        self.target = CustomTkImage(light_image=Image.open(asset('target.png')),
-                                    dark_image=Image.open(asset('target.png')),
-                                    size=(self.target_dimension, self.target_dimension),
-                                    resampling=Image.Resampling.LANCZOS)
+
+        self.img1 = Image.open(asset('color_wheel.png')).resize(
+            (self.image_dimension, self.image_dimension), Image.Resampling.LANCZOS)
+        self.img2 = Image.open(asset('target.png')).resize((self.target_dimension, self.target_dimension),
+                                                           Image.Resampling.LANCZOS)
+        self.wheel = ImageTk.PhotoImage(self.img1)
+        self.target = ImageTk.PhotoImage(self.img2)
+
         self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2,
-                                 image=self.wheel.create_scaled_photo_image(self._get_widget_scaling(),
-                                                                            self._get_appearance_mode()))
+                                 image=self.wheel)
         self.set_initial_color(initial_color)
         self.brightness_slider_value = tk.IntVar()
         self.brightness_slider_value.set(255)
@@ -109,8 +108,7 @@ class CustomColorPicker(CustomFrame):
         y = event.y
         self.canvas.delete("all")
         self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2,
-                                 image=self.wheel.create_scaled_photo_image(self._get_widget_scaling(),
-                                                                            self._get_appearance_mode()))
+                                 image=self.wheel)
 
         d_from_center = math.sqrt(((self.image_dimension / 2) - x) ** 2 + ((self.image_dimension / 2) - y) ** 2)
 
@@ -122,15 +120,14 @@ class CustomColorPicker(CustomFrame):
                                                                 self.image_dimension / 2 - 1)
 
         self.canvas.create_image(self.target_x, self.target_y,
-                                 image=self.target.create_scaled_photo_image(self._get_widget_scaling(),
-                                                                             self._get_appearance_mode()))
+                                 image=self.target)
 
         self.get_target_color()
         self.update_colors()
 
     def get_target_color(self):
         try:
-            self.rgb_color = self.wheel.cget("light_image").getpixel((self.target_x, self.target_y))
+            self.rgb_color = self.img1.getpixel((self.target_x, self.target_y))
             r = self.rgb_color[0]
             g = self.rgb_color[1]
             b = self.rgb_color[2]
@@ -194,25 +191,25 @@ class CustomColorPicker(CustomFrame):
 
     def create_rgb_entries(self):
         rgb_frame = CustomFrame(master=self.frame, fg_color=self.fg_color)
-        rgb_frame.pack(fill="both", padx=10, pady=(5, 0))
+        rgb_frame.pack(fill="both")
 
-        self.r_label = CustomLabel(master=rgb_frame, text="R", width=60)
-        self.r_label.grid(row=0, column=0, padx=(0, 5))
+        self.r_label = CustomLabel(master=rgb_frame, text="R")
+        self.r_label.grid(row=0, column=0)
         self.r_entry = CustomEntry(master=rgb_frame, width=60, corner_radius=self.corner_radius,
                                    textvariable=tk.StringVar(value=f"{self.default_rgb[0]}"))
-        self.r_entry.grid(row=0, column=1, padx=(0, 5))
+        self.r_entry.grid(row=0, column=1)
 
-        self.g_label = CustomLabel(master=rgb_frame, text="G", width=60)
-        self.g_label.grid(row=0, column=2, padx=(0, 5))
+        self.g_label = CustomLabel(master=rgb_frame, text="G")
+        self.g_label.grid(row=0, column=2)
         self.g_entry = CustomEntry(master=rgb_frame, width=60, corner_radius=self.corner_radius,
                                    textvariable=tk.StringVar(value=f"{self.default_rgb[1]}"))
-        self.g_entry.grid(row=0, column=3, padx=(0, 5))
+        self.g_entry.grid(row=0, column=3)
 
-        self.b_label = CustomLabel(master=rgb_frame, text="B", width=60)
-        self.b_label.grid(row=0, column=4, padx=(0, 5))
+        self.b_label = CustomLabel(master=rgb_frame, text="B")
+        self.b_label.grid(row=0, column=4)
         self.b_entry = CustomEntry(master=rgb_frame, width=60, corner_radius=self.corner_radius,
                                    textvariable=tk.StringVar(value=f"{self.default_rgb[2]}"))
-        self.b_entry.grid(row=0, column=5, padx=(0, 5))
+        self.b_entry.grid(row=0, column=5)
         # Bind the return key to update the color from the entry values
         self.r_entry.bind("<Return>", lambda event: self.update_colors(from_entry="rgb"))
         self.g_entry.bind("<Return>", lambda event: self.update_colors(from_entry="rgb"))
@@ -232,14 +229,12 @@ class CustomColorPicker(CustomFrame):
             self.default_hex_color = initial_color
             for i in range(0, self.image_dimension):
                 for j in range(0, self.image_dimension):
-                    self.rgb_color = self.wheel.cget("light_image").getpixel((i, j))
+                    self.rgb_color = self.img1.getpixel((i, j))
                     if (self.rgb_color[0], self.rgb_color[1], self.rgb_color[2]) == (r, g, b):
                         self.canvas.create_image(i, j,
-                                                 image=self.target.create_scaled_photo_image(self._get_widget_scaling(),
-                                                                                             self._get_appearance_mode()
-                                                                                             )
-                                                 )
+                                                 image=self.target)
                         self.target_x = i
                         self.target_y = j
                         return
-        self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2, image=self.target)
+        self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2,
+                                 image=self.target)

@@ -84,8 +84,8 @@ class BaseDialog(Dialog):
                             validatecommand=(self.master.register(self.validate_command), '%P'))
         entry.bind("<Return>", lambda event: self.close())
         entry.grid(row=0, column=2, columnspan=3, pady=(7, 7), padx=(7, 7), sticky="we")
-        CustomLabel(self, text=self.name_tip, background="red", wraplength=400).grid(row=1, column=1, columnspan=4,
-                                                                                     padx=(7, 7), sticky="we")
+        CustomLabel(self, text=self.name_tip, wraplength=400).grid(row=1, column=1, columnspan=4,
+                                                                   padx=(7, 7), sticky="we")
         CustomButton(self, text=i18n.dialog_buttons[I18N_CONFIRM_BUTTON], command=self.close).grid(row=2, column=2,
                                                                                                    pady=(7, 7),
                                                                                                    padx=(7, 7),

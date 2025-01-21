@@ -18,16 +18,16 @@ class ColorPickerLabel(View):
 
     def create_view(self):
         CustomLabel(self, textvariable=self._label_info).pack(side=tk.LEFT)
-        button_frame = CustomFrame(self, padx=5)
+        button_frame = CustomFrame(self)
         button_frame.pack(side=tk.LEFT, expand=True, fill=tk.X)
-        self.color_button = CustomButton(button_frame, text="", relief='flat', command=self.pick_color, width=12,
-                                         height=1)
+        self.color_button = CustomButton(button_frame, text="", command=self.pick_color, width=28,
+                                         height=28)
         self.color_button.pack(side=tk.LEFT)
         self.color_button.configure(fg_color=self.color.get())
 
     def pick_color(self):
         logger.debug("pick color")
-        color = AskColor(initialcolor=self.color.get()).get()
+        color = AskColor(initial_color=self.color.get()).get()
         if color:
             logger.debug(f"color picked {color}")
             self.color.set(color)

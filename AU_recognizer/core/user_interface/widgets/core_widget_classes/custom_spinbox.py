@@ -12,11 +12,13 @@ class CustomSpinbox(CustomFrame):
                  min_value: float = 0,
                  max_value: float = 0,
                  use_float: bool = True,
+                 decimal_places: int = 2,
                  command: Callable = None,
                  **kwargs):
         self.min_value = float(min_value) if use_float else int(min_value)
         self.max_value = float(max_value) if use_float else int(max_value)
         self.use_float = use_float
+        self.decimal_places = decimal_places if use_float else 0
         super().__init__(*args, width=width, height=height, **kwargs)
 
         self.step_size = float(step_size) if use_float else int(step_size)
@@ -31,7 +33,7 @@ class CustomSpinbox(CustomFrame):
                                             command=self.subtract_button_callback)
         self.subtract_button.grid(row=0, column=0, padx=(3, 0), pady=3)
 
-        self.entry = CustomEntry(self, width=width - 70, height=height - 6, border_width=0)
+        self.entry = CustomEntry(self, width=width - (70 - 10 * self.decimal_places), height=height - 6, border_width=0)
         self.entry.grid(row=0, column=1, columnspan=1, padx=3, pady=3, sticky="nsew")
 
         self.add_button = CustomButton(self, text="+", width=height - 6, height=height - 6,
@@ -39,7 +41,7 @@ class CustomSpinbox(CustomFrame):
         self.add_button.grid(row=0, column=2, padx=(0, 3), pady=3)
 
         # default value
-        self.entry.insert(0, f"{float(default) if use_float else int(default)}")
+        self.entry.insert(0, f"{float(default):.{self.decimal_places}f}" if self.use_float else f"{int(default)}")
         # All elements on mousewheel event
         self.entry.bind("<MouseWheel>", self.on_mouse_wheel)
         self.subtract_button.bind("<MouseWheel>", self.on_mouse_wheel)
@@ -54,7 +56,7 @@ class CustomSpinbox(CustomFrame):
                 self.step_size)
             if value <= self.max_value:
                 self.entry.delete(0, "end")
-                self.entry.insert(0, f"{value if self.use_float else int(value)}")
+                self.entry.insert(0, f"{float(value):.{self.decimal_places}f}" if self.use_float else f"{int(value)}")
         except ValueError:
             return
 
@@ -66,7 +68,7 @@ class CustomSpinbox(CustomFrame):
                 else int(self.entry.get()) - int(self.step_size)
             if value >= self.min_value:
                 self.entry.delete(0, "end")
-                self.entry.insert(0, f"{value if self.use_float else int(value)}")
+                self.entry.insert(0, f"{float(value):.{self.decimal_places}f}" if self.use_float else f"{int(value)}")
         except ValueError:
             return
 
@@ -84,4 +86,4 @@ class CustomSpinbox(CustomFrame):
 
     def set(self, value: int):
         self.entry.delete(0, "end")
-        self.entry.insert(0, f"{float(value) if self.use_float else int(value)}")
+        self.entry.insert(0, f"{float(value):.{self.decimal_places}f}" if self.use_float else f"{int(value)}")

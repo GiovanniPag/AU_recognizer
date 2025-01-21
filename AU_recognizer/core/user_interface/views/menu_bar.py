@@ -4,7 +4,8 @@ from AU_recognizer.core.user_interface import AppearanceModeTracker, ThemeManage
 from AU_recognizer.core.user_interface.views.view import View
 from AU_recognizer.core.util import M_HELP, M_MASTER, M_FILE, M_INDEX, M_EDIT, M_NEW, M_OPEN, M_SETTINGS, \
     M_EXIT, M_LANGUAGE, M_ABOUT, M_LOGS, M_GUIDE, M_IT, M_RADIO, M_VARIABLE, M_VALUE, M_EN, logger, \
-    i18n, M_LABEL, M_UNDERLINE, M_DEFAULT_STATE, M_STATE_NORMAL, M_ACCELERATOR, M_STATE, M_COMMAND
+    i18n, M_LABEL, M_UNDERLINE, M_DEFAULT_STATE, M_STATE_NORMAL, M_ACCELERATOR, M_STATE, M_COMMAND, nect_config, CONFIG, \
+    LANGUAGE
 
 
 class MenuBar(Menu, View):
@@ -120,6 +121,7 @@ class MenuBar(Menu, View):
         # menu_help_language items
         self.update_command_or_cascade(name=M_IT, info_updated=i18n.menu_help_language_it)
         self.update_command_or_cascade(name=M_EN, info_updated=i18n.menu_help_language_en)
+        self.language.set(nect_config[CONFIG][LANGUAGE])
 
     def add_cascade_item(self, menu_name, menu_to_add, info):
         logger.debug(f"add cascade item {menu_to_add} to {menu_name} with info {info}")
