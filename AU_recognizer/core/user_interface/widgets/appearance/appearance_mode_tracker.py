@@ -1,4 +1,5 @@
 from typing import Callable
+
 from AU_recognizer.core.util import darkdetect
 
 

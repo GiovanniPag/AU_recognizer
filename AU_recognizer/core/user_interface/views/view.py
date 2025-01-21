@@ -1,4 +1,5 @@
 from abc import abstractmethod
+
 from ..widgets.core_widget_classes import CustomFrame
 
 

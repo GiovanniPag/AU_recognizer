@@ -5,7 +5,7 @@ def theme():
     """ Uses the Windows Registry to detect if the user is using Dark Mode """
     # Registry will return 0 if Windows is in Dark Mode and 1 if Windows is in Light Mode. This dictionary converts
     # that output into the text that the program is expecting.
-    valueMeaning = {0: "Dark", 1: "Light"}
+    value_meaning = {0: "Dark", 1: "Light"}
     # In HKEY_CURRENT_USER, get the Personalisation Key.
     try:
         key = getKey(HKEY, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize")
@@ -16,7 +16,7 @@ def theme():
     except FileNotFoundError:
         # some headless Windows instances (e.g. GitHub Actions or Docker images) do not have this key
         return None
-    return valueMeaning[subkey]
+    return value_meaning[subkey]
 
 
 def isDark():

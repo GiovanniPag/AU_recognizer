@@ -1,30 +1,31 @@
-import tkinter as tk
 from pathlib import Path
-from tkinter import ttk, HORIZONTAL, VERTICAL
+from tkinter import ttk, HORIZONTAL, VERTICAL, FALSE, NSEW
 
-from AU_recognizer.core.controllers import Controller
-from AU_recognizer.core.util import i18n, logger, config, call_by_ws
-from AU_recognizer.core.views import CustomTk
-from AU_recognizer.core.views.views.view import View
+from AU_recognizer.core.util import (i18n, logger, config, call_by_ws, nect_config, OPEN_PROJECTS,
+                                     check_if_folder_exist, check_if_is_project, purge_option_config, P_PATH)
+from AU_recognizer.core.user_interface import *
+from AU_recognizer.core.user_interface.views import (View, MenuBar, ProjectTreeView, ProjectInfoView,
+                                                     ProjectActionView, Viewer3DView, TreeViewMenu)
+from AU_recognizer.core.user_interface.dialogs.dialog import SettingsDialog
+from AU_recognizer.core.controllers import Controller, MenuController, TreeViewMenuController, TreeController, \
+    Viewer3DController, SelectedFileController, SelectedProjectController, ProjectActionController
+from AU_recognizer.core.user_interface.views.selected_file_view import SelectedFileView
 
 
 # main window of AU_rec MVC app
 class AURecognizer(CustomTk):
     def __init__(self):
         super().__init__()
-        self.option_add('*tearOff', tk.FALSE)
+        self.option_add('*tearOff', FALSE)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.title(i18n.title)
         config.windowing_system = self.tk.call('tk', 'windowingsystem')
         logger.debug("windowing system: " + config.windowing_system)
-
         self.devices = []
         self.open_projects = {}
         self.selected_project = None
-
         self.__recover_model()
-        self.__create_style()
         self.__create_gui()
         self.__create_controllers()
         self.__bind_controllers()
@@ -78,16 +79,6 @@ class AURecognizer(CustomTk):
         self.remove_project(old_path)
         self.add_project(new_metadata, new_name)
 
-    @staticmethod
-    def __create_style():
-        logger.debug("create style")
-        # Initialize style
-        s = ttk.Style()
-        # Create style used by default for all Frames
-        s.configure('TFrame', background='green')
-        # Create style for the first frame
-        s.configure('Control.TFrame', background='yellow')
-
     # create all view classes
     def __create_gui(self):
         logger.debug("create gui")
@@ -97,7 +88,7 @@ class AURecognizer(CustomTk):
         # create mainframe
         logger.debug("main frame initialization")
         mainframe = ttk.PanedWindow(self, orient=HORIZONTAL)
-        mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+        mainframe.grid(column=0, row=0, sticky=NSEW)
         logger.debug("left frame initialization")
         left_frame = ttk.PanedWindow(self, orient=VERTICAL)
         logger.debug("right frame initialization")
@@ -106,9 +97,8 @@ class AURecognizer(CustomTk):
         center_frame = ttk.PanedWindow(self, orient=VERTICAL)
         # create views
         # left views
-        scroll_wrapper = ScrollWrapperView(master=left_frame)
+        scroll_wrapper = ScrollableFrame(master=left_frame)
         self.project_tree_view = ProjectTreeView(master=scroll_wrapper)
-        scroll_wrapper.add(self.project_tree_view)
         self.selected_file = SelectedFileView(self)
         left_frame.add(scroll_wrapper, weight=3)
         left_frame.add(self.selected_file, weight=2)

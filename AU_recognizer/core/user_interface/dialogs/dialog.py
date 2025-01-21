@@ -1,22 +1,20 @@
-import tkinter as tk
-from tkinter import ttk
 from abc import abstractmethod
+from tkinter import StringVar, EW, E, NSEW, END, RIGHT, X, BOTH, BooleanVar
+from tkinter.ttk import Treeview
 
 from AU_recognizer.core.projects.emoca_fitter import emoca_fit
+from AU_recognizer.core.user_interface import CustomToplevel, CustomLabel, CustomEntry, CustomButton, CustomFrame, \
+    ScrollableFrame, CustomCheckBox, CustomTabview
+from AU_recognizer.core.user_interface.widgets.complex_widget import EntryButton, ComboLabel, \
+    NumberPicker, ColorPickerLabel
 from AU_recognizer.core.util import retrieve_files_from_path
 from AU_recognizer.core.util.config import logger, nect_config, write_config
 from AU_recognizer.core.util.constants import *
 from AU_recognizer.core.util.language_resource import i18n
-from AU_recognizer.core.views import FloatPicker
-from AU_recognizer.core.views import IntPicker
-from AU_recognizer.core.views import ColorPicker
-from AU_recognizer.core.views import ComboLabel
-from AU_recognizer.core.views import EntryButton
 from AU_recognizer.core.util.utility_functions import check_name, check_file_name
-from AU_recognizer.core.views import ScrollWrapperView
 
 
-class Dialog(tk.Toplevel):
+class Dialog(CustomToplevel):
     def show(self):
         logger.debug(f"show dialog")
         self.create_view()
@@ -56,7 +54,7 @@ class BaseDialog(Dialog):
         self.master = master
         self.i18n_data = i18n_data
         self.t = self.i18n_data[I18N_TITLE]
-        self.name_var = tk.StringVar()
+        self.name_var = StringVar()
         self.name_var.set("")
         self.has_back = has_back
         self.back = False
@@ -78,30 +76,31 @@ class BaseDialog(Dialog):
         self.resizable(False, False)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        tk.Label(self, image=FULL_QUESTION_ICON).grid(row=0, column=0, rowspan=2, pady=(7, 0), padx=(7, 7), sticky="e")
-        ttk.Label(self, text=self.name_label, font="bold").grid(row=0, column=1, columnspan=1, pady=(7, 7), padx=(7, 7),
-                                                                sticky="w")
-        entry = ttk.Entry(self, textvariable=self.name_var, validate='key',
-                          validatecommand=(self.master.register(self.validate_command), '%P'))
+        CustomLabel(self, image=FULL_QUESTION_ICON).grid(row=0, column=0, rowspan=2, pady=(7, 0), padx=(7, 7),
+                                                         sticky="e")
+        CustomLabel(self, text=self.name_label).grid(row=0, column=1, columnspan=1, pady=(7, 7), padx=(7, 7),
+                                                     sticky="w")
+        entry = CustomEntry(self, textvariable=self.name_var, validate='key',
+                            validatecommand=(self.master.register(self.validate_command), '%P'))
         entry.bind("<Return>", lambda event: self.close())
         entry.grid(row=0, column=2, columnspan=3, pady=(7, 7), padx=(7, 7), sticky="we")
-        ttk.Label(self, text=self.name_tip, background="red", wraplength=400).grid(row=1, column=1, columnspan=4,
-                                                                                   padx=(7, 7), sticky="we")
-        ttk.Button(self, text=i18n.dialog_buttons[I18N_CONFIRM_BUTTON], command=self.close).grid(row=2, column=2,
-                                                                                                 pady=(7, 7),
-                                                                                                 padx=(7, 7),
-                                                                                                 sticky="e")
+        CustomLabel(self, text=self.name_tip, background="red", wraplength=400).grid(row=1, column=1, columnspan=4,
+                                                                                     padx=(7, 7), sticky="we")
+        CustomButton(self, text=i18n.dialog_buttons[I18N_CONFIRM_BUTTON], command=self.close).grid(row=2, column=2,
+                                                                                                   pady=(7, 7),
+                                                                                                   padx=(7, 7),
+                                                                                                   sticky="e")
         c_c = 3
         if self.has_back:
             c_c = 4
-            ttk.Button(self, text=i18n.dialog_buttons[I18N_BACK_BUTTON], command=self.go_back).grid(row=2, column=3,
+            CustomButton(self, text=i18n.dialog_buttons[I18N_BACK_BUTTON], command=self.go_back).grid(row=2, column=3,
+                                                                                                      pady=(7, 7),
+                                                                                                      padx=(7, 7),
+                                                                                                      sticky="e")
+        CustomButton(self, text=i18n.dialog_buttons[I18N_CANCEL_BUTTON], command=self.dismiss).grid(row=2, column=c_c,
                                                                                                     pady=(7, 7),
                                                                                                     padx=(7, 7),
                                                                                                     sticky="e")
-        ttk.Button(self, text=i18n.dialog_buttons[I18N_CANCEL_BUTTON], command=self.dismiss).grid(row=2, column=c_c,
-                                                                                                  pady=(7, 7),
-                                                                                                  padx=(7, 7),
-                                                                                                  sticky="e")
         entry.focus_set()
 
     def go_back(self):
@@ -120,22 +119,22 @@ class SelectFitImageDialog(Dialog):
         self._project_name = str(self.project.sections()[0])
         self.selected_images = []
         self.fit_data = data
-        self.main_frame = tk.Frame(self, padx=20, pady=20)
-        self.scroll_frame = ScrollWrapperView(master=self.main_frame)
-        self.bottom_frame = ttk.Frame(self.main_frame)
-        self.image_treeview = ttk.Treeview(self.scroll_frame, selectmode='extended')
+        self.main_frame = CustomFrame(self, padx=20, pady=20)
+        self.scroll_frame = ScrollableFrame(master=self.main_frame)
+        self.bottom_frame = CustomFrame(self.main_frame)
+        self.image_treeview = Treeview(self.scroll_frame, selectmode='extended')
         # Variable for checkbox state
-        self.hide_fitted_var = tk.BooleanVar(value=False)
+        self.hide_fitted_var = BooleanVar(value=False)
         # Create the checkbox
-        self.hide_fitted_checkbox = ttk.Checkbutton(
+        self.hide_fitted_checkbox = CustomCheckBox(
             self.main_frame,
             text=i18n.im_sel_dialog[TD_HIDE_FITTED],
             variable=self.hide_fitted_var,
             command=self.populate_image_treeview  # Refresh the Treeview when toggled
         )
         # Entry widget for filter text
-        self.filter_var = tk.StringVar()  # StringVar to hold the filter input
-        self.filter_entry = ttk.Entry(
+        self.filter_var = StringVar()  # StringVar to hold the filter input
+        self.filter_entry = CustomEntry(
             self.main_frame,
             textvariable=self.filter_var,
             validate="key"
@@ -145,10 +144,9 @@ class SelectFitImageDialog(Dialog):
     def create_view(self):
         logger.debug(f"{self.__class__.__name__} create view")
         # Main frame
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
-        self.scroll_frame.pack(fill=tk.BOTH, expand=True)
-        self.scroll_frame.add(self.image_treeview)
-        self.filter_entry.pack(fill=tk.X, padx=5, pady=5)  # Filter text box
+        self.main_frame.pack(fill=BOTH, expand=True)
+        self.scroll_frame.pack(fill=BOTH, expand=True)
+        self.filter_entry.pack(fill=X, padx=5, pady=5)  # Filter text box
         # Add the checkbox above the Treeview
         self.hide_fitted_checkbox.pack(anchor='w')
         # Treeview for images
@@ -165,20 +163,20 @@ class SelectFitImageDialog(Dialog):
         # show
         self.image_treeview["show"] = "headings"
         # Bottom frame for buttons
-        self.bottom_frame.pack(fill=tk.X, expand=True)
+        self.bottom_frame.pack(fill=X, expand=True)
         # Buttons
-        close_button = ttk.Button(self.bottom_frame, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
-        close_button.pack(side=tk.RIGHT, padx=5, pady=5)
-        fit_selected_button = ttk.Button(self.bottom_frame, text=i18n.dialog_buttons[I18N_FIT_SEL_BUTTON],
-                                         command=self.fit_selected)
-        fit_selected_button.pack(side=tk.RIGHT, padx=5, pady=5)
-        fit_all_button = ttk.Button(self.bottom_frame, text=i18n.dialog_buttons[I18N_FIT_ALL_BUTTON],
-                                    command=self.fit_all)
-        fit_all_button.pack(side=tk.RIGHT, padx=5, pady=5)
+        close_button = CustomButton(self.bottom_frame, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
+        close_button.pack(side=RIGHT, padx=5, pady=5)
+        fit_selected_button = CustomButton(self.bottom_frame, text=i18n.dialog_buttons[I18N_FIT_SEL_BUTTON],
+                                           command=self.fit_selected)
+        fit_selected_button.pack(side=RIGHT, padx=5, pady=5)
+        fit_all_button = CustomButton(self.bottom_frame, text=i18n.dialog_buttons[I18N_FIT_ALL_BUTTON],
+                                      command=self.fit_all)
+        fit_all_button.pack(side=RIGHT, padx=5, pady=5)
         # Populate the treeview with images
         self.populate_image_treeview()
 
-    def filter_images(self, event):
+    def filter_images(self, _event):
         """This method will be triggered every time the user types in the filter Entry widget."""
         self.populate_image_treeview()  # Repopulate treeview with filter applied
 
@@ -206,7 +204,7 @@ class SelectFitImageDialog(Dialog):
             # Check the state of the checkbox to decide whether to add the image
             if (not self.hide_fitted_var.get() or fit_status == i18n.im_sel_dialog["data"]["not_fitted"]) and \
                     (filter_text in image.name.lower()):
-                self.image_treeview.insert('', tk.END, values=(image.name, fit_status, image), tags=(tag,))
+                self.image_treeview.insert('', END, values=(image.name, fit_status, image), tags=(tag,))
         # Define tags and styles for alternating row colors
         self.image_treeview.tag_configure('even', background='#f0f0ff')
         self.image_treeview.tag_configure('odd', background='#ffffff')
@@ -252,11 +250,11 @@ class SettingsDialog(Dialog):
         super().__init__(master)
         self.master = master
         # Create the notebook
-        self.notebook = ttk.Notebook(self)
+        self.notebook = CustomTabview(self)
 
         # Create frames for the tabs
-        self.general_frame = ttk.Frame(self.notebook)
-        self.viewer_frame = ttk.Frame(self.notebook)
+        self.general_frame = self.notebook.add(name=i18n.settings_dialog[GENERAL_TAB])
+        self.viewer_frame = self.notebook.add(name=i18n.settings_dialog[VIEWER_TAB])
         self.startpage = page
         # Create the main frame
         self._i18n_path = EntryButton(master=self.general_frame, label_text="i18n_path",
@@ -275,37 +273,38 @@ class SettingsDialog(Dialog):
                                              values=[str(file_name.stem) for file_name in self.i18n_json_files],
                                              selected=self.language)
         # viewer tab
-        self._fill_color = ColorPicker(master=self.viewer_frame, label_text="fill_color",
-                                       default=nect_config[VIEWER][FILL_COLOR])
-        self._line_color = ColorPicker(master=self.viewer_frame, label_text="line_color",
-                                       default=nect_config[VIEWER][LINE_COLOR])
-        self._canvas_color = ColorPicker(master=self.viewer_frame, label_text="canvas_color",
-                                         default=nect_config[VIEWER][CANVAS_COLOR])
-        self._point_color = ColorPicker(master=self.viewer_frame, label_text="point_color",
-                                        default=nect_config[VIEWER][POINT_COLOR])
-        self._point_size = IntPicker(master=self.viewer_frame, label_text="point_size",
-                                     default=nect_config[VIEWER][POINT_SIZE], min_value=1, max_value=20)
-        self._ground_color = ColorPicker(master=self.viewer_frame, label_text="ground_color",
-                                         default=nect_config[VIEWER][GROUND_COLOR])
-        self._sky_color = ColorPicker(master=self.viewer_frame, label_text="sky_color",
-                                      default=nect_config[VIEWER][SKY_COLOR])
-        self._moving_step = FloatPicker(master=self.viewer_frame, label_text="moving_step",
-                                        default=nect_config[VIEWER][MOVING_STEP], min_value=0.01, max_value=1,
-                                        increment=0.01)
+        self._fill_color = ColorPickerLabel(master=self.viewer_frame, label_text="fill_color",
+                                            default=nect_config[VIEWER][FILL_COLOR])
+        self._line_color = ColorPickerLabel(master=self.viewer_frame, label_text="line_color",
+                                            default=nect_config[VIEWER][LINE_COLOR])
+        self._canvas_color = ColorPickerLabel(master=self.viewer_frame, label_text="canvas_color",
+                                              default=nect_config[VIEWER][CANVAS_COLOR])
+        self._point_color = ColorPickerLabel(master=self.viewer_frame, label_text="point_color",
+                                             default=nect_config[VIEWER][POINT_COLOR])
+        self._point_size = NumberPicker(master=self.viewer_frame, label_text="point_size",
+                                        default=nect_config[VIEWER][POINT_SIZE], min_value=1, max_value=20, increment=1,
+                                        is_float=False)
+        self._ground_color = ColorPickerLabel(master=self.viewer_frame, label_text="ground_color",
+                                              default=nect_config[VIEWER][GROUND_COLOR])
+        self._sky_color = ColorPickerLabel(master=self.viewer_frame, label_text="sky_color",
+                                           default=nect_config[VIEWER][SKY_COLOR])
+        self._moving_step = NumberPicker(master=self.viewer_frame, label_text="moving_step",
+                                         default=nect_config[VIEWER][MOVING_STEP], min_value=0.01, max_value=1,
+                                         increment=0.01, is_float=True)
 
     def create_view(self):
         logger.debug(f"{self.__class__.__name__} create view method")
         self.grid_columnconfigure(0, weight=1)
-        self.notebook.grid(row=0, column=0, sticky=tk.NSEW, columnspan=2, padx=10)
+        self.notebook.grid(row=0, column=0, sticky=NSEW, columnspan=2, padx=10)
         # Add frames to notebook as tabs
         self.__create_general_tab()
         self.__create_viewer_tab()
-        save_button = tk.Button(self, text=i18n.dialog_buttons[I18N_SAVE_BUTTON], command=self.save_config)
-        save_button.grid(row=1, column=0, sticky=tk.E, padx=10, pady=10)
-        close_button = tk.Button(self, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
-        close_button.grid(row=1, column=1, sticky=tk.EW, padx=10, pady=10)
+        save_button = CustomButton(self, text=i18n.dialog_buttons[I18N_SAVE_BUTTON], command=self.save_config)
+        save_button.grid(row=1, column=0, sticky=E, padx=10, pady=10)
+        close_button = CustomButton(self, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
+        close_button.grid(row=1, column=1, sticky=EW, padx=10, pady=10)
         if self.startpage == "viewer":
-            self.notebook.select(self.viewer_frame)
+            self.notebook.set(i18n.settings_dialog[VIEWER_TAB])
 
     def save_config(self):
         logger.debug(f"{self.__class__.__name__} save config")
@@ -350,39 +349,37 @@ class SettingsDialog(Dialog):
         pass
 
     def __create_general_tab(self):
-        self.notebook.add(self.general_frame, text=i18n.settings_dialog[GENERAL_TAB])
         self.general_frame.grid_columnconfigure(0, weight=1)
-        self._i18n_path.grid(row=0, column=0, sticky=tk.EW, columnspan=2, padx=10)
+        self._i18n_path.grid(row=0, column=0, sticky=EW, columnspan=2, padx=10)
         self._i18n_path.create_view()
-        self.languages_combobox.grid(row=1, column=0, sticky=tk.EW, columnspan=2, padx=10)
+        self.languages_combobox.grid(row=1, column=0, sticky=EW, columnspan=2, padx=10)
         self.languages_combobox.create_view()
-        self._logger_path.grid(row=2, column=0, sticky=tk.EW, columnspan=2, padx=10)
+        self._logger_path.grid(row=2, column=0, sticky=EW, columnspan=2, padx=10)
         self._logger_path.create_view()
-        self._log_folder.grid(row=3, column=0, sticky=tk.EW, columnspan=2, padx=10)
+        self._log_folder.grid(row=3, column=0, sticky=EW, columnspan=2, padx=10)
         self._log_folder.create_view()
-        self._projects_folder.grid(row=4, column=0, sticky=tk.EW, columnspan=2, padx=10)
+        self._projects_folder.grid(row=4, column=0, sticky=EW, columnspan=2, padx=10)
         self._projects_folder.create_view()
-        self._path_to_model.grid(row=5, column=0, sticky=tk.EW, columnspan=2, padx=10)
+        self._path_to_model.grid(row=5, column=0, sticky=EW, columnspan=2, padx=10)
         self._path_to_model.create_view()
 
     def __create_viewer_tab(self):
-        self.notebook.add(self.viewer_frame, text=i18n.settings_dialog[VIEWER_TAB])
         self.viewer_frame.grid_columnconfigure(0, weight=1)
-        self._fill_color.grid(row=0, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._fill_color.grid(row=0, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._fill_color.create_view()
-        self._line_color.grid(row=1, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._line_color.grid(row=1, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._line_color.create_view()
-        self._canvas_color.grid(row=2, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._canvas_color.grid(row=2, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._canvas_color.create_view()
-        self._ground_color.grid(row=4, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._ground_color.grid(row=4, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._ground_color.create_view()
-        self._sky_color.grid(row=5, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._sky_color.grid(row=5, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._sky_color.create_view()
-        self._point_color.grid(row=3, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._point_color.grid(row=3, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._point_color.create_view()
-        self._point_size.grid(row=6, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._point_size.grid(row=6, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._point_size.create_view()
-        self._moving_step.grid(row=7, column=0, sticky=tk.EW, columnspan=2, padx=10, pady=5)
+        self._moving_step.grid(row=7, column=0, sticky=EW, columnspan=2, padx=10, pady=5)
         self._moving_step.create_view()
 
 
@@ -418,12 +415,12 @@ class DialogMessage(Dialog):
         self.resizable(False, False)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        tk.Label(self, image=BASENAME_ICON + self.icon) \
+        CustomLabel(self, image=BASENAME_ICON + self.icon) \
             .grid(row=0, column=0, rowspan=2, pady=(7, 0), padx=(7, 7), sticky="e")
-        ttk.Label(self, text=self.message, font="bold") \
+        CustomLabel(self, text=self.message) \
             .grid(row=0, column=1, columnspan=2, pady=(7, 7), padx=(7, 7), sticky="w")
-        ttk.Label(self, text=self.detail).grid(row=1, column=1, columnspan=2, pady=(7, 7), padx=(7, 7), sticky="w")
-        ttk.Button(self, text=i18n.dialog_buttons[I18N_BACK_BUTTON], command=self.dismiss) \
+        CustomLabel(self, text=self.detail).grid(row=1, column=1, columnspan=2, pady=(7, 7), padx=(7, 7), sticky="w")
+        CustomButton(self, text=i18n.dialog_buttons[I18N_BACK_BUTTON], command=self.dismiss) \
             .grid(row=2, column=2, pady=(7, 7), padx=(7, 7), sticky="e")
 
 
@@ -441,7 +438,7 @@ class DialogAsk(Dialog):
             self.options = [I18N_NO_BUTTON, I18N_YES_BUTTON]
         else:
             self.options = options
-        self.response_var = tk.StringVar(value=dismiss_response)
+        self.response_var = StringVar(value=dismiss_response)
 
     def ask_value(self):
         logger.debug("ask Dialog: " + self.response_var.get())
@@ -462,12 +459,12 @@ class DialogAsk(Dialog):
         self.resizable(False, False)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        tk.Label(self, image=BASENAME_ICON + self.icon) \
+        CustomLabel(self, image=BASENAME_ICON + self.icon) \
             .grid(row=0, column=0, rowspan=2, pady=(7, 0), padx=(7, 7), sticky="e")
-        ttk.Label(self, text=self.message, font="bold") \
+        CustomLabel(self, text=self.message) \
             .grid(row=0, column=1, columnspan=(1 + len(self.options)), pady=(7, 7), padx=(7, 7), sticky="w")
-        ttk.Label(self, text=self.detail).grid(row=1, column=1, columnspan=(1 + len(self.options)), pady=(7, 7),
-                                               padx=(7, 7), sticky="w")
+        CustomLabel(self, text=self.detail).grid(row=1, column=1, columnspan=(1 + len(self.options)), pady=(7, 7),
+                                                 padx=(7, 7), sticky="w")
         for index, option in enumerate(self.options):
-            b = ttk.Button(self, text=i18n.dialog_buttons[option], command=lambda opt=option: self.response(opt))
+            b = CustomButton(self, text=i18n.dialog_buttons[option], command=lambda opt=option: self.response(opt))
             b.grid(row=2, column=2 + index, pady=(7, 7), padx=(7, 7), sticky="e")

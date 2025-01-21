@@ -1,5 +1,5 @@
-import tkinter
 import math
+import tkinter
 from typing import Union, Tuple, Optional, Callable, Any
 
 try:

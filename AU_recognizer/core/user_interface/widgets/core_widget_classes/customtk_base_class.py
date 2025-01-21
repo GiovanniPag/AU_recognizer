@@ -3,8 +3,9 @@ import tkinter.ttk as ttk
 from typing import Union, Callable, Tuple, Any
 
 from AU_recognizer.core.util import pop_from_dict_by_set, check_kwargs_empty, logger
-from .... import views
 from .. import core_widget_classes
+from ... import CustomTk, CustomToplevel
+
 try:
     from typing import TypedDict
 except ImportError:
@@ -196,7 +197,7 @@ class CustomTKBaseClass(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScal
             master_widget = self.master
 
         if isinstance(master_widget, (
-                CustomTKBaseClass, views.CustomTk, views.CustomToplevel,
+                CustomTKBaseClass, CustomTk, CustomToplevel,
                 core_widget_classes.scrollable_frame.ScrollableFrame)):
             if master_widget.cget("fg_color") is not None and master_widget.cget("fg_color") != "transparent":
                 return master_widget.cget("fg_color")

@@ -1,9 +1,9 @@
+import math
 import tkinter as tk
 from tkinter import END
 from typing import Literal
 
 from PIL import Image
-import math
 
 from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomTkImage, CustomSlider, CustomEntry, \
     CustomButton, CustomLabel, CustomToplevel
@@ -28,6 +28,15 @@ class AskColor(CustomToplevel):
                  **button_kwargs):
 
         super().__init__(master=master)
+        self.b_entry = None
+        self.b_label = None
+        self.g_entry = None
+        self.g_label = None
+        self.r_entry = None
+        self.r_label = None
+        self.target_y = None
+        self.target_x = None
+        self._color = None
         self.title(title)
         width = max(width, 200)
         height = width + 250
@@ -134,8 +143,8 @@ class AskColor(CustomToplevel):
             self.target_x, self.target_y = x, y
         else:
             self.target_x, self.target_y = projection_on_circle(x, y, self.image_dimension / 2,
-                                                                     self.image_dimension / 2,
-                                                                     self.image_dimension / 2 - 1)
+                                                                self.image_dimension / 2,
+                                                                self.image_dimension / 2 - 1)
 
         self.canvas.create_image(self.target_x, self.target_y,
                                  image=self.target.create_scaled_photo_image(self._get_widget_scaling(),

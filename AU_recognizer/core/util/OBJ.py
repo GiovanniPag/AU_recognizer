@@ -1,3 +1,7 @@
+from pathlib import Path
+
+import numpy as np
+
 """
 @brief: Extracts vertices, faces, texture coordinates, and material information from an .obj file.
 
@@ -8,9 +12,6 @@
 @ret  : texcoords (a numpy array of texture coordinates)
 @ret  : materials (a dictionary with material properties)
 """
-from pathlib import Path
-
-import numpy as np
 
 
 class OBJ:

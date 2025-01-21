@@ -1,5 +1,5 @@
-import tkinter
 import copy
+import tkinter
 from typing import Union, Tuple, List, Dict, Callable, Optional, Any
 
 from AU_recognizer.core.util import check_kwargs_empty

@@ -1,6 +1,6 @@
+import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog
-import tkinter as tk
 
 from PIL import Image
 

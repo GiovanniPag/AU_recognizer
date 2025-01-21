@@ -1,14 +1,15 @@
-import tkinter
-from packaging import version
-import sys
+import ctypes
 import os
 import platform
-import ctypes
+import sys
+import tkinter
 from typing import Union, Tuple, Optional
 
-from .widgets.theme import ThemeManager
-from .widgets.scaling import CustomScalingBaseClass
+from packaging import version
+
 from .widgets.appearance import CustomAppearanceModeBaseClass
+from .widgets.scaling import CustomScalingBaseClass
+from .widgets.theme import ThemeManager
 from ..util import pop_from_dict_by_set, check_kwargs_empty, asset, logger
 
 
@@ -242,15 +243,15 @@ class CustomToplevel(tkinter.Toplevel, CustomScalingBaseClass, CustomAppearanceM
 
             try:
                 hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
-                DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-                DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19
+                dwmwa_use_immersive_dark_mode = 20
+                dwmwa_use_immersive_dark_mode_before_20_h1 = 19
 
                 # try with DWMWA_USE_IMMERSIVE_DARK_MODE
-                if ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                if ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, dwmwa_use_immersive_dark_mode,
                                                               ctypes.byref(ctypes.c_int(value)),
                                                               ctypes.sizeof(ctypes.c_int(value))) != 0:
                     # try with DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20h1
-                    ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
+                    ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, dwmwa_use_immersive_dark_mode_before_20_h1,
                                                                ctypes.byref(ctypes.c_int(value)),
                                                                ctypes.sizeof(ctypes.c_int(value)))
 
@@ -269,7 +270,7 @@ class CustomToplevel(tkinter.Toplevel, CustomScalingBaseClass, CustomAppearanceM
         if self._windows_set_titlebar_color_called:
 
             if self._withdraw_called_after_windows_set_titlebar_color:
-                pass  # leave it withdrawed
+                pass  # leave it withdraw
             elif self._iconify_called_after_windows_set_titlebar_color:
                 super().iconify()
             else:

@@ -1,32 +1,41 @@
 # Canvas widget to zoom image.
 import math
 import os
-import warnings
 import tkinter as tk
+import warnings
 
-from tkinter import ttk
 from PIL import Image, ImageTk
 
+from AU_recognizer.core.user_interface import CustomScrollbar, CustomFrame, ThemeManager
 from AU_recognizer.core.util import logger
-from AU_recognizer.core.views import AutoScrollbar
 
 MAX_IMAGE_PIXELS = 1500000000  # maximum pixels in the image, use it carefully
 
 
 # canvas to Display and zoom image
+# noinspection PyPropertyAccess
 class CanvasImage:
     def __init__(self, placeholder, path, can_grab_focus=True):
         # Initialize the ImageFrame
         self.imscale = 1.0  # scale for the canvas image zoom, public for outer classes
         self.__delta = 1.3  # zoom magnitude
-        self.__filter = Image.LANCZOS  # could be: NEAREST, BILINEAR, BICUBIC and LANCZOS
+        self.__filter = Image.Resampling.LANCZOS  # could be: NEAREST, BILINEAR, BICUBIC and LANCZOS
         self.__previous_state = 0  # previous state of the keyboard
         self.path = path  # path to the image, should be public for outer classes
         # Create ImageFrame in placeholder widget
-        self.__imframe = ttk.Frame(placeholder)  # placeholder of the ImageFrame object
+        self.__imframe = CustomFrame(placeholder)  # placeholder of the ImageFrame object
         # Vertical and horizontal scrollbars for canvas
-        hbar = AutoScrollbar(self.__imframe, orient='horizontal', row_grid=1, column_grid=0)
-        vbar = AutoScrollbar(self.__imframe, orient='vertical', row_grid=0, column_grid=1)
+        self._fg_color = ThemeManager.theme["CustomFrame"]["top_fg_color"]
+        self._button_color = ThemeManager.theme["CustomScrollbar"]["button_color"]
+        self._button_hover_color = ThemeManager.theme["CustomScrollbar"]["button_hover_color"]
+        hbar = CustomScrollbar(master=self.__imframe, orient='horizontal',
+                               fg_color=self._fg_color,
+                               button_color=self._button_color,
+                               button_hover_color=self._button_hover_color)
+        vbar = CustomScrollbar(master=self.__imframe, orient='vertical',
+                               fg_color=self._fg_color,
+                               button_color=self._button_color,
+                               button_hover_color=self._button_hover_color)
 
         # Create canvas and bind it with scrollbars. Public for outer classes
         self.canvas = tk.Canvas(self.__imframe, highlightthickness=0,
@@ -39,11 +48,11 @@ class CanvasImage:
         self.canvas.bind('<Configure>', lambda event: self.__show_image())  # canvas is resized
         self.canvas.bind('<ButtonPress-3>', self.__move_from)  # remember canvas position
         self.canvas.bind('<B3-Motion>', self.__move_to)  # move canvas to the new position
-        self.canvas.bind('<MouseWheel>', self.__wheel)  # zoom for Windows and MacOS, but not Linux
+        self.canvas.bind('<MouseWheel>', self.__wheel)  # zoom for Windows and macOS, but not Linux
         self.canvas.bind('<Button-5>', self.__wheel)  # zoom for Linux, wheel scroll down
         self.canvas.bind('<Button-4>', self.__wheel)  # zoom for Linux, wheel scroll up
         # Handle keystrokes in idle mode, because program slows down on a weak computers,
-        # when too many key stroke events in the same time
+        # when too many keystroke events in the same time
         self.canvas.bind('<Key>', lambda event: self.canvas.after_idle(self.__keystroke, event))
         logger.debug(f'Open image: {self.path}')
 
@@ -60,7 +69,7 @@ class CanvasImage:
                 self.__image.tile[0][0] == 'raw':  # only raw images could be tiled
             self.__huge = True  # image is huge
             self.__offset = self.__image.tile[0][2]  # initial tile offset
-            self.__tile = [self.__image.tile[0][0],  # it have to be 'raw'
+            self.__tile = [self.__image.tile[0][0],  # it has to be 'raw'
                            [0, 0, self.imwidth, 0],  # tile extent (a rectangle)
                            self.__offset,
                            self.__image.tile[0][3]]  # list of arguments to the decoder
@@ -70,7 +79,7 @@ class CanvasImage:
         # Set ratio coefficient for image pyramid
         self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size if self.__huge else 1.0
         self.__curr_img = 0  # current image from the pyramid
-        self.__scale = self.imscale * self.__ratio  # image pyramide scale
+        self.__scale = self.imscale * self.__ratio  # image pyramid scale
         self.__reduction = 2  # reduction degree of image pyramid
         (w, h), m, j = self.__pyramid[-1].size, 512, 0
         n = math.ceil(math.log(min(w, h) / m, self.__reduction)) + 1  # image pyramid length
@@ -109,7 +118,7 @@ class CanvasImage:
             j += 1
             logger.debug(f'Opening image: {j} from {n}')
             band = min(self.__band_width, self.imheight - i)  # width of the tile band
-            self.__tile[1][3] = band  # set band width
+            self.__tile[1][3] = band  # set bandwidth
             self.__tile[2] = self.__offset + self.imwidth * i * 3  # tile offset (3 bytes per pixel)
             self.__image.close()
             self.__image = Image.open(self.path)  # reopen / reset image
@@ -209,16 +218,19 @@ class CanvasImage:
         """ Zoom with mouse wheel """
         x = self.canvas.canvasx(event.x)  # get coordinates of the event on the canvas
         y = self.canvas.canvasy(event.y)
-        if self.outside(x, y): return  # zoom only inside image area
+        if self.outside(x, y):
+            return  # zoom only inside image area
         scale = 1.0
         # Respond to Linux (event.num) or Windows (event.delta) wheel event
         if event.num == 5 or event.delta == -120:  # scroll down, zoom out, smaller
-            if round(self.__min_side * self.imscale) < 30: return  # image is less than 30 pixels
+            if round(self.__min_side * self.imscale) < 30:
+                return  # image is less than 30 pixels
             self.imscale /= self.__delta
             scale /= self.__delta
         if event.num == 4 or event.delta == 120:  # scroll up, zoom in, bigger
             i = float(min(self.canvas.winfo_width(), self.canvas.winfo_height()) >> 1)
-            if i < self.imscale: return  # 1 pixel is bigger than the visible area
+            if i < self.imscale:
+                return  # 1 pixel is bigger than the visible area
             self.imscale *= self.__delta
             scale *= self.__delta
         # Take appropriate image from the pyramid
@@ -232,7 +244,7 @@ class CanvasImage:
 
     def __keystroke(self, event):
         """ Scrolling with the keyboard.
-            Independent from the language of the keyboard, CapsLock, <Ctrl>+<key>, etc. """
+            Independent of the language of the keyboard, CapsLock, <Ctrl>+<key>, etc. """
         if event.state - self.__previous_state == 4:  # means that the Control key is pressed
             pass  # do nothing if Control key is pressed
         else:

@@ -58,10 +58,10 @@ class FPSCounter:
         else:
             self.hide()
 
-    def show_close_button(self, event=None):
+    def show_close_button(self, _event=None):
         """Show the close button."""
         self.close_button.pack(side="right", padx=5)
 
-    def hide_close_button(self, event=None):
+    def hide_close_button(self, _event=None):
         """Hide the close button."""
         self.close_button.pack_forget()

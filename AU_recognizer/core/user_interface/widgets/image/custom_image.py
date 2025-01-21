@@ -1,6 +1,6 @@
 from typing import Tuple, Dict, Callable, List, Union
+
 from PIL import Image, ImageTk
-from torchaudio.functional import resample
 
 
 class CustomTkImage:

@@ -1,6 +1,7 @@
 from __future__ import annotations
-import sys
+
 import math
+import sys
 import tkinter
 from typing import Union, TYPE_CHECKING
 
@@ -481,7 +482,7 @@ class DrawEngine:
         """ Draws a rounded rectangle with a corner_radius and border_width on the canvas which is split at
             left_section_width.
             The border elements have the tags 'border_parts_left', 'border_parts_lright',
-            the main foreground elements have an 'inner_parts_left' and inner_parts_right' tag,
+            the main foreground elements have an 'inner_parts_left' and 'inner_parts_right' tag,
             to color the elements accordingly.
             returns bool if recoloring is necessary """
 
@@ -862,9 +863,9 @@ class DrawEngine:
                                               corner_radius: Union[float, int],
                                               border_width: Union[float, int], progress_value_1: float,
                                               progress_value_2: float, orientation: str) -> bool:
-        """ Draws a rounded bar on the canvas, and onntop sits a progress bar from value 1 to value 2
+        """ Draws a rounded bar on the canvas, and on top sits a progress bar from value 1 to value 2
             (range 0-1, left to right, bottom to top).
-            The border elements get the 'border_parts' tag", the main elements get the 'inner_parts' tag and
+            The border elements get the 'border_parts' tag, the main elements get the 'inner_parts' tag and
             the progress elements get the 'progress_parts' tag. The 'orientation' argument defines from which direction
             the progress starts (n, w, s, e).
             returns bool if recoloring is necessary """
@@ -1182,9 +1183,9 @@ class DrawEngine:
             requires_recoloring = True
 
         if corner_radius <= border_width:
-            bottom_right_shift = -1  # weird canvas rendering inaccuracy that has to be corrected in some cases
+            _bottom_right_shift = -1  # weird canvas rendering inaccuracy that has to be corrected in some cases
         else:
-            bottom_right_shift = 0
+            _bottom_right_shift = 0
 
         if orientation == "w":
             slider_x_position = corner_radius + (button_length / 2) + (

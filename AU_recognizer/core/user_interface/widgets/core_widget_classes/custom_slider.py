@@ -1,11 +1,11 @@
-import tkinter
 import sys
+import tkinter
 from typing import Union, Tuple, Callable, Optional, Any
 
-from ..core_rendering import CustomCanvas
-from ..theme import ThemeManager
-from ..core_rendering import DrawEngine
 from . import CustomTKBaseClass
+from ..core_rendering import CustomCanvas
+from ..core_rendering import DrawEngine
+from ..theme import ThemeManager
 
 
 class CustomSlider(CustomTKBaseClass):

@@ -1,5 +1,5 @@
-import sys
 import platform
+import sys
 
 
 def macos_supported_version():
@@ -23,7 +23,7 @@ if sys.platform == "darwin":
     else:
         from ._dummy import *
 elif sys.platform == "win32" and platform.release().isdigit() and int(platform.release()) >= 10:
-    # Checks if running Windows 10 version 10.0.14393 (Anniversary Update) OR HIGHER. The getwindowsversion method
+    # Checks if running Windows 10 version 10.0.14393 (Anniversary Update) OR HIGHER. The get Windows version method
     # returns a tuple. The third item is the build number that we can use to check if the user has a new enough
     # version of Windows.
     win_ver = int(platform.version().split('.')[2])

@@ -2,12 +2,12 @@ import tkinter
 from typing import Union, Tuple, Optional, Callable
 
 from AU_recognizer.core.util import pop_from_dict_by_set, check_kwargs_empty
-from ..core_rendering import CustomCanvas
 from . import CustomScrollbar
-from ..theme import ThemeManager
-from ..core_rendering import DrawEngine
 from . import CustomTKBaseClass
+from ..core_rendering import CustomCanvas
+from ..core_rendering import DrawEngine
 from ..font import CustomFont
+from ..theme import ThemeManager
 
 
 class CustomTextbox(CustomTKBaseClass):

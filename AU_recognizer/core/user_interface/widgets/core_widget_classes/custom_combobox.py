@@ -1,14 +1,14 @@
-import tkinter
-import sys
 import copy
+import sys
+import tkinter
 from typing import Union, Tuple, Callable, List, Optional, Any, Literal
 
+from . import CustomTKBaseClass
 from . import DropdownMenu
 from ..core_rendering import CustomCanvas
-from ..theme import ThemeManager
 from ..core_rendering import DrawEngine
-from . import CustomTKBaseClass
 from ..font import CustomFont
+from ..theme import ThemeManager
 
 
 class CustomComboBox(CustomTKBaseClass):

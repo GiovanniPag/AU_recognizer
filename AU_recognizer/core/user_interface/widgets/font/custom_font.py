@@ -1,6 +1,7 @@
-from tkinter.font import Font
 import copy
+from tkinter.font import Font
 from typing import List, Callable, Tuple, Optional
+
 try:
     from typing import Literal
 except ImportError:
@@ -41,7 +42,8 @@ class CustomFont(Font):
                          overstrike=overstrike)
 
         self._family = super().cget("family")
-        self._tuple_style_string = f"{super().cget('weight')} {slant} {'underline' if underline else ''} {'overstrike' if overstrike else ''}"
+        self._tuple_style_string = (f"{super().cget('weight')} {slant} "
+                                    f"{'underline' if underline else ''} {'overstrike' if overstrike else ''}")
 
     def add_size_configure_callback(self, callback: Callable):
         """ add function, that gets called when font got configured """
@@ -71,7 +73,8 @@ class CustomFont(Font):
             self._family = super().cget("family")
         super().configure(**kwargs)
         # update style string for create_scaled_tuple() method
-        self._tuple_style_string = f"{super().cget('weight')} {super().cget('slant')} {'underline' if super().cget('underline') else ''} {'overstrike' if super().cget('overstrike') else ''}"
+        self._tuple_style_string = (f"{super().cget('weight')} {super().cget('slant')} "
+                                    f"{'underline' if super().cget('underline') else ''} {'overstrike' if super().cget('overstrike') else ''}")
         # call all functions registered with add_size_configure_callback()
         for callback in self._size_configure_callback_list:
             callback()

@@ -60,14 +60,14 @@ class ScalingTracker:
         window_root = cls.get_window_root_of_widget(widget)
         try:
             cls.window_widgets_dict[window_root].remove(widget_callback)
-        except:
+        except Exception:
             pass
 
     @classmethod
     def remove_window(cls, window):
         try:
             del cls.window_widgets_dict[window]
-        except:
+        except Exception:
             pass
 
     @classmethod

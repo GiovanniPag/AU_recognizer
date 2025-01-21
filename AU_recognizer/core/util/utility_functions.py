@@ -2,9 +2,9 @@ import configparser
 import os
 import re
 import subprocess
+from configparser import ConfigParser
 from pathlib import Path
 from typing import Union
-from configparser import ConfigParser
 
 from . import logger, nect_config, windowing_system, operating_system, write_config
 from .constants import CONFIG, GUIDE_FILE, LOG_FOLDER, P_NAME, P_PATH, F_OUTPUT, F_INPUT, DESKTOP_LIST, OPEN_PROJECTS

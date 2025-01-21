@@ -31,21 +31,21 @@ def C(classname):
 
 
 def theme():
-    NSAutoreleasePool = objc.objc_getClass('NSAutoreleasePool')
-    pool = msg(NSAutoreleasePool, n('alloc'))
+    ns_autorelease_pool = objc.objc_getClass('NSAutoreleasePool')
+    pool = msg(ns_autorelease_pool, n('alloc'))
     pool = msg(pool, n('init'))
 
-    NSUserDefaults = C('NSUserDefaults')
-    stdUserDef = msg(NSUserDefaults, n('standardUserDefaults'))
+    ns_user_defaults = C('NSUserDefaults')
+    std_user_def = msg(ns_user_defaults, n('standardUserDefaults'))
 
-    NSString = C('NSString')
+    ns_string = C('NSString')
 
-    key = msg(NSString, n("stringWithUTF8String:"), _utf8('AppleInterfaceStyle'))
-    appearanceNS = msg(stdUserDef, n('stringForKey:'), void_p(key))
-    appearanceC = msg(appearanceNS, n('UTF8String'))
+    key = msg(ns_string, n("stringWithUTF8String:"), _utf8('AppleInterfaceStyle'))
+    appearance_ns = msg(std_user_def, n('stringForKey:'), void_p(key))
+    appearance_c = msg(appearance_ns, n('UTF8String'))
 
-    if appearanceC is not None:
-        out = ctypes.string_at(appearanceC)
+    if appearance_c is not None:
+        out = ctypes.string_at(appearance_c)
     else:
         out = None
 

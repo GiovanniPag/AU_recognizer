@@ -1,12 +1,12 @@
 import tkinter
 from typing import Union, Tuple, Dict, List, Callable, Optional, Any
 
-from ..theme import ThemeManager
 from . import CustomFrame
+from . import CustomSegmentedButton
+from . import CustomTKBaseClass
 from ..core_rendering import CustomCanvas
 from ..core_rendering import DrawEngine
-from . import CustomTKBaseClass
-from . import CustomSegmentedButton
+from ..theme import ThemeManager
 
 
 class CustomTabview(CustomTKBaseClass):
@@ -403,8 +403,11 @@ class CustomTabview(CustomTKBaseClass):
         self._segmented_button.insert(old_index, new_name)
 
         # name list
-        self._name_list.remove(old_name)
-        self._name_list.append(new_name)
+        self._name_list[self._name_list.index(old_name)] = new_name
+
+        # update current_name, so we don't lose the connection to the frame
+        if self._current_name == old_name:
+            self._current_name = new_name
 
         # tab dictionary
         self._tab_dict[new_name] = self._tab_dict.pop(old_name)
@@ -414,7 +417,7 @@ class CustomTabview(CustomTKBaseClass):
 
         if name in self._tab_dict:
             self._name_list.remove(name)
-            self._tab_dict[name].grid_forget()
+            self._tab_dict[name].destroy()
             self._tab_dict.pop(name)
             self._segmented_button.delete(name)
 

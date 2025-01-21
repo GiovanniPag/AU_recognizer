@@ -1,16 +1,16 @@
-import tkinter
 import sys
+import tkinter
 from typing import Union, Tuple, Callable, Optional, Any
 
 from PIL import ImageTk
 
 from AU_recognizer.core.util import i18n
 from ..core_rendering import CustomCanvas
-from ..theme import ThemeManager
 from ..core_rendering import DrawEngine
 from ..core_widget_classes import CustomTKBaseClass
 from ..font import CustomFont
 from ..image import CustomTkImage
+from ..theme import ThemeManager
 
 
 class CustomButton(CustomTKBaseClass):

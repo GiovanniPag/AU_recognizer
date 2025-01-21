@@ -1,6 +1,6 @@
+import shutil
 import subprocess
 import sys
-import shutil
 from pathlib import Path
 from typing import Union
 
@@ -33,8 +33,8 @@ class FontManager:
     def windows_load_font(cls, font_path: Union[str, bytes], private: bool = True,
                           enumerable: bool = False) -> bool:
         from ctypes import windll, byref, create_unicode_buffer, create_string_buffer
-        FR_PRIVATE = 0x10
-        FR_NOT_ENUM = 0x20
+        fr_private = 0x10
+        fr_not_enum = 0x20
         if isinstance(font_path, bytes):
             path_buffer = create_string_buffer(font_path)
             add_font_resource_ex = windll.gdi32.AddFontResourceExA
@@ -43,7 +43,7 @@ class FontManager:
             add_font_resource_ex = windll.gdi32.AddFontResourceExW
         else:
             raise TypeError('font_path must be of type bytes or str')
-        flags = (FR_PRIVATE if private else 0) | (FR_NOT_ENUM if not enumerable else 0)
+        flags = (fr_private if private else 0) | (fr_not_enum if not enumerable else 0)
         num_fonts_added = add_font_resource_ex(byref(path_buffer), flags, 0)
         return bool(min(num_fonts_added, 1))
 

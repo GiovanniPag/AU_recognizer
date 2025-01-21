@@ -2,13 +2,13 @@ from pathlib import Path
 from tkinter import filedialog
 
 from .base_controller import Controller
+from ..user_interface.dialogs.dialog import DialogProjectOptions
+from ..user_interface.dialogs.dialog_util import open_message_dialog
+from ..user_interface.views import MenuBar
 from ..util import logger, nect_config, CONFIG, LANGUAGE, M_ABOUT, M_COMMAND, M_LOGS, open_log_folder, \
     M_GUIDE, open_guide, M_IT, M_EN, M_NEW, M_OPEN, M_SETTINGS, M_EXIT, check_if_is_project, ERROR_ICON, i18n, \
     I18N_BACK_BUTTON, check_if_folder_exist, PROJECTS_FOLDER, I18N_TITLE, add_to_open_projects, create_project_folder, \
     store_open_project
-from AU_recognizer.core.views import DialogProjectOptions
-from AU_recognizer.core.views import open_message_dialog
-from AU_recognizer.core.views import MenuBar
 
 
 class MenuController(Controller):

@@ -1,9 +1,9 @@
+import math
 import tkinter as tk
 from tkinter import END
 from typing import Literal
 
 from PIL import Image
-import math
 
 from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomTkImage, CustomSlider, CustomEntry, \
     CustomButton, CustomLabel
@@ -27,6 +27,12 @@ class CustomColorPicker(CustomFrame):
                  **button_kwargs):
 
         super().__init__(master=master, corner_radius=corner_radius)
+        self.b_entry = None
+        self.b_label = None
+        self.g_entry = None
+        self.g_label = None
+        self.r_entry = None
+        self.r_label = None
         width = max(width, 200)
         self.image_dimension = int(self._apply_widget_scaling(width - 100))
         self.target_dimension = int(self._apply_widget_scaling(20))

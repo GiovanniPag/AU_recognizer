@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Optional
 
 from AU_recognizer.core.controllers.base_controller import Controller
+from AU_recognizer.core.user_interface.views.selected_file_view import SelectedFileView
 from AU_recognizer.core.util import logger, open_path_by_os, P_PATH, FV_OPEN_S
-from AU_recognizer.core.views import SelectedFileView
 
 
 class SelectedFileController(Controller):

@@ -2,11 +2,11 @@ import tkinter
 from typing import Union, Tuple, Optional, Any, Literal
 
 from AU_recognizer.core.util import check_kwargs_empty, pop_from_dict_by_set
-from ..core_rendering import CustomCanvas
-from ..theme import ThemeManager
-from ..core_rendering import DrawEngine
 from . import CustomTKBaseClass
+from ..core_rendering import CustomCanvas
+from ..core_rendering import DrawEngine
 from ..font import CustomFont
+from ..theme import ThemeManager
 
 
 class CustomEntry(CustomTKBaseClass):

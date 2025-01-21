@@ -1,5 +1,5 @@
-import tkinter
 import sys
+import tkinter
 from typing import Union, Tuple, Literal
 
 _Anchor = Literal["nw", "n", "ne", "w", "center", "e", "sw", "s", "se"]

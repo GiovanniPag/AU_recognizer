@@ -1,14 +1,15 @@
-import tkinter as tk
-import sys
+import ctypes
 import os
 import platform
-import ctypes
+import sys
+import tkinter as tk
 from typing import Union, Tuple, Optional
+
 from packaging import version
 
-from .widgets.theme import ThemeManager
-from .widgets.scaling import CustomScalingBaseClass
 from .widgets.appearance import CustomAppearanceModeBaseClass
+from .widgets.scaling import CustomScalingBaseClass
+from .widgets.theme import ThemeManager
 from ..util import logger
 from ..util.utility_functions import pop_from_dict_by_set, check_kwargs_empty, asset
 
@@ -46,7 +47,8 @@ class CustomTk(tk.Tk, CustomAppearanceModeBaseClass, CustomScalingBaseClass):
         self._max_width: int = 1_000_000
         self._max_height: int = 1_000_000
         self._last_resizable_args: Union[Tuple[list, dict], None] = None  # (args, kwargs)
-        self._fg_color = ThemeManager.theme["CustomTk"]["fg_color"] if fg_color is None else self._check_color_type(fg_color)
+        self._fg_color = ThemeManager.theme["CustomTk"]["fg_color"] if fg_color is None \
+            else self._check_color_type(fg_color)
         # set bg of tkinter.Tk
         super().configure(bg=self._apply_appearance_mode(self._fg_color))
         # set title
@@ -264,12 +266,12 @@ class CustomTk(tk.Tk, CustomAppearanceModeBaseClass, CustomScalingBaseClass):
                 return
             try:
                 hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
-                DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-                DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19
-                if ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                dwmwa_use_immersive_dark_mode = 20
+                dwmwa_use_immersive_dark_mode_before_20_h1 = 19
+                if ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, dwmwa_use_immersive_dark_mode,
                                                               ctypes.byref(ctypes.c_int(value)),
                                                               ctypes.sizeof(ctypes.c_int(value))) != 0:
-                    ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
+                    ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, dwmwa_use_immersive_dark_mode_before_20_h1,
                                                                ctypes.byref(ctypes.c_int(value)),
                                                                ctypes.sizeof(ctypes.c_int(value)))
             except Exception as err:

@@ -1,14 +1,19 @@
 # import manager classes
 from .widgets.appearance import AppearanceModeTracker
+# import font classes
+from .widgets.font import CustomFont
 from .widgets.font import FontManager
 from .widgets.scaling import ScalingTracker
 from .widgets.theme import ThemeManager
-from .widgets.core_rendering import DrawEngine
-
 # import base widgets
+from .widgets.core_rendering import DrawEngine
 from .widgets.core_rendering import CustomCanvas
+# import windows
+from .custom_tk import CustomTk
+from .custom_toplevel import CustomToplevel
 from .widgets.core_widget_classes import CustomTKBaseClass
-
+# import image classes
+from .widgets.image import CustomTkImage
 # import widgets
 from .widgets.core_widget_classes import CustomButton
 from .widgets.core_widget_classes import CustomCheckBox
@@ -22,23 +27,14 @@ from .widgets.core_widget_classes import CustomRadioButton
 from .widgets.core_widget_classes import CustomScrollbar
 from .widgets.core_widget_classes import CustomSegmentedButton
 from .widgets.core_widget_classes import CustomSlider
+from .widgets.core_widget_classes import CustomSpinbox
 from .widgets.core_widget_classes import CustomSwitch
 from .widgets.core_widget_classes import CustomTabview
 from .widgets.core_widget_classes import CustomTextbox
-from .widgets.core_widget_classes import ScrollableFrame
 from .widgets.core_widget_classes import CustomTooltip
-from .widgets.core_widget_classes import CustomSpinbox
-
-# import windows
-from .custom_tk import CustomTk
-from .custom_toplevel import CustomToplevel
+from .widgets.core_widget_classes import ScrollableFrame
+# dialog
 from .dialogs import CustomInputDialog
-
-# import font classes
-from .widgets.font import CustomFont
-
-# import image classes
-from .widgets.image import CustomTkImage
 
 
 def set_appearance_mode(mode_string: str):

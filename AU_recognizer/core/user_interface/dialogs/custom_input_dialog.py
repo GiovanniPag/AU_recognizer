@@ -1,10 +1,9 @@
 from typing import Union, Tuple, Optional
 
-from ..widgets.core_widget_classes import CustomLabel
-from ..widgets.core_widget_classes import CustomEntry
+from .. import CustomToplevel, ThemeManager
 from ..widgets.core_widget_classes import CustomButton
-from AU_recognizer.core.views.widgets.theme import ThemeManager
-from .. import CustomToplevel
+from ..widgets.core_widget_classes import CustomEntry
+from ..widgets.core_widget_classes import CustomLabel
 from ..widgets.font import CustomFont
 
 

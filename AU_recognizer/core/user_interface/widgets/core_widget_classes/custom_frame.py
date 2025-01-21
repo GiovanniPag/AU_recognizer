@@ -2,8 +2,8 @@ from typing import Union, Tuple, List, Optional, Any
 
 from . import CustomTKBaseClass
 from ..core_rendering import CustomCanvas
-from ..theme import ThemeManager
 from ..core_rendering import DrawEngine
+from ..theme import ThemeManager
 
 
 class CustomFrame(CustomTKBaseClass):

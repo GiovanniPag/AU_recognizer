@@ -1,12 +1,12 @@
-import tkinter
 import sys
+import tkinter
 from typing import Union, Tuple, Callable, List, Optional
 
 from AU_recognizer.core.util import logger
-from ..theme import ThemeManager
-from ..font import CustomFont
 from ..appearance import CustomAppearanceModeBaseClass
+from ..font import CustomFont
 from ..scaling import CustomScalingBaseClass
+from ..theme import ThemeManager
 
 
 class DropdownMenu(tkinter.Menu, CustomAppearanceModeBaseClass, CustomScalingBaseClass):

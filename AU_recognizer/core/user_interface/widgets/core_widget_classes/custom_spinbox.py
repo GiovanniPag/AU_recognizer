@@ -62,7 +62,8 @@ class CustomSpinbox(CustomFrame):
         if self.command is not None:
             self.command()
         try:
-            value = float(self.entry.get()) - self.step_size if self.use_float else int(self.entry.get()) - int(self.step_size)
+            value = float(self.entry.get()) - self.step_size if self.use_float \
+                else int(self.entry.get()) - int(self.step_size)
             if value >= self.min_value:
                 self.entry.delete(0, "end")
                 self.entry.insert(0, f"{value if self.use_float else int(value)}")

@@ -1,14 +1,14 @@
-import tkinter
 import copy
 import sys
+import tkinter
 from typing import Union, Tuple, Callable, Optional, Any, Literal
 
-from ..core_rendering import CustomCanvas
-from ..theme import ThemeManager
-from ..core_rendering import DrawEngine
 from . import CustomTKBaseClass
 from . import DropdownMenu
+from ..core_rendering import CustomCanvas
+from ..core_rendering import DrawEngine
 from ..font import CustomFont
+from ..theme import ThemeManager
 
 
 class CustomOptionMenu(CustomTKBaseClass):

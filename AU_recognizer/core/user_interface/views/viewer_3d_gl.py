@@ -1,37 +1,36 @@
 import platform as pf
 import time
-import tkinter as tk
-from tkinter import ttk
+from tkinter import BOTH, StringVar
 
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram
-from OpenGL.GLUT import *
 from OpenGL.GLU import *
+from OpenGL.GLUT import *
 from PIL import Image
 from pyopengltk import OpenGLFrame
 
-from AU_recognizer import VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_COLOR, POINT_SIZE, MOVING_STEP, GL_SOLID, \
-    i18n, logger, GL_U_VALUE, GL_U_POINTER, SKY_COLOR, GROUND_COLOR, GL_U_TYPE, GL_DEFAULT, GL_NO, GL_WIREFRAME, \
-    GL_V_COLOR, GL_NORMAL, GL_C_POINTS, GL_C_TEXTURE, GL_C_NORMAL_MAP
-from AU_recognizer.core.util import nect_config, hex_to_float_rgb, hex_to_float_rgba
+from AU_recognizer.AURecognizer import AURecognizer
+from AU_recognizer.core.user_interface import CustomFrame, CustomCheckBox, CustomButton, CustomTkImage, CustomTooltip
+from AU_recognizer.core.user_interface.views import View
+from AU_recognizer.core.user_interface.widgets.complex_widget import ComboLabel, FPSCounter
+from AU_recognizer.core.util import nect_config, hex_to_float_rgb, hex_to_float_rgba, i18n, GL_SOLID, GL_DEFAULT, \
+    GL_NO, \
+    CANVAS_COLOR, VIEWER, MOVING_STEP, POINT_SIZE, FILL_COLOR, LINE_COLOR, POINT_COLOR, SKY_COLOR, GROUND_COLOR, \
+    GL_NORMAL, GL_C_NORMAL_MAP, GL_V_COLOR, GL_C_TEXTURE, GL_WIREFRAME, GL_C_POINTS, GL_U_TYPE, GL_U_POINTER, \
+    GL_U_VALUE, logger, asset
 from AU_recognizer.core.util.OBJ import OBJ
 from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quaternion_multiply, look_at, perspective, \
     quaternion_to_matrix
-from AU_recognizer.core.views import View
-from AU_recognizer.core.views.widgets.complex_widget.check_label import CheckLabel
-from AU_recognizer.core.views.widgets.complex_widget.combo_label import ComboLabel
-from AU_recognizer.core.views.widgets.complex_widget.icon_button import IconButton
-from AU_recognizer.core.views.widgets.complex_widget.fps_counter import FPSCounter
 
 
 class Viewer3DGl(View):
     def __init__(self, master, placeholder, obj_file_path=None):
         super().__init__(placeholder)
-        self.master = master
+        self.master: AURecognizer = master
         self.obj = OBJ(filepath=obj_file_path)
-        self.viewer_frame = ttk.Frame(self)
-        self.control_frame = ttk.Frame(self, style='Control.TFrame')
+        self.viewer_frame = CustomFrame(self)
+        self.control_frame = CustomFrame(self, style='Control.TFrame')
         self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj)
         self.render_combobox = ComboLabel(master=self.control_frame, label_text="gl_combo",
                                           selected=i18n.gl_viewer["combo"][GL_SOLID],
@@ -42,17 +41,25 @@ class Viewer3DGl(View):
         self.normal_combobox = ComboLabel(master=self.control_frame, label_text="gl_normal",
                                           selected=i18n.gl_viewer["normal_combo"][GL_NO],
                                           values=list(i18n.gl_viewer['normal_combo'].values()), state="readonly")
-        self.lighting_checkbox = CheckLabel(master=self.control_frame, label_text="gl_light", default=False,
-                                            command=self._toggle_light)
-        self.reset_button = IconButton(master=self.control_frame, asset_name="reset_view.png", tooltip="reset_view",
-                                       command=self.canvas_3d.reset_view)
-        self.settings_button = IconButton(master=self.control_frame, asset_name="settings.png", tooltip="open_set",
-                                          command=self.open_settings)
-
-        # TODO: add controls on the combobox list if avaible
+        self.lighting_checkbox = CustomCheckBox(master=self.control_frame, text="gl_light", textvariable=StringVar(),
+                                                command=self._toggle_light)
+        self.reset_icon = CustomTkImage(
+            light_image=Image.open(asset("reset_view_light.png")),
+            dark_image=Image.open(asset("reset_view_dark.png")),
+            size=(24, 24))
+        self.reset_button = CustomButton(master=self.control_frame, corner_radius=0, height=40, border_spacing=10,
+                                         fg_color="transparent", command=self.canvas_3d.reset_view)
+        self.reset_tooltip = CustomTooltip(self.reset_button, text=i18n.tooltips["reset_view"])
+        self.settings_icon = CustomTkImage(
+            light_image=Image.open(asset("settings_light.png")),
+            dark_image=Image.open(asset("settings_dark.png")),
+            size=(24, 24))
+        self.settings_button = CustomButton(master=self.control_frame, corner_radius=0, height=40, border_spacing=10,
+                                            fg_color="transparent", command=self.open_settings)
+        self.settings_tooltip = CustomTooltip(self.reset_button, text=i18n.tooltips["open_set"])
 
     def _toggle_light(self):
-        self.canvas_3d.update_shader_uniforms([("useLight", self.lighting_checkbox.get_value())], start_shader=True)
+        self.canvas_3d.update_shader_uniforms([("useLight", self.lighting_checkbox.get())], start_shader=True)
 
     def open_settings(self):
         self.master.open_settings(page="viewer")
@@ -111,7 +118,7 @@ class Viewer3DGl(View):
         self.control_frame.grid(row=1, column=0, sticky='nswe', padx=5, pady=5)
         self.control_frame.columnconfigure(0, weight=1)
         # grid canvas 3d
-        self.canvas_3d.pack(fill=tk.BOTH, expand=True)
+        self.canvas_3d.pack(fill=BOTH, expand=True)
         # Modal box for view modes
         self.render_combobox.create_view()
         self.render_combobox.grid(row=1, column=0, columnspan=3, sticky='e')
@@ -122,15 +129,11 @@ class Viewer3DGl(View):
         self.normal_combobox.create_view()
         self.normal_combobox.grid(row=3, column=0, columnspan=3, sticky='e')
         # Checkbox for lighting
-        self.lighting_checkbox.create_view()
         self.lighting_checkbox.grid(row=4, column=0, columnspan=3, sticky='e')
         # Button to reset view
-        self.reset_button.create_view()
         self.reset_button.grid(row=5, column=1, sticky='e')
         # Button to open settings
-        self.settings_button.create_view()
         self.settings_button.grid(row=5, column=2, sticky='e')
-
         self.render_combobox.bind_combobox_event(self._change_render_mode)
         self.color_combobox.bind_combobox_event(self._change_color_mode)
         self.normal_combobox.bind_combobox_event(self._change_normal_mode)
@@ -145,9 +148,12 @@ class Viewer3DGl(View):
         self.lighting_checkbox.update_language()
         self.reset_button.update_language()
         self.settings_button.update_language()
+        self.reset_tooltip.configure(text=i18n.tooltips["reset_view"])
+        self.settings_tooltip.configure(text=i18n.tooltips["open_set"])
 
     def display(self, animate):
         self.canvas_3d.animate = animate
+
 
 class Frame3DGl(OpenGLFrame):
     def __init__(self, placeholder, obj: OBJ = None):
@@ -323,7 +329,7 @@ class Frame3DGl(OpenGLFrame):
         # Bind the scrolling on canvas event to zoom slider (Button-4/5 on linux)
         self.bind('<Button-4>', self.mouse_wheel_handler)
         self.bind('<Button-5>', self.mouse_wheel_handler)
-        # zoom for Windows and MacOS, but not Linux
+        # zoom for Windows and macOS, but not Linux
         self.bind('<MouseWheel>', self.mouse_wheel_handler)
         # Bind keys for movement
         self.bind_all('<KeyPress-w>', self.key_handler)
@@ -504,8 +510,9 @@ class Frame3DGl(OpenGLFrame):
                 glActiveTexture(GL_TEXTURE0)  # Set to use texture unit 0 for the diffuse texture
                 glBindTexture(GL_TEXTURE_2D, self.textures[material_name])
 
-            if 'index_data' in self.model['batched_data'][material_name] and self.model['batched_data'][material_name][
-                'index_data'] is not None:
+            if ('index_data' in self.model['batched_data'][material_name]
+                    and self.model['batched_data'][material_name][
+                        'index_data'] is not None):
                 glDrawElements(GL_TRIANGLES, len(self.model['batched_data'][material_name]['index_data']),
                                GL_UNSIGNED_INT,
                                None)
@@ -549,7 +556,7 @@ class Frame3DGl(OpenGLFrame):
         if delta != 0:
             self.camera_position[2] += delta * 0.5
 
-    def __resized(self, *args):
+    def __resized(self, *_args):
         """Callback to the window resize events"""
         w, h = self.winfo_width(), self.winfo_height()
         if self._canvas_w != w or self._canvas_h != h:
@@ -562,7 +569,7 @@ class Frame3DGl(OpenGLFrame):
             # Calculate scaling factor
             self.scale = (distance_to_camera * np.tan(np.radians(45 / 2))) / (mesh_size / 2.0)
 
-    def __start_rotate(self, event): 
+    def __start_rotate(self, event):
         """Start capturing the initial mouse click position for rotation"""
         self._is_left_mouse_button_down = True
         self._start_orientation = self._rotation
@@ -618,11 +625,11 @@ class Frame3DGl(OpenGLFrame):
             new_orientation = quaternion_multiply(rotation, self._start_orientation)
             self._rotation = new_orientation
 
-    def __end_rotate(self, event):
+    def __end_rotate(self, _event):
         """End rotation on left-click release"""
         self._is_left_mouse_button_down = False
 
-    def __end_pan(self, event):
+    def __end_pan(self, _event):
         """End panning on right-click release"""
         self._is_right_mouse_button_down = False
 
@@ -633,11 +640,11 @@ def bytestr(s):
 
 
 # Avoiding glitches in pyopengl-3.0.x and python3.4
-def compileShader(source, shaderType):
+def compileShader(source, shader_type):
     """
     Compile shader source of given type
         source -- GLSL source-code for the shader
-    shaderType -- GLenum GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, etc,
+    shaderType -- GLenum GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, etc.,
         returns GLuint compiled shader reference
     raises RuntimeError when a compilation failure occurs
     """
@@ -646,7 +653,7 @@ def compileShader(source, shaderType):
     elif isinstance(source, bytes):
         source = [source.decode('utf-8')]
 
-    shader = glCreateShader(shaderType)
+    shader = glCreateShader(shader_type)
     glShaderSource(shader, source)
     glCompileShader(shader)
     result = glGetShaderiv(shader, GL_COMPILE_STATUS)
@@ -659,14 +666,14 @@ def compileShader(source, shaderType):
                 glGetShaderInfoLog(shader),
             ),
             source,
-            shaderType,
+            shader_type,
         )
     return shader
 
 
 def load_texture(texture_file):
     image = Image.open(texture_file)
-    image = image.transpose(Image.FLIP_TOP_BOTTOM)  # Flip image vertically for OpenGL
+    image = image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)  # Flip image vertically for OpenGL
     img_data = np.array(image.convert("RGB"), dtype=np.uint8)
 
     texture = glGenTextures(1)

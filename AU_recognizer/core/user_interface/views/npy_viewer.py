@@ -1,5 +1,6 @@
-import numpy as np
 import tkinter as tk
+
+import numpy as np
 
 from AU_recognizer.core.user_interface.views import View
 from AU_recognizer.core.user_interface.widgets.core_widget_classes import CustomTextbox

@@ -1,5 +1,5 @@
-from typing import Union, Tuple
 import sys
+from typing import Union, Tuple
 
 from AU_recognizer.core.user_interface import CustomToplevel, AppearanceModeTracker, CustomLabel
 
@@ -25,7 +25,7 @@ class CustomTooltip(CustomToplevel):
         self._visible = False
         self._is_hovering_tooltip = False
         self._bg_color_is_default = True if bg_color == "transparent" else False
-        # used on linux because rounded corners doesnt seem to be possible usually
+        # used on linux because rounded corners doesn't seem to be possible usually
 
         # determine colors
         self.__appearance_mode = AppearanceModeTracker.get_mode()

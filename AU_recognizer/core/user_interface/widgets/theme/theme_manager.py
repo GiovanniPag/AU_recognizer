@@ -1,5 +1,5 @@
-import sys
 import json
+import sys
 from typing import List, Union
 
 from AU_recognizer.core.util import asset

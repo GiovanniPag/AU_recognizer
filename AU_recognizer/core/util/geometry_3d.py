@@ -1,7 +1,7 @@
 import math
 
-import numpy as np
 import numba
+import numpy as np
 
 
 def projection_on_circle(point_x, point_y, circle_x, circle_y, radius):

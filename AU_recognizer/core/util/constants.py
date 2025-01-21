@@ -82,9 +82,6 @@ I18N_CLOSE_BUTTON = "close"
 I18N_FIT_SEL_BUTTON = "fit_sel"
 I18N_FIT_ALL_BUTTON = "fit_all"
 
-# Mac specific
-MAC_SHOW_HELP = 'tk::mac::ShowHelp'
-
 # menu options
 M_UNDERLINE = "underline"
 M_MASTER = "master"
@@ -100,7 +97,6 @@ M_RADIO = "radio"
 M_COMMAND = "command"
 
 # menu commands names
-M_APPLE = "apple"
 M_FILE = "file"
 M_EDIT = "edit"
 M_HELP = "help"

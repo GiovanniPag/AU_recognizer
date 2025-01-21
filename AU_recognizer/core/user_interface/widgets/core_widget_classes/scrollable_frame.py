@@ -35,7 +35,7 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
                  label_text: str = "",
                  label_font: Optional[Union[tuple, CustomFont]] = None,
                  label_anchor: Literal["nw", "n", "ne", "w", "center", "e", "sw", "s", "se"] = "center",
-                 orientation: Literal["vertical", "horizontal"] = "vertical"):
+                 orientation: Literal["vertical", "horizontal", "both"] = "vertical"):
         self._orientation = orientation
         # dimensions independent of scaling
         # _desired_width and _desired_height, represent desired size set by width and height
@@ -46,18 +46,27 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
                                          border_color=border_color)
         self._parent_canvas = tkinter.Canvas(master=self._parent_frame, highlightthickness=0)
         self._set_scroll_increments()
-        if self._orientation == "horizontal":
-            self._scrollbar = CustomScrollbar(master=self._parent_frame, orientation="horizontal",
-                                              command=self._parent_canvas.xview,
-                                              fg_color=scrollbar_fg_color, button_color=scrollbar_button_color,
-                                              button_hover_color=scrollbar_button_hover_color)
-            self._parent_canvas.configure(xscrollcommand=self._scrollbar.set)
-        elif self._orientation == "vertical":
-            self._scrollbar = CustomScrollbar(master=self._parent_frame, orientation="vertical",
-                                              command=self._parent_canvas.yview,
-                                              fg_color=scrollbar_fg_color, button_color=scrollbar_button_color,
-                                              button_hover_color=scrollbar_button_hover_color)
-            self._parent_canvas.configure(yscrollcommand=self._scrollbar.set)
+        if self._orientation in ["horizontal", "both"]:
+            self._scrollbar_x = CustomScrollbar(
+                master=self._parent_frame,
+                orientation="horizontal",
+                command=self._parent_canvas.xview,
+                fg_color=scrollbar_fg_color,
+                button_color=scrollbar_button_color,
+                button_hover_color=scrollbar_button_hover_color,
+            )
+            self._parent_canvas.configure(xscrollcommand=self._scrollbar_x.set)
+
+        if self._orientation in ["vertical", "both"]:
+            self._scrollbar_y = CustomScrollbar(
+                master=self._parent_frame,
+                orientation="vertical",
+                command=self._parent_canvas.yview,
+                fg_color=scrollbar_fg_color,
+                button_color=scrollbar_button_color,
+                button_hover_color=scrollbar_button_hover_color,
+            )
+            self._parent_canvas.configure(yscrollcommand=self._scrollbar_y.set)
         self._label_text = label_text
         self._label = CustomLabel(self._parent_frame, text=label_text, anchor=label_anchor, font=label_font,
                                   corner_radius=self._parent_frame.cget("corner_radius"), text_color=label_text_color,
@@ -69,9 +78,11 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
         self._create_grid()
         self._parent_canvas.configure(width=self._apply_widget_scaling(self._desired_width),
                                       height=self._apply_widget_scaling(self._desired_height))
-        self.bind("<Configure>", lambda e: self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all")))
+        self.bind("<Configure>", self._update_scroll_region)
         self._parent_canvas.bind("<Configure>", self._fit_frame_dimensions_to_canvas)
         self.bind_all("<MouseWheel>", self._mouse_wheel_all, add="+")
+        self.bind_all("<Button-4>", self._mouse_wheel_all, add="+")
+        self.bind_all("<Button-5>", self._mouse_wheel_all, add="+")
         self.bind_all("<KeyPress-Shift_L>", self._keyboard_shift_press_all, add="+")
         self.bind_all("<KeyPress-Shift_R>", self._keyboard_shift_press_all, add="+")
         self.bind_all("<KeyRelease-Shift_L>", self._keyboard_shift_release_all, add="+")
@@ -85,8 +96,36 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
             self._parent_canvas.configure(bg=self._apply_appearance_mode(self._parent_frame.cget("fg_color")))
         self._shift_pressed = False
 
+    def _check_scroll_necessity(self):
+        canvas_height = self._parent_canvas.winfo_height()
+        canvas_width = self._parent_canvas.winfo_width()
+        content_height = self.winfo_height()
+        content_width = self.winfo_width()
+        # Check horizontal scroll necessity
+        if self._orientation in ["horizontal", "both"]:
+            if content_width <= canvas_width:
+                self._scrollbar_x.grid_remove()
+                self._parent_canvas.configure(xscrollcommand="")
+            else:
+                self._scrollbar_x.grid()
+                self._parent_canvas.configure(xscrollcommand=self._scrollbar_x.set)
+
+        # Check vertical scroll necessity
+        if self._orientation in ["vertical", "both"]:
+            if content_height <= canvas_height:
+                self._scrollbar_y.grid_remove()
+                self._parent_canvas.configure(yscrollcommand="")
+            else:
+                self._scrollbar_y.grid()
+                self._parent_canvas.configure(yscrollcommand=self._scrollbar_y.set)
+
+    def _update_scroll_region(self, _=None):
+        self._parent_canvas.configure(scrollregion=self._parent_canvas.bbox("all"))
+        self._check_scroll_necessity()
+
     def destroy(self):
         tkinter.Frame.destroy(self)
+        self._parent_frame.destroy()
         CustomAppearanceModeBaseClass.destroy(self)
         CustomScalingBaseClass.destroy(self)
 
@@ -97,7 +136,7 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
             self._parent_frame.grid_columnconfigure(0, weight=1)
             self._parent_frame.grid_rowconfigure(1, weight=1)
             self._parent_canvas.grid(row=1, column=0, sticky="nsew", padx=border_spacing, pady=(border_spacing, 0))
-            self._scrollbar.grid(row=2, column=0, sticky="nsew", padx=border_spacing)
+            self._scrollbar_x.grid(row=2, column=0, sticky="nsew", padx=border_spacing)
             if self._label_text is not None and self._label_text != "":
                 self._label.grid(row=0, column=0, sticky="ew", padx=border_spacing, pady=border_spacing)
             else:
@@ -106,7 +145,19 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
             self._parent_frame.grid_columnconfigure(0, weight=1)
             self._parent_frame.grid_rowconfigure(1, weight=1)
             self._parent_canvas.grid(row=1, column=0, sticky="nsew", padx=(border_spacing, 0), pady=border_spacing)
-            self._scrollbar.grid(row=1, column=1, sticky="nsew", pady=border_spacing)
+            self._scrollbar_y.grid(row=1, column=1, sticky="nsew", pady=border_spacing)
+            if self._label_text is not None and self._label_text != "":
+                self._label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=border_spacing, pady=border_spacing)
+            else:
+                self._label.grid_forget()
+        elif self._orientation == "both":
+            self._parent_frame.grid_columnconfigure(0, weight=1)
+            self._parent_frame.grid_rowconfigure(1, weight=1)
+
+            self._parent_canvas.grid(row=1, column=0, sticky="nsew", padx=(border_spacing, 0), pady=border_spacing)
+            self._scrollbar_y.grid(row=1, column=1, sticky="nsew", pady=border_spacing)
+            self._scrollbar_x.grid(row=2, column=0, sticky="nsew", padx=border_spacing)
+
             if self._label_text is not None and self._label_text != "":
                 self._label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=border_spacing, pady=border_spacing)
             else:
@@ -160,11 +211,20 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
                 if isinstance(child, CustomTKBaseClass):
                     child.configure(bg_color=self._parent_frame.cget("fg_color"))
         if "scrollbar_fg_color" in kwargs:
-            self._scrollbar.configure(fg_color=kwargs.pop("scrollbar_fg_color"))
+            if self._scrollbar_x:
+                self._scrollbar_x.configure(fg_color=kwargs.pop("scrollbar_fg_color"))
+            if self._scrollbar_y:
+                self._scrollbar_y.configure(fg_color=kwargs.pop("scrollbar_fg_color"))
         if "scrollbar_button_color" in kwargs:
-            self._scrollbar.configure(button_color=kwargs.pop("scrollbar_button_color"))
+            if self._scrollbar_x:
+                self._scrollbar_x.configure(fg_color=kwargs.pop("scrollbar_button_color"))
+            if self._scrollbar_y:
+                self._scrollbar_y.configure(fg_color=kwargs.pop("scrollbar_button_color"))
         if "scrollbar_button_hover_color" in kwargs:
-            self._scrollbar.configure(button_hover_color=kwargs.pop("scrollbar_button_hover_color"))
+            if self._scrollbar_x:
+                self._scrollbar_x.configure(fg_color=kwargs.pop("scrollbar_button_hover_color"))
+            if self._scrollbar_y:
+                self._scrollbar_y.configure(fg_color=kwargs.pop("scrollbar_button_hover_color"))
         if "label_text" in kwargs:
             self._label_text = kwargs.pop("label_text")
             self._label.configure(text=self._label_text)
@@ -195,11 +255,26 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
         elif attribute_name == "label_anchor":
             return self._label.cget("anchor")
         elif attribute_name.startswith("scrollbar_fg_color"):
-            return self._scrollbar.cget("fg_color")
+            if self._scrollbar_x:
+                return self._scrollbar_x.cget("fg_color")
+            elif self._scrollbar_y:
+                return self._scrollbar_y.cget("fg_color")
+            else:
+                return None
         elif attribute_name.startswith("scrollbar_button_color"):
-            return self._scrollbar.cget("button_color")
+            if self._scrollbar_x:
+                return self._scrollbar_x.cget("button_color")
+            elif self._scrollbar_y:
+                return self._scrollbar_y.cget("button_color")
+            else:
+                return None
         elif attribute_name.startswith("scrollbar_button_hover_color"):
-            return self._scrollbar.cget("button_hover_color")
+            if self._scrollbar_x:
+                return self._scrollbar_x.cget("button_hover_color")
+            elif self._scrollbar_y:
+                return self._scrollbar_y.cget("button_hover_color")
+            else:
+                return None
         else:
             return self._parent_frame.cget(attribute_name)
 
@@ -208,6 +283,7 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
             self._parent_canvas.itemconfigure(self._create_window_id, height=self._parent_canvas.winfo_height())
         elif self._orientation == "vertical":
             self._parent_canvas.itemconfigure(self._create_window_id, width=self._parent_canvas.winfo_width())
+        self._check_scroll_necessity()
 
     def _set_scroll_increments(self):
         if sys.platform.startswith("win"):
@@ -217,27 +293,20 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
 
     def _mouse_wheel_all(self, event):
         if self.check_if_master_is_canvas(event.widget):
+            # Normalize `event.delta` across platforms
             if sys.platform.startswith("win"):
-                if self._shift_pressed:
-                    if self._parent_canvas.xview() != (0.0, 1.0):
-                        self._parent_canvas.xview("scroll", -int(event.delta / 6), "units")
-                else:
-                    if self._parent_canvas.yview() != (0.0, 1.0):
-                        self._parent_canvas.yview("scroll", -int(event.delta / 6), "units")
+                delta = -int(event.delta / 6)
             elif sys.platform == "darwin":
-                if self._shift_pressed:
-                    if self._parent_canvas.xview() != (0.0, 1.0):
-                        self._parent_canvas.xview("scroll", -event.delta, "units")
-                else:
-                    if self._parent_canvas.yview() != (0.0, 1.0):
-                        self._parent_canvas.yview("scroll", -event.delta, "units")
+                delta = -event.delta
             else:
-                if self._shift_pressed:
-                    if self._parent_canvas.xview() != (0.0, 1.0):
-                        self._parent_canvas.xview("scroll", -event.delta, "units")
-                else:
-                    if self._parent_canvas.yview() != (0.0, 1.0):
-                        self._parent_canvas.yview("scroll", -event.delta, "units")
+                delta = -1 if event.num == 5 else 1  # Button-5 (down) or Button-4 (up)
+            # Determine the scroll direction (horizontal/vertical)
+            if self._shift_pressed:  # Horizontal scroll
+                if self._parent_canvas.xview() != (0.0, 1.0):
+                    self._parent_canvas.xview("scroll", delta, "units")
+            else:  # Vertical scroll
+                if self._parent_canvas.yview() != (0.0, 1.0):
+                    self._parent_canvas.yview("scroll", delta, "units")
 
     def _keyboard_shift_press_all(self, _):
         self._shift_pressed = True

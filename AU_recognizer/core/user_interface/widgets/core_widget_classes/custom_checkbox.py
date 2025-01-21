@@ -1,13 +1,13 @@
-import tkinter
 import sys
+import tkinter
 from typing import Union, Tuple, Callable, Optional, Any
 
 from AU_recognizer.core.util import i18n
-from ..core_rendering import CustomCanvas
-from ..theme import ThemeManager
-from ..core_rendering import DrawEngine
 from . import CustomTKBaseClass
+from ..core_rendering import CustomCanvas
+from ..core_rendering import DrawEngine
 from ..font import CustomFont
+from ..theme import ThemeManager
 
 
 class CustomCheckBox(CustomTKBaseClass):
@@ -42,7 +42,7 @@ class CustomCheckBox(CustomTKBaseClass):
                  onvalue: Union[int, str] = 1,
                  offvalue: Union[int, str] = 0,
                  variable: Union[tkinter.Variable, None] = None,
-                 **kwargs):
+                 check_state: bool = False, **kwargs):
 
         # transfer basic functionality (_bg_color, size, __appearance_mode, scaling) to CustomTkBaseClass
         super().__init__(master=master, bg_color=bg_color, width=width, height=height, **kwargs)
@@ -84,7 +84,7 @@ class CustomCheckBox(CustomTKBaseClass):
         self._command = command
         self._state = state
         self._hover = hover
-        self._check_state = False
+        self._check_state = check_state
 
         self._onvalue = onvalue
         self._offvalue = offvalue

@@ -1,13 +1,13 @@
 from pathlib import Path
-from tqdm import auto
 
 import torch
+from tqdm import auto
 
-from ..util import logger, P_PATH, nect_config, CONFIG, MODEL_FOLDER, MF_MODEL, F_OUTPUT, MF_FIT_MODE, MF_SAVE_MESH, \
-    MF_SAVE_IMAGES, MF_SAVE_CODES
-from emoca.gdl_apps.EMOCA.utils.load import load_model
 from emoca.gdl.datasets.ImageTestDataset import TestData
 from emoca.gdl_apps.EMOCA.utils.io import save_obj, save_images, save_codes, test
+from emoca.gdl_apps.EMOCA.utils.load import load_model
+from ..util import logger, P_PATH, nect_config, CONFIG, MODEL_FOLDER, MF_MODEL, F_OUTPUT, MF_FIT_MODE, MF_SAVE_MESH, \
+    MF_SAVE_IMAGES, MF_SAVE_CODES
 
 
 def emoca_fit(fit_data, images_to_fit, project_data):

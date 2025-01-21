@@ -1,6 +1,6 @@
-from typing import Union, Tuple
 import copy
 import re
+from typing import Union, Tuple
 
 try:
     from typing import Literal

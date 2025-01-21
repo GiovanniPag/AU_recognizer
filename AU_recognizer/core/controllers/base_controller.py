@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from AU_recognizer.core.views import View
+from AU_recognizer.core.user_interface.views import View
 
 
 class Controller(ABC):
