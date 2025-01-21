@@ -33,7 +33,7 @@ class CustomCheckBox(CustomTKBaseClass):
                  text_color: Optional[Union[str, Tuple[str, str]]] = None,
                  text_color_disabled: Optional[Union[str, Tuple[str, str]]] = None,
 
-                 text: str = "CustomCheckBox",
+                 text: str = "",
                  font: Optional[Union[tuple, CustomFont]] = None,
                  textvariable: Union[tkinter.Variable, None] = None,
                  state: str = tkinter.NORMAL,
@@ -91,7 +91,6 @@ class CustomCheckBox(CustomTKBaseClass):
         self._variable: tkinter.Variable = variable
         self._variable_callback_blocked = False
         self._textvariable: tkinter.Variable = textvariable
-        self._textvariable.set(i18n.custom_checkbox[self._text])
         self._variable_callback_name = None
 
         # configure grid system (1x3)
@@ -134,7 +133,7 @@ class CustomCheckBox(CustomTKBaseClass):
         self._draw()
 
     def update_language(self):
-        self._textvariable.set(i18n.custom_checkbox[self._text])
+        self._textvariable.set(i18n.entry_buttons[self._text])
 
     def _create_bindings(self, sequence: Optional[str] = None):
         """ set necessary bindings for functionality of widget, will overwrite other bindings """

@@ -8,7 +8,7 @@ from AU_recognizer.core.util import logger, T_COLUMNS, T_SIZE, T_MODIFIED, T_NAM
 class ProjectTreeView(ttk.Treeview, View):
     def __init__(self, master=None):
         View.__init__(self, master=master)
-        ttk.Treeview.__init__(self, master)
+        ttk.Treeview.__init__(self, master, columns=(T_NAME, T_SIZE, T_MODIFIED))
         self.tree_style = None
         self.master = master
         self.rowconfigure(0, weight=1)
@@ -18,8 +18,6 @@ class ProjectTreeView(ttk.Treeview, View):
 
     def create_view(self):
         logger.debug("create view in project tree view")
-
-        self[T_COLUMNS] = (T_SIZE, T_MODIFIED)
         self.column(T_NAME, anchor=T_CENTER, minwidth=150, width=150)
         self.column(T_SIZE, anchor=T_CENTER, minwidth=150, width=150)
         self.column(T_MODIFIED, anchor=T_CENTER, minwidth=150, width=150)

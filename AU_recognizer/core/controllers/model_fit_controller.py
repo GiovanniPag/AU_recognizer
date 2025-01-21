@@ -4,7 +4,6 @@ from AU_recognizer.core.user_interface.views import ModelFitView
 from AU_recognizer.core.util import logger
 
 
-
 class ModelFitController(Controller):
     def __init__(self, master=None) -> None:
         super().__init__()
@@ -17,7 +16,7 @@ class ModelFitController(Controller):
         logger.debug(f"bind in ModelFit controller")
         self.view = v
         self.view.create_view()
-        self.view.select_images_button.config(command=lambda: self.open_image_select_dialog(data=self.view.get_form()))
+        self.view.select_images_button.configure(command=lambda: self.open_image_select_dialog(data=self.view.get_form()))
 
     def update_selected(self, data):
         logger.debug(f"update selected in ModelFit controller")

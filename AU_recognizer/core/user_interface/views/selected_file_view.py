@@ -41,7 +41,8 @@ class SelectedFileView(View):
 
     def create_view(self):
         logger.debug("create view in selected file view")
-        self._open_s = CustomButton(self, textvariable=self._open_s_label, command=...)
+        self._open_s = CustomButton(self, text=FV_OPEN_S, textvariable=self._open_s_label, command=...)
+        self._open_s_label.set(i18n.selected_file_view[FV_OPEN_S])
 
     def __update_view(self):
         logger.debug("update view in selected file view")

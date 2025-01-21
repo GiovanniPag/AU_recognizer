@@ -32,7 +32,7 @@ class CustomLabel(CustomTKBaseClass):
                  text_color: Optional[Union[str, Tuple[str, str]]] = None,
                  text_color_disabled: Optional[Union[str, Tuple[str, str]]] = None,
 
-                 text: str = "CustomLabel",
+                 text: str = "",
                  font: Optional[Union[tuple, CustomFont]] = None,
                  image: Union[CustomTkImage, None] = None,
                  compound: Literal["top", "left", "center", "right", "bottom", "none"] = "center",

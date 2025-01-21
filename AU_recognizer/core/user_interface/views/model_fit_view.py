@@ -25,12 +25,12 @@ class ModelFitView(View):
         self.model_combobox = ComboLabel(master=self.scrollFrame, label_text="m_combo",
                                          selected="EMOCA_v2_lr_mse_20",
                                          values=[str(file_name.stem) for file_name in models], state="readonly")
-        self.save_images_text = StringVar()
+        self.save_images_text = StringVar(value=i18n.entry_buttons["c_simages"])
         self.save_images = CustomCheckBox(master=self.scrollFrame, text="c_simages", textvariable=self.save_images_text,
                                           check_state=True)
-        self.save_codes_text = StringVar()
+        self.save_codes_text = StringVar(value=i18n.entry_buttons["c_scodes"])
         self.save_codes = CustomCheckBox(master=self.scrollFrame, text="c_scodes", textvariable=self.save_codes_text)
-        self.save_mesh_text = StringVar()
+        self.save_mesh_text = StringVar(value=i18n.entry_buttons["c_smesh"])
         self.save_mesh = CustomCheckBox(master=self.scrollFrame, text="c_smesh", textvariable=self.save_mesh_text)
         self.fit_mode = RadioList(master=self.scrollFrame, list_title="mode_radio", default=R_DETAIL,
                                   data=[R_DETAIL, R_COARSE])

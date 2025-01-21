@@ -37,7 +37,7 @@ class CustomButton(CustomTKBaseClass):
                  background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None,
                  round_width_to_even_numbers: bool = True,
                  round_height_to_even_numbers: bool = True,
-                 text: str = "CustomButton",
+                 text: str = "",
                  font: Optional[Union[tuple, CustomFont]] = None,
                  textvariable: Union[tkinter.Variable, None] = None,
                  image: Union[CustomTkImage, "ImageTk.PhotoImage", None] = None,
@@ -76,7 +76,6 @@ class CustomButton(CustomTKBaseClass):
         self._text = text
         self._text_label: Union[tkinter.Label, None] = None
         self._textvariable: tkinter.Variable = textvariable
-        self._textvariable.set(i18n.custom_button[self._text])
         self._font: Union[tuple, CustomFont] = CustomFont() if font is None else self._check_font_type(font)
         if isinstance(self._font, CustomFont):
             self._font.add_size_configure_callback(self._update_font)

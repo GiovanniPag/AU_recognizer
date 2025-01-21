@@ -148,7 +148,7 @@ class AURecognizer(CustomTk):
 
         # attach menu_bar
         logger.debug("attach menu_bar")
-        self['menu'] = self.menu_bar
+        self.configure(menu=self.menu_bar)
         # attach virtual event controllers
         logger.debug("attach virtual event controllers for <<LanguageChange>>")
         self.bind("<<LanguageChange>>", lambda event: self.update_app_language())
