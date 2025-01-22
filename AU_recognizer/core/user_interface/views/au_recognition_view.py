@@ -13,11 +13,12 @@ class AURecognitionView(View):
         self.master = master
         self._project_info: Optional[ConfigParser] = None
         self._exist_label_info = StringVar()
-        self._exist_label: Optional[CustomLabel] = None
+        self._exist_label: Optional[CustomLabel] = CustomLabel(self, text="exists")
         self.update_language()
 
     def create_view(self):
         logger.debug("update view in AURecognition view")
+        self._exist_label.grid(row=0, column=0, sticky="nsew")
 
     def update_language(self):
         logger.debug("update language in AURecognition view")

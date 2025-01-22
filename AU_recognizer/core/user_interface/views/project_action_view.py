@@ -8,6 +8,7 @@ from AU_recognizer.core.util import logger, i18n, PA_NAME, PA_DISABLED, PA_NORMA
 class ProjectActionView(CustomTabview, View):
     def __init__(self, master=None):
         super().__init__(master)
+        CustomTabview.__init__(self, master)
         self._aur_frame_name = i18n.project_actions_au_rec[PA_NAME]
         self._mf_frame_name = i18n.project_actions_fit[PA_NAME]
         self.master = master
@@ -32,8 +33,10 @@ class ProjectActionView(CustomTabview, View):
         logger.debug(f"create view in project action view")
         _mf_frame = self.add(name=i18n.project_actions_fit[PA_NAME])
         self._model_fit_frame = ModelFitView(_mf_frame)
+        self._model_fit_frame.grid(row=0, column=0)
         _aur_frame = self.add(name=i18n.project_actions_au_rec[PA_NAME])
         self._au_recognition_frame = AURecognitionView(_aur_frame)
+        self._au_recognition_frame.grid(row=0, column=0)
         self.__update_view()
 
     def __update_view(self):
@@ -43,6 +46,13 @@ class ProjectActionView(CustomTabview, View):
         else:
             self.__tabs_change_state(PA_NORMAL)
             self.set(i18n.project_actions_fit[PA_NAME])
+
+    def print_children(self, widget, depth=0):
+        """Recursively print all children of a widget."""
+        indent = "  " * depth  # Indentation for better visualization
+        print(f"{indent}{widget}")
+        for child in widget.winfo_children():
+            self.print_children(child, depth + 1)
 
     def bind_controllers(self, model_fit_controller, au_recognition_controller):
         logger.debug(f"bind controllers in project action view")

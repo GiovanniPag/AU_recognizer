@@ -17,7 +17,7 @@ class ModelFitView(View):
         self.master = master
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.scrollFrame = ScrollableFrame(self)  # add a new scrollable frame.
+        self.scrollFrame = ScrollableFrame(self)  # add a new scrollable frame
         self.scrollFrame.rowconfigure(0, weight=1)
         self.scrollFrame.columnconfigure(0, weight=1)
         self._project_info: Optional[ConfigParser] = None
@@ -68,7 +68,7 @@ class ModelFitView(View):
         self.select_images_button.grid(row=5, column=0, sticky=E, pady=5)
 
     def update_selected_project(self, data: Optional[ConfigParser] = None):
-        logger.debug("update selected project in scan view")
+        logger.debug("update selected project in fit view")
         self._project_info = data
         self.__update_view()
 

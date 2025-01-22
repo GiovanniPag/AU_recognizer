@@ -11,3 +11,4 @@ if __name__ == "__main__":
 
 # TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
 # TODO: point size not update from setting to viewer
+# TODO: project action view selected tab and language change error
