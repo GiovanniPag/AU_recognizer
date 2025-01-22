@@ -47,14 +47,16 @@ class Viewer3DGl(View):
             dark_image=Image.open(asset("reset_view_dark.png")),
             size=(24, 24))
         self.reset_button = CustomButton(master=self.control_frame, corner_radius=0, height=40, border_spacing=10,
-                                         fg_color="transparent", command=self.canvas_3d.reset_view)
+                                         fg_color="transparent", image=self.reset_icon,
+                                         command=self.canvas_3d.reset_view)
         self.reset_tooltip = CustomTooltip(self.reset_button, text=i18n.tooltips["reset_view"])
         self.settings_icon = CustomTkImage(
             light_image=Image.open(asset("settings_light.png")),
             dark_image=Image.open(asset("settings_dark.png")),
             size=(24, 24))
         self.settings_button = CustomButton(master=self.control_frame, corner_radius=0, height=40, border_spacing=10,
-                                            fg_color="transparent", command=self.open_settings)
+                                            fg_color="transparent", image=self.settings_icon,
+                                            command=self.open_settings)
         self.settings_tooltip = CustomTooltip(self.reset_button, text=i18n.tooltips["open_set"])
 
     def _toggle_light(self):

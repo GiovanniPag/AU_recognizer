@@ -41,4 +41,4 @@ class ComboLabel(View):
 
     def bind_combobox_event(self, callback):
         """Bind an external function to the Combobox selection event."""
-        self.combobox.bind("<<ComboboxSelected>>", lambda event: callback(self.combobox.get()))
+        self.combobox.configure(command=lambda e: callback(self.combobox.get()))

@@ -6,7 +6,7 @@ import warnings
 
 from PIL import Image, ImageTk
 
-from AU_recognizer.core.user_interface import CustomScrollbar, CustomFrame, ThemeManager
+from AU_recognizer.core.user_interface import CustomScrollbar, ThemeManager, CustomFrame
 from AU_recognizer.core.util import logger
 
 MAX_IMAGE_PIXELS = 1500000000  # maximum pixels in the image, use it carefully
@@ -15,7 +15,7 @@ MAX_IMAGE_PIXELS = 1500000000  # maximum pixels in the image, use it carefully
 # canvas to Display and zoom image
 # noinspection PyPropertyAccess
 class CanvasImage:
-    def __init__(self, placeholder, path, can_grab_focus=True):
+    def __init__(self, placeholder, path, can_grab_focus=True, **kwargs):
         # Initialize the ImageFrame
         self.imscale = 1.0  # scale for the canvas image zoom, public for outer classes
         self.__delta = 1.3  # zoom magnitude
@@ -292,7 +292,8 @@ class CanvasImage:
         """ ImageFrame destructor """
         logger.debug(f'Close image: {self.path}')
         self.__image.close()
-        map(lambda i: i.close, self.__pyramid)  # close all pyramid images
+        if self.__pyramid:
+            map(lambda i: i.close, self.__pyramid)  # close all pyramid images
         del self.__pyramid[:]  # delete pyramid list
         del self.__pyramid  # delete pyramid variable
         self.canvas.destroy()
