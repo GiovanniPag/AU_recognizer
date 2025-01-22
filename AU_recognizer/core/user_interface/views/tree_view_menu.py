@@ -6,10 +6,9 @@ from AU_recognizer.core.util import (MT_SEL_P, M_MASTER, M_INDEX, MT_ADD_IMAGES,
                                      M_DEFAULT_STATE, M_STATE_NORMAL, M_ACCELERATOR, M_STATE, M_COMMAND)
 
 
-class TreeViewMenu(Menu, View):
+class TreeViewMenu(Menu):
 
     def __init__(self, master=None):
-        View.__init__(self, master)
         Menu.__init__(self, master, tearoff=0)
         self.master = master
         self.data = None

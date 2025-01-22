@@ -255,6 +255,7 @@ class TreeViewMenuController(Controller):
         self.controller: Optional[TreeController] = None
         self.view = None
         self.after_id = None
+        self.after_id2 = None
 
     def bind(self, v: TreeViewMenu):
         logger.debug("bind in menu controller")
@@ -399,10 +400,11 @@ class TreeViewMenuController(Controller):
         self.view.is_open = True
         self.view.post(event.x_root, event.y_root)
         self.view.focus_set()
-        self.view.bind_all("<Button-1>", self.on_close)
-        self.view.bind_all("<Button-2>", self.on_close)
+        self.master.bind("<Button-1>", self.on_close)
+        self.master.bind("<Button-2>", self.on_close)
         self.view.bind("<FocusOut>", self.on_close)
-        self.after_id = self.view.after(100, lambda: self.view.bind_all("<Button-3>", self.on_close))
+        self.after_id = self.view.after(100, lambda: self.master.bind("<Button-3>", self.on_close))
+        self.after_id2 = self.view.after(100, lambda: self.master.bind("<FocusOut>", self.on_close))
 
     def on_close(self, _):
         logger.debug(f"on_close of tree view menu {_}")
@@ -411,6 +413,7 @@ class TreeViewMenuController(Controller):
             # Check if the pointer is over the menubar
             menubar_bbox = re.split("[x+]", self.view.winfo_geometry())  # widthxheight+x+y
             menubar_width, menubar_height, menubar_x, menubar_y = map(int, menubar_bbox)
+
             if (menubar_x <= _.x_root <= menubar_x + menubar_width
                     and menubar_y <= _.y_root <= menubar_y + menubar_height):
                 unpost = False
@@ -420,8 +423,11 @@ class TreeViewMenuController(Controller):
     def unpost_menu(self, _):
         logger.debug(f"unpost_menu of tree view menu {_}")
         self.view.is_open = False
-        self.view.unbind_all("<Button-1>")
-        self.view.unbind_all("<Button-2>")
+        self.master.unbind("<Button-1>")
+        self.master.unbind("<Button-2>")
         self.view.after_cancel(self.after_id)
-        self.view.unbind_all("<Button-3>")
+        self.master.after_cancel(self.after_id2)
+        self.master.unbind("<Button-3>")
+        self.master.unbind("<FocusOut>")
+        self.view.unbind("<FocusOut>")
         self.view.unpost()
