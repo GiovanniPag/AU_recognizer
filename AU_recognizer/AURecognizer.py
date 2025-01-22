@@ -100,11 +100,9 @@ class AURecognizer(CustomTk):
         center_frame = ttk.PanedWindow(self, orient=VERTICAL)
         # create views
         # left views
-        custom_frame = CustomFrame(self)
-        scroll_wrapper = ScrollableFrame(master=custom_frame)
-        self.project_tree_view = ProjectTreeView(master=scroll_wrapper)
+        self.project_tree_view = ProjectTreeView(master=self)
         self.selected_file = SelectedFileView(self)
-        left_frame.add(custom_frame, weight=3)
+        left_frame.add(self.project_tree_view, weight=3)
         left_frame.add(self.selected_file, weight=2)
 
         # center views

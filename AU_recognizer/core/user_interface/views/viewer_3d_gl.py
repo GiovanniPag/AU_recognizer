@@ -29,7 +29,7 @@ class Viewer3DGl(View):
         self.master = master
         self.obj = OBJ(filepath=obj_file_path)
         self.viewer_frame = CustomFrame(self)
-        self.control_frame = CustomFrame(self, style='Control.TFrame')
+        self.control_frame = CustomFrame(self)
         self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj)
         self.render_combobox = ComboLabel(master=self.control_frame, label_text="gl_combo",
                                           selected=i18n.gl_viewer["combo"][GL_SOLID],

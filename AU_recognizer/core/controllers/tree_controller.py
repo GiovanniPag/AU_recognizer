@@ -80,7 +80,6 @@ class TreeController(Controller):
             self.view.selection_remove(item)
 
     def focus_item(self, _):
-
         selection = self.view.selection()
         if selection:
             selected_item_id = selection[0]

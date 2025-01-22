@@ -1,4 +1,5 @@
 from tkinter import ttk as ttk
+from typing import Callable, Union
 
 from AU_recognizer.core.user_interface import ThemeManager, AppearanceModeTracker
 from AU_recognizer.core.user_interface.views.view import View
@@ -15,6 +16,21 @@ class ProjectTreeView(ttk.Treeview, View):
         self.columnconfigure(0, weight=1)
         self.update_style()
         AppearanceModeTracker.add(self.update_style)
+
+    def bind(self, sequence: str = None, command: Callable = None, add: Union[str, bool] = True):
+        """ called on the tkinter.Canvas """
+        if not (add == "+" or add is True):
+            raise ValueError("'add' argument can only be '+' or True to preserve internal callbacks")
+        self._canvas.bind(sequence, command, add=True)
+        ttk.Treeview.bind(self, sequence, command, add=True)
+
+    def unbind(self, sequence: str = None, funcid: str = None):
+        """ called on the tkinter.Label and tkinter.Canvas """
+        if funcid is not None:
+            raise ValueError("'funcid' argument can only be None, because there is a bug in" +
+                             " tkinter and its not clear whether the internal callbacks will be unbinded or not")
+        self._canvas.unbind(sequence, None)
+        ttk.Treeview.unbind(self, sequence, None)
 
     def create_view(self):
         logger.debug("create view in project tree view")

@@ -28,11 +28,11 @@ class CanvasImage:
         self._fg_color = ThemeManager.theme["CustomFrame"]["top_fg_color"]
         self._button_color = ThemeManager.theme["CustomScrollbar"]["button_color"]
         self._button_hover_color = ThemeManager.theme["CustomScrollbar"]["button_hover_color"]
-        hbar = CustomScrollbar(master=self.__imframe, orient='horizontal',
+        hbar = CustomScrollbar(master=self.__imframe, orientation='horizontal',
                                fg_color=self._fg_color,
                                button_color=self._button_color,
                                button_hover_color=self._button_hover_color)
-        vbar = CustomScrollbar(master=self.__imframe, orient='vertical',
+        vbar = CustomScrollbar(master=self.__imframe, orientation='vertical',
                                fg_color=self._fg_color,
                                button_color=self._button_color,
                                button_hover_color=self._button_hover_color)
