@@ -110,7 +110,6 @@ class BaseDialog(Dialog):
             self.close()
 
 
-# TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
 class SelectFitImageDialog(Dialog):
     def __init__(self, master, data, project):
         super().__init__(master)

@@ -127,7 +127,8 @@ class CustomButton(CustomTKBaseClass):
                 self._image_label.bind("<Button-1>", self._clicked)
 
     def update_language(self):
-        self._textvariable.set(i18n.custom_button[self._text])
+        if self._textvariable:
+            self._textvariable.set(i18n.entry_buttons[self._text])
 
     def _set_scaling(self, *args, **kwargs):
         super()._set_scaling(*args, **kwargs)

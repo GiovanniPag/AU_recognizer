@@ -1,5 +1,6 @@
 from pathlib import Path
-from tkinter import ttk, HORIZONTAL, VERTICAL, FALSE, NSEW
+from tkinter import ttk, HORIZONTAL, VERTICAL, FALSE, NSEW, Menu
+from typing import Union
 
 from AU_recognizer.core.util import (i18n, logger, config, call_by_ws, nect_config, OPEN_PROJECTS,
                                      check_if_folder_exist, check_if_is_project, purge_option_config, P_PATH)
@@ -38,7 +39,7 @@ class AURecognizer(CustomTk):
                    win32_func=lambda: self.state("zoomed"))
 
     @staticmethod
-    def __bind_controller(controller: Controller, view: View):
+    def __bind_controller(controller: Controller, view: Union[View, Menu]):
         logger.debug(f"bind {controller.__class__} to {view.__class__}")
         controller.bind(view)
 

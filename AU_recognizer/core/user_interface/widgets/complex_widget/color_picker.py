@@ -8,7 +8,6 @@ from PIL import Image, ImageTk
 from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomSlider, CustomEntry, \
     CustomButton, CustomLabel
 from AU_recognizer.core.util import asset
-from AU_recognizer.core.util.geometry_3d import projection_on_circle
 
 
 class CustomColorPicker(CustomFrame):
@@ -115,9 +114,7 @@ class CustomColorPicker(CustomFrame):
         if d_from_center < self.image_dimension / 2:
             self.target_x, self.target_y = x, y
         else:
-            self.target_x, self.target_y = projection_on_circle(x, y, self.image_dimension / 2,
-                                                                self.image_dimension / 2,
-                                                                self.image_dimension / 2 - 1)
+            pass
 
         self.canvas.create_image(self.target_x, self.target_y,
                                  image=self.target)

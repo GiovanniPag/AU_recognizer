@@ -1,23 +1,19 @@
-import math
+import colorsys
 import tkinter as tk
-from tkinter import END
-from typing import Literal
 
+import numpy as np
 from PIL import Image, ImageTk
 
-from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomSlider, CustomEntry, \
+from AU_recognizer.core.user_interface import CustomFrame, ThemeManager, CustomEntry, \
     CustomButton, CustomLabel, CustomToplevel
-from AU_recognizer.core.util import asset
-from AU_recognizer.core.util.geometry_3d import projection_on_circle
 
 
 class AskColor(CustomToplevel):
 
     def __init__(self,
                  master: any = None,
-                 width: int = 350,
                  title: str = "Choose Color",
-                 initial_color: str = None,
+                 initial_color: str = "#ffffff",
                  bg_color: str = None,
                  fg_color: str = None,
                  button_color: str = None,
@@ -28,23 +24,7 @@ class AskColor(CustomToplevel):
                  **button_kwargs):
 
         super().__init__(master=master)
-        self.b_entry = None
-        self.b_label = None
-        self.g_entry = None
-        self.g_label = None
-        self.r_entry = None
-        self.r_label = None
-        self.target_y = None
-        self.target_x = None
-        self._color = None
         self.title(title)
-        width = max(width, 200)
-        height = width + 250
-        self.image_dimension = self._apply_window_scaling(width - 100)
-        self.target_dimension = self._apply_window_scaling(20)
-
-        self.maxsize(width, height)
-        self.minsize(width, height)
         self.resizable(width=False, height=False)
         self.transient(self.master)
         self.after(100, self.lift)
@@ -52,9 +32,6 @@ class AskColor(CustomToplevel):
         self.grid_rowconfigure(0, weight=1)
         self.after(10)
         self.protocol("WM_DELETE_WINDOW", self._on_closing)
-        self.default_hex_color = "#ffffff"
-        self.default_rgb = [255, 255, 255]
-        self.rgb_color = self.default_rgb[:]
         self.bg_color = self._apply_appearance_mode(
             ThemeManager.theme["CustomFrame"]["fg_color"]) if bg_color is None else bg_color
         self.fg_color = self._apply_appearance_mode(
@@ -66,219 +43,352 @@ class AskColor(CustomToplevel):
         self.button_text = text
         self.corner_radius = corner_radius
         self.slider_border = min(10, slider_border)
-        self.config(bg=self.bg_color)
+        self.configure(bg_color=self.bg_color)
         self.frame = CustomFrame(master=self, fg_color=self.fg_color, bg_color=self.bg_color)
         self.frame.grid(padx=20, pady=20, sticky="nswe")
-        self.canvas = tk.Canvas(self.frame, height=self.image_dimension, width=self.image_dimension,
-                                highlightthickness=0,
-                                bg=self.fg_color)
-        self.canvas.pack(pady=20)
-        self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
 
-        self.img1 = Image.open(asset('color_wheel.png')).resize(
-            (self.image_dimension, self.image_dimension), Image.Resampling.LANCZOS)
-        self.img2 = Image.open(asset('target.png')).resize((self.target_dimension, self.target_dimension),
-                                                           Image.Resampling.LANCZOS)
-        self.wheel = ImageTk.PhotoImage(self.img1)
-        self.target = ImageTk.PhotoImage(self.img2)
+        self.mode = "RGB"
+        self.hue, self.saturation, self.value = self.hex_to_hsv(initial_color)
+        self.gradient_cache = {}
 
-        self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2,
-                                 image=self.wheel)
-        self.set_initial_color(initial_color)
-        self.brightness_slider_value = tk.IntVar()
-        self.brightness_slider_value.set(255)
-        self.slider = CustomSlider(master=self.frame, height=20, border_width=self.slider_border,
-                                   button_length=15, progress_color=self.default_hex_color, from_=0, to=255,
-                                   variable=self.brightness_slider_value, number_of_steps=256,
-                                   button_corner_radius=self.corner_radius, corner_radius=self.corner_radius,
-                                   button_color=self.button_color, button_hover_color=self.button_hover_color,
-                                   command=lambda x: self.update_colors())
-        self.slider.pack(fill="both", pady=(0, 15), padx=20 - self.slider_border)
-        self.label = CustomEntry(master=self.frame, text_color="#000000", height=50, fg_color=self.default_hex_color,
-                                 corner_radius=self.corner_radius,
-                                 textvariable=tk.StringVar(value=self.default_hex_color))
-        self.label.pack(fill="both", padx=10)
-        self.label.bind("<Return>", lambda event: self.update_colors(from_entry="hex"))
-        self.create_rgb_entries()
+        # Gradient rectangle
+        self.gradient_canvas = tk.Canvas(self.frame, width=300, height=200, bd=0, highlightthickness=0)
+        self.gradient_canvas.pack()
+        self.gradient_image_tk = ImageTk.PhotoImage(image=Image.new("RGB", (300, 200), color=(255, 0, 0)))
+        self.gradient_canvas.create_image((0, 0), image=self.gradient_image_tk, anchor="nw")
+        self.gradient_target = self.gradient_canvas.create_oval(-5, -5, 5, 5, outline="black", width=2)
+        self.gradient_canvas.bind("<Button-1>", self.select_color)
+        self.gradient_canvas.bind("<B1-Motion>", self.select_color)
+        # Color preview
+        self.preview_frame = CustomFrame(master=self.frame,
+                                         fg_color=initial_color,
+                                         bg_color=self.bg_color, width=40,
+                                         height=40)
+        self.preview_frame.pack(pady=5)
+        # Hue slider
+        self.hue_canvas = tk.Canvas(self.frame, height=15, width=300,
+                                    highlightthickness=0,
+                                    bg=self.fg_color)
+        self.hue_canvas.pack(pady=10)
+        self.hue_canvas.bind("<Button-1>", self.select_hue)
+        self.hue_canvas.bind("<B1-Motion>", self.select_hue)
+        self.create_hue_gradient()
+        self.hue_target = self.hue_canvas.create_oval(-5, -5, 5, 5, outline="black", width=2)
+
+        # Input fields
+        self.input_frame = CustomFrame(master=self.frame, fg_color=self.fg_color, bg_color=self.bg_color)
+        self.input_frame.pack(pady=10, fill="both")
+        self.create_input_fields()
         self.button = CustomButton(master=self.frame, text=self.button_text, height=50,
                                    corner_radius=self.corner_radius,
                                    fg_color=self.button_color,
                                    hover_color=self.button_hover_color, command=self._ok_event, **button_kwargs)
         self.button.pack(fill="both", padx=10, pady=20)
-        self.after(150, lambda: self.label.focus())
         self.grab_set()
-        self.updating = False  # Flag to prevent recursive updates
+        self.set_color(hex=initial_color, update_gradient=True)
+
+    def create_hue_gradient(self):
+        """Create a hue gradient for the hue slider."""
+        for i in range(300):
+            hue = i / 300
+            r, g, b = self.hsv_to_rgb(hue, 1, 1)
+            color = f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}"
+            self.hue_canvas.create_line(i, 0, i, 15, fill=color)
+
+    def update_gradient(self):
+        """Update the gradient rectangle based on the selected hue."""
+        width, height = 300, 200
+        # Create saturation and value arrays (using broadcasting)
+        x = np.arange(width)  # array of x coordinates (saturation)
+        y = np.arange(height)  # array of y coordinates (value)
+
+        saturation = x / width  # Saturation for each x
+        value = 1 - y / height  # Value for each y
+        # Now mesh the saturation and value grids
+        S, V = np.meshgrid(saturation, value)
+        # Vectorize the HSV to RGB conversion
+        # Apply the vectorized function over the meshgrid
+        r, g, b = self.hsv_to_rgb_vec(self.hue, S, V)
+        # Scale RGB values to the range [0, 255] and fill the gradient array
+        gradient_array = np.dstack((r, g, b)) * 255
+        gradient_array = gradient_array.astype(np.uint8)
+        # Create a PIL image from the NumPy array
+        gradient_image = Image.fromarray(gradient_array)
+        # Convert the PIL image to Tkinter-compatible format
+        self.gradient_image_tk.paste(gradient_image)
+
+    def set_color(self, update_gradient=False, **kwargs):
+        """Set the color based on the input format (HSV, HSL, HEX, RGB)."""
+        if 'hex' in kwargs:
+            self.hue, self.saturation, self.value = self.hex_to_hsv(kwargs['hex'])
+        elif 'rgb' in kwargs:
+            self.hue, self.saturation, self.value = self.rgb_to_hsv(*kwargs['rgb'])
+        elif 'hsv' in kwargs:
+            self.hue, self.saturation, self.value = kwargs['hsv']
+        elif 'hls' in kwargs:
+            self.hue, self.saturation, self.value = self.hls_to_hsv(*kwargs['hls'])
+        else:
+            raise ValueError("Invalid color format. Please provide 'hex', 'rgb', 'hsv', or 'hsl'.")
+
+        self.update_preview()
+        # Update gradient for the new hue
+        if update_gradient:
+            self.update_gradient()
+        # Update entries
+        self.update_fields()
+        # Update targets
+        self.update_targets()
+
+    def update_preview(self):
+        """Update the preview frame to show the current color."""
+        self.preview_frame.configure(fg_color=self.hsv_to_hex(self.hue, self.saturation, self.value))
+
+    def update_targets(self):
+        """Update the position of the targets on the hue slider and gradient."""
+        # Update hue target
+        hue_x = int(self.hue * 300)
+        self.hue_canvas.coords(self.hue_target, hue_x - 5, 2, hue_x + 5, 12)
+        # Update gradient target
+        gradient_x = int(self.saturation * 300)
+        gradient_y = int((1 - self.value) * 200)
+        self.gradient_canvas.coords(self.gradient_target, gradient_x - 5, gradient_y - 5, gradient_x + 5,
+                                    gradient_y + 5)
+
+    def create_input_fields(self):
+        """Create RGB, HEX, or HLS input fields."""
+        rgb_frame = CustomFrame(master=self.input_frame, fg_color=self.fg_color, bg_color=self.bg_color)
+        rgb_frame.pack(pady=10, fill="both")
+        self.r_label = CustomLabel(rgb_frame, text="R:")
+        self.r_label.grid(row=0, column=0)
+        self.r_entry = CustomEntry(rgb_frame, corner_radius=self.corner_radius)
+        self.r_entry.grid(row=0, column=1)
+        self.r_entry.bind("<FocusOut>", self.update_from_entries)
+        self.r_entry.bind("<Return>", self.update_from_entries)
+
+        self.g_label = CustomLabel(rgb_frame, text="G:")
+        self.g_label.grid(row=0, column=2)
+        self.g_entry = CustomEntry(rgb_frame, corner_radius=self.corner_radius)
+        self.g_entry.grid(row=0, column=3)
+        self.g_entry.bind("<FocusOut>", self.update_from_entries)
+        self.g_entry.bind("<Return>", self.update_from_entries)
+
+        self.b_label = CustomLabel(rgb_frame, text="B:")
+        self.b_label.grid(row=0, column=4)
+        self.b_entry = CustomEntry(rgb_frame, corner_radius=self.corner_radius)
+        self.b_entry.grid(row=0, column=5)
+        self.b_entry.bind("<FocusOut>", self.update_from_entries)
+        self.b_entry.bind("<Return>", self.update_from_entries)
+
+        self.switch_mode_button = CustomButton(self.input_frame, text="RGB ↕", command=self.switch_mode)
+        self.switch_mode_button.pack(pady=10, fill="both")
+
+    def update_from_entries(self, event=None):
+        """Update the color based on the current input fields."""
+        try:
+            if self.mode == "RGB":
+                # Validate and update color from RGB entries
+                r = int(self.r_entry.get())
+                g = int(self.g_entry.get())
+                b = int(self.b_entry.get())
+                r, g, b = r / 255, g / 255, b / 255
+                if 0 <= r <= 1 and 0 <= g <= 1 and 0 <= b <= 1:
+                    self.set_color(rgb=(r, g, b), update_gradient=True)
+                else:
+                    raise ValueError
+            elif self.mode == "HEX":
+                # Validate and update color from HEX entry
+                hex_color = self.r_entry.get().strip()
+                if len(hex_color) == 7 and hex_color.startswith("#"):
+                    self.set_color(hex=hex_color, update_gradient=True)
+                else:
+                    raise ValueError
+            elif self.mode == "HLS":
+                # Validate and update color from HSL entries
+                h = float(self.r_entry.get())
+                s = float(self.g_entry.get())
+                l = float(self.b_entry.get())
+                # Normalize HSL values to 0-1 range
+                h = h / 360
+                s = s / 100
+                l = l / 100
+                if 0 <= h <= 1 and 0 <= s <= 1 and 0 <= l <= 1:
+                    self.set_color(hls=(h, l, s), update_gradient=True)
+                else:
+                    raise ValueError
+        except ValueError:
+            # Reset the fields if input is invalid
+            self.update_fields()
+
+    def switch_mode(self):
+        """Switch between RGB, HEX, and HSL input modes."""
+        if self.mode == "RGB":
+            self.mode = "HEX"
+            self.switch_mode_button.configure(text="HEX ↕")
+            self.update_input_fields("HEX")
+        elif self.mode == "HEX":
+            self.mode = "HLS"
+            self.switch_mode_button.configure(text="HSL ↕")
+            self.update_input_fields("HLS")
+        else:
+            self.mode = "RGB"
+            self.switch_mode_button.configure(text="RGB ↕")
+            self.update_input_fields("RGB")
+
+    def update_fields(self):
+        if self.mode == "RGB":
+            self.r_entry.delete(0, tk.END)
+            self.g_entry.delete(0, tk.END)
+            self.b_entry.delete(0, tk.END)
+            # Populate RGB entries
+            r, g, b = [int(c * 255) for c in self.hsv_to_rgb(self.hue, self.saturation, self.value)]
+            self.r_entry.insert(0, r)
+            self.g_entry.insert(0, g)
+            self.b_entry.insert(0, b)
+        elif self.mode == "HEX":
+            self.r_entry.delete(0, tk.END)
+            self.r_entry.insert(0, self.hsv_to_hex(self.hue, self.saturation, self.value))
+        elif self.mode == "HLS":
+            self.r_entry.delete(0, tk.END)
+            self.g_entry.delete(0, tk.END)
+            self.b_entry.delete(0, tk.END)
+            h, l, s = self.hsv_to_hls(self.hue, self.saturation, self.value)
+            h = int(h * 360)  # Hue in degrees
+            s = int(s * 100)  # Saturation in percentage
+            l = int(l * 100)  # Lightness in percentage
+            self.r_entry.insert(0, h)
+            self.g_entry.insert(0, s)
+            self.b_entry.insert(0, l)
+
+    def update_input_fields(self, mode):
+        """Update the input fields to match the selected mode."""
+        if mode == "RGB":
+            self.r_label.configure(text="R:")
+            self.g_label.configure(text="G:")
+            self.b_label.configure(text="B:")
+            self.r_entry.delete(0, tk.END)
+            self.g_entry.delete(0, tk.END)
+            self.b_entry.delete(0, tk.END)
+            # Populate RGB entries
+            r, g, b = [int(c * 255) for c in self.hsv_to_rgb(self.hue, self.saturation, self.value)]
+            self.r_entry.insert(0, r)
+            self.g_entry.insert(0, g)
+            self.b_entry.insert(0, b)
+        elif mode == "HEX":
+            self.r_label.configure(text="HEX:")
+            self.g_label.grid_remove()
+            self.b_label.grid_remove()
+            self.g_entry.grid_remove()
+            self.b_entry.grid_remove()
+            self.r_entry.delete(0, tk.END)
+            self.r_entry.insert(0, self.hsv_to_hex(self.hue, self.saturation, self.value))
+        elif mode == "HLS":
+            self.r_label.configure(text="H:")
+            self.g_label.configure(text="S:")
+            self.b_label.configure(text="L:")
+            self.g_label.grid()
+            self.b_label.grid()
+            self.g_entry.grid()
+            self.b_entry.grid()
+            self.r_entry.delete(0, tk.END)
+            self.g_entry.delete(0, tk.END)
+            self.b_entry.delete(0, tk.END)
+            h, l, s = self.hsv_to_hls(self.hue, self.saturation, self.value)
+            h = int(h * 360)  # Hue in degrees
+            s = int(s * 100)  # Saturation in percentage
+            l = int(l * 100)  # Lightness in percentage
+            self.r_entry.insert(0, h)
+            self.g_entry.insert(0, s)
+            self.b_entry.insert(0, l)
 
     def get(self):
-        self._color = self.label.get()
+        self._color = self.hsv_to_hex(self.hue, self.saturation, self.value)
         self.master.wait_window(self)
         return self._color
 
     def _ok_event(self, _=None):
-        self._color = self.label.get()
+        self._color = self.hsv_to_hex(self.hue, self.saturation, self.value)
         self.grab_release()
         self.destroy()
-        del self.img1
-        del self.img2
-        del self.wheel
-        del self.target
 
     def _on_closing(self):
         self._color = None
         self.grab_release()
         self.destroy()
-        del self.img1
-        del self.img2
-        del self.wheel
-        del self.target
 
-    def on_mouse_drag(self, event):
-        x = event.x
-        y = event.y
-        self.canvas.delete("all")
-        self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2,
-                                 image=self.wheel)
+    def select_hue(self, event):
+        """Select a hue based on the position on the hue slider."""
+        x = max(0, min(300, event.x))
+        self.hue = x / 300
+        self.update_gradient()
+        self.set_color(hsv=(self.hue, self.saturation, self.value), update_gradient=True)
 
-        d_from_center = math.sqrt(((self.image_dimension / 2) - x) ** 2 + ((self.image_dimension / 2) - y) ** 2)
+    def select_color(self, event):
+        """Select a color from the gradient rectangle."""
+        x = max(0, min(300, event.x))
+        y = max(0, min(200, event.y))
+        self.saturation = x / 300
+        self.value = 1 - y / 200
+        self.set_color(hsv=(self.hue, self.saturation, self.value))
 
-        if d_from_center < self.image_dimension / 2:
-            self.target_x, self.target_y = x, y
-        else:
-            self.target_x, self.target_y = projection_on_circle(x, y, self.image_dimension / 2,
-                                                                self.image_dimension / 2,
-                                                                self.image_dimension / 2 - 1)
+    @staticmethod
+    def hls_to_hsv(h, l, s):
+        # Convert HSL to RGB
+        r, g, b = colorsys.hls_to_rgb(h, l, s)
+        return colorsys.rgb_to_hsv(r, g, b)
 
-        self.canvas.create_image(self.target_x, self.target_y,
-                                 image=self.target)
+    @staticmethod
+    def hsv_to_hls(h, s, v):
+        # Convert HSL to RGB
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        return colorsys.rgb_to_hls(r, g, b)
 
-        self.get_target_color()
-        self.update_colors()
+    @staticmethod
+    def rgb_to_hsv(r, g, b): # rgb normalized to [0,1]
+        return colorsys.rgb_to_hsv(r , g , b )
 
-    def get_target_color(self):
-        try:
-            self.rgb_color = self.img1.getpixel((self.target_x, self.target_y))
-            r = self.rgb_color[0]
-            g = self.rgb_color[1]
-            b = self.rgb_color[2]
-            self.rgb_color = [r, g, b]
-        except AttributeError:
-            self.rgb_color = self.default_rgb
+    # Color conversion helpers
+    @staticmethod
+    def hsv_to_rgb(h, s, v):
+        return colorsys.hsv_to_rgb(h, s, v)
 
-    def update_colors(self, from_entry: Literal["hex", "rgb", ""] = ""):
-        if self.updating:
-            return
+    @staticmethod
+    def hex_to_hsv(hex_color):
+        # Remove the "#" if it exists
+        hex_color = hex_color.lstrip('#')
+        # Convert hex to RGB
+        r = int(hex_color[0:2], 16) / 255.0
+        g = int(hex_color[2:4], 16) / 255.0
+        b = int(hex_color[4:6], 16) / 255.0
+        # Convert RGB to HSV
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        # Return HSV values
+        return h, s, v
 
-        self.updating = True
+    @staticmethod
+    def hsv_to_hex(h, s, v):
+        # Convert HSV to RGB
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        # Convert RGB to Hex
+        hex_color = '#{:02x}{:02x}{:02x}'.format(int(r * 255), int(g * 255), int(b * 255))
+        return hex_color
 
-        if from_entry == "hex":
-            try:
-                hex_color = self.label.get()
-                if hex_color.startswith("#") and len(hex_color) == 7:
-                    r, g, b = tuple(int(hex_color.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
-                    self.rgb_color = [r, g, b]
-                    self.default_hex_color = hex_color
-            except ValueError:
-                pass  # Ignore invalid input
-        elif from_entry == "rgb":
-            try:
-                r = int(self.r_entry.get())
-                g = int(self.g_entry.get())
-                b = int(self.b_entry.get())
-                self.rgb_color = [r, g, b]
-                self.default_hex_color = f"#{r:02x}{g:02x}{b:02x}"
-            except ValueError:
-                pass  # Ignore invalid input
-        else:
-            try:
-                brightness = self.brightness_slider_value.get()
+    @staticmethod
+    def hsv_to_rgb_vec(h, s, v):
+        """Vectorized version of HSV to RGB conversion."""
+        h = np.asarray(h)
+        s = np.asarray(s)
+        v = np.asarray(v)
 
-                self.get_target_color()
+        i = np.floor(h * 6) % 6
+        f = h * 6 - i
+        p = v * (1 - s)
+        q = v * (1 - f * s)
+        t = v * (1 - (1 - f) * s)
 
-                r = int(self.rgb_color[0] * (brightness / 255))
-                g = int(self.rgb_color[1] * (brightness / 255))
-                b = int(self.rgb_color[2] * (brightness / 255))
+        i = i.astype(int)
 
-                self.rgb_color = [r, g, b]
+        r = np.select([i == 0, i == 1, i == 2, i == 3, i == 4, i == 5], [v, q, p, p, t, v])
+        g = np.select([i == 0, i == 1, i == 2, i == 3, i == 4, i == 5], [t, v, v, q, p, p])
+        b = np.select([i == 0, i == 1, i == 2, i == 3, i == 4, i == 5], [p, p, t, v, v, q])
 
-                self.default_hex_color = f"#{r:02x}{g:02x}{b:02x}"
-            except Exception:
-                pass
-
-        try:
-            self.slider.configure(progress_color=self.default_hex_color)
-            self.label.configure(fg_color=self.default_hex_color)
-
-            self.label.delete(0, END)
-            self.label.insert(0, self.default_hex_color)
-
-            self.r_entry.delete(0, END)
-            self.r_entry.insert(0, str(self.rgb_color[0]))
-            self.g_entry.delete(0, END)
-            self.g_entry.insert(0, str(self.rgb_color[1]))
-            self.b_entry.delete(0, END)
-            self.b_entry.insert(0, str(self.rgb_color[2]))
-        except Exception:
-            pass
-
-        if self.brightness_slider_value.get() < 70:
-            self.label.configure(text_color="white")
-        else:
-            self.label.configure(text_color="black")
-
-        if str(self.label.get()) == "#000000":
-            self.label.configure(text_color="white")
-
-        self.updating = False
-
-    def create_rgb_entries(self):
-        rgb_frame = CustomFrame(master=self.frame, fg_color=self.fg_color)
-        rgb_frame.pack(fill="both")
-
-        self.r_label = CustomLabel(master=rgb_frame, text="R")
-        self.r_label.grid(row=0, column=0)
-        self.r_entry = CustomEntry(master=rgb_frame, width=60, corner_radius=self.corner_radius,
-                                   textvariable=tk.StringVar(value=f"{self.default_rgb[0]}"))
-        self.r_entry.grid(row=0, column=1)
-
-        self.g_label = CustomLabel(master=rgb_frame, text="G")
-        self.g_label.grid(row=0, column=2)
-        self.g_entry = CustomEntry(master=rgb_frame, width=60, corner_radius=self.corner_radius,
-                                   textvariable=tk.StringVar(value=f"{self.default_rgb[1]}"))
-        self.g_entry.grid(row=0, column=3)
-
-        self.b_label = CustomLabel(master=rgb_frame, text="B")
-        self.b_label.grid(row=0, column=4)
-        self.b_entry = CustomEntry(master=rgb_frame, width=60, corner_radius=self.corner_radius,
-                                   textvariable=tk.StringVar(value=f"{self.default_rgb[2]}"))
-        self.b_entry.grid(row=0, column=5)
-        # Bind the return key to update the color from the entry values
-        self.r_entry.bind("<Return>", lambda event: self.update_colors(from_entry="rgb"))
-        self.g_entry.bind("<Return>", lambda event: self.update_colors(from_entry="rgb"))
-        self.b_entry.bind("<Return>", lambda event: self.update_colors(from_entry="rgb"))
-        # Bind the entry fields to update the color as the user types
-        self.r_entry.bind("<KeyRelease>", lambda event: self.update_colors(from_entry="rgb"))
-        self.g_entry.bind("<KeyRelease>", lambda event: self.update_colors(from_entry="rgb"))
-        self.b_entry.bind("<KeyRelease>", lambda event: self.update_colors(from_entry="rgb"))
-
-    def set_initial_color(self, initial_color):
-        # set_initial_color is in beta stage, cannot seek all colors accurately
-
-        if initial_color and initial_color.startswith("#"):
-            try:
-                r, g, b = tuple(int(initial_color.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
-            except ValueError:
-                return
-
-            self.default_hex_color = initial_color
-            for i in range(0, self.image_dimension):
-                for j in range(0, self.image_dimension):
-                    self.rgb_color = self.img1.getpixel((i, j))
-                    if (self.rgb_color[0], self.rgb_color[1], self.rgb_color[2]) == (r, g, b):
-                        self.canvas.create_image(i, j,
-                                                 image=self.target)
-                        self.target_x = i
-                        self.target_y = j
-                        return
-
-        self.canvas.create_image(self.image_dimension / 2, self.image_dimension / 2,
-                                 image=self.target)
+        return r, g, b

@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from AU_recognizer.core.user_interface import CustomLabel, CustomFrame, CustomButton
-from AU_recognizer.core.user_interface.dialogs import AskColor
+from AU_recognizer.core.user_interface.dialogs.color_picker_dial import AskColor
 from AU_recognizer.core.user_interface.views import View
 from AU_recognizer.core.util import logger, i18n
 
@@ -27,8 +27,8 @@ class ColorPickerLabel(View):
 
     def pick_color(self):
         logger.debug("pick color")
-        color = AskColor(initial_color=self.color.get()).get()
-        if color:
+        color = AskColor(master=self.master, initial_color=self.color.get()).get()
+        if color and self.color_button.winfo_exists():
             logger.debug(f"color picked {color}")
             self.color.set(color)
             self.color_button.configure(fg_color=self.color.get())

@@ -69,6 +69,7 @@ class Viewer3DGl(View):
         self.canvas_3d._canvas_color = hex_to_float_rgba(str(nect_config[VIEWER][CANVAS_COLOR]))
         self.canvas_3d._moving_step = float(nect_config[VIEWER][MOVING_STEP])
         self.canvas_3d._point_size = int(nect_config[VIEWER][POINT_SIZE])
+        self.canvas_3d.update_constants()
         self.canvas_3d.update_shader_uniforms([("solidColor", hex_to_float_rgb(str(nect_config[VIEWER][FILL_COLOR]))),
                                                ("wireframeColor",
                                                 hex_to_float_rgb(str(nect_config[VIEWER][LINE_COLOR]))),
@@ -273,6 +274,10 @@ class Frame3DGl(OpenGLFrame):
         self._rotation = np.array([0.0, 0.0, 0.0, 1.0])  # Quaternion [x, y, z, w]
         self.camera_position = np.array([0.0, 0.0, 10.0])
         self.panning = np.array([0.0, 0.0])
+
+    def update_constants(self):
+        glClearColor(*self._canvas_color)
+        glPointSize(self._point_size)
 
     def update_shader_uniforms(self, uniform_list, start_shader=False):
         if self.shader is not None:

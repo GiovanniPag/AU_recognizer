@@ -1,4 +1,6 @@
+from colorsys import hsv_to_rgb
 from pathlib import Path
+from tkinter import PhotoImage
 
 # Desktops
 DESKTOP_LIST = ["Desktop", "Scrivania"]
