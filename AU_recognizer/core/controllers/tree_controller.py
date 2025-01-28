@@ -299,6 +299,7 @@ class TreeViewMenuController(Controller):
                     if source_path.suffix.lower() in ['.jpg', '.png', '.bmp']:
                         shutil.copy(source_path, destination_dir)
                         logger.info(f"Success: {filename} copied successfully inside {destination_dir}")
+                        self.master.event_generate("<<UpdateTreeSmall>>")
                     elif source_path.suffix.lower() in ['.jpeg', '.gif']:
                         try:
                             filestem = source_path.stem
@@ -307,6 +308,7 @@ class TreeViewMenuController(Controller):
                                 logger.info(
                                     f"Success: {filename} copied and converted to png successfully inside "
                                     f"{destination_dir}")
+                                self.master.event_generate("<<UpdateTreeSmall>>")
                         except Exception as e:
                             logger.error(f"Error converting {filename} to PNG: {e}")
                     else:

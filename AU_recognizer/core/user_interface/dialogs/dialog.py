@@ -349,7 +349,6 @@ class SettingsDialog(Dialog):
         self.close()
 
     def save_viewer_config(self):
-        print("sadsadads")
         new_viewer_value = {
             FILL_COLOR: self._fill_color.get_value(),
             LINE_COLOR: self._line_color.get_value(),
