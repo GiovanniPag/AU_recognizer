@@ -1,6 +1,8 @@
+import configparser
 import platform as pf
 import time
-from tkinter import BOTH, StringVar
+from pathlib import Path
+from tkinter import BOTH, StringVar, Canvas
 
 import numpy as np
 from OpenGL.GL import *
@@ -8,16 +10,18 @@ from OpenGL.GL.shaders import compileProgram
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from PIL import Image
+from PIL.ImageTk import PhotoImage
 from pyopengltk import OpenGLFrame
 
-from AU_recognizer.core.user_interface import CustomFrame, CustomCheckBox, CustomButton, CustomTkImage, CustomTooltip
+from AU_recognizer.core.user_interface import CustomFrame, CustomCheckBox, CustomButton, CustomTkImage, CustomTooltip, \
+    CustomLabel
 from AU_recognizer.core.user_interface.views import View
 from AU_recognizer.core.user_interface.widgets.complex_widget import ComboLabel, FPSCounter
 from AU_recognizer.core.util import nect_config, hex_to_float_rgb, hex_to_float_rgba, i18n, GL_SOLID, GL_DEFAULT, \
     GL_NO, \
     CANVAS_COLOR, VIEWER, MOVING_STEP, POINT_SIZE, FILL_COLOR, LINE_COLOR, POINT_COLOR, SKY_COLOR, GROUND_COLOR, \
     GL_NORMAL, GL_C_NORMAL_MAP, GL_V_COLOR, GL_C_TEXTURE, GL_WIREFRAME, GL_C_POINTS, GL_U_TYPE, GL_U_POINTER, \
-    GL_U_VALUE, logger, asset
+    GL_U_VALUE, logger, asset, F_COMPARE, F_INPUT
 from AU_recognizer.core.util.OBJ import OBJ
 from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quaternion_multiply, look_at, perspective, \
     quaternion_to_matrix
@@ -26,16 +30,21 @@ from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quater
 class Viewer3DGl(View):
     def __init__(self, master, placeholder, obj_file_path=None):
         super().__init__(placeholder)
+        self.compare_face_img = None
+        self.neutral_face_img = None
         self.master = master
+        self.is_comparison = self.check_if_compare(obj_file_path)
         self.obj = OBJ(filepath=obj_file_path)
         self.viewer_frame = CustomFrame(self)
         self.control_frame = CustomFrame(self)
-        self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj)
+        self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj, is_comparison=self.is_comparison)
         self.render_combobox = ComboLabel(master=self.control_frame, label_text="gl_combo",
                                           selected=i18n.gl_viewer["combo"][GL_SOLID],
                                           values=list(i18n.gl_viewer['combo'].values()), state="readonly")
         self.color_combobox = ComboLabel(master=self.control_frame, label_text="gl_color",
-                                         selected=i18n.gl_viewer["color_combo"][GL_DEFAULT],
+                                         selected=i18n.gl_viewer["color_combo"][
+                                             GL_DEFAULT] if not self.is_comparison else i18n.gl_viewer["color_combo"][
+                                             GL_V_COLOR],
                                          values=list(i18n.gl_viewer['color_combo'].values()), state="readonly")
         self.normal_combobox = ComboLabel(master=self.control_frame, label_text="gl_normal",
                                           selected=i18n.gl_viewer["normal_combo"][GL_NO],
@@ -58,6 +67,31 @@ class Viewer3DGl(View):
                                             fg_color="transparent", image=self.settings_icon,
                                             command=self.open_settings)
         self.settings_tooltip = CustomTooltip(self.reset_button, text=i18n.tooltips["open_set"])
+
+        # New attributes to track the face comparison data
+        if self.is_comparison:
+            self.load_comparison_data(obj_file_path)
+            if self.neutral_face_img and self.compare_face_img:
+                self.show_comparison_images()
+
+    @staticmethod
+    def check_if_compare(obj_file_path):
+        return Path(obj_file_path).parent.name == F_COMPARE
+
+    def load_comparison_data(self, obj_file_path):
+        # Check if the object file is in the compare folder
+        compare_folder = Path(obj_file_path).parent
+        input_folder = Path(obj_file_path).parent.parent.parent / F_INPUT
+        comparison_log_path = compare_folder / "face_comparisons.ini"
+        if comparison_log_path.exists():
+            config = configparser.ConfigParser()
+            config.read(comparison_log_path)
+            # Check if the object is in the comparison data
+            for neutral_face in config.sections():
+                for key, value in config[neutral_face].items():
+                    if value == obj_file_path.name[:obj_file_path.name.find("_with_heatmap.obj")]:
+                        self.neutral_face_img = [file for file in input_folder.glob(f"{neutral_face[:-2]}.*")][0]
+                        self.compare_face_img = [file for file in input_folder.glob(f"{value[:-2]}.*")][0]
 
     def _toggle_light(self):
         self.canvas_3d.update_shader_uniforms([("useLight", self.lighting_checkbox.get())], start_shader=True)
@@ -143,22 +177,53 @@ class Viewer3DGl(View):
     def update_language(self):
         self.render_combobox.update_language(sel=i18n.gl_viewer["combo"][GL_SOLID],
                                              values=list(i18n.gl_viewer['combo'].values()))
-        self.color_combobox.update_language(sel=i18n.gl_viewer["color_combo"][GL_DEFAULT],
+        self.color_combobox.update_language(sel=i18n.gl_viewer["color_combo"][
+            GL_DEFAULT] if not self.is_comparison else i18n.gl_viewer["color_combo"][
+            GL_V_COLOR],
                                             values=list(i18n.gl_viewer['color_combo'].values()))
         self.normal_combobox.update_language(sel=i18n.gl_viewer["normal_combo"][GL_NO],
                                              values=list(i18n.gl_viewer['normal_combo'].values()))
         self.lighting_checkbox.update_language()
         self.reset_button.update_language()
         self.settings_button.update_language()
-        self.reset_tooltip.configure(text=i18n.tooltips["reset_view"])
-        self.settings_tooltip.configure(text=i18n.tooltips["open_set"])
+        self.reset_tooltip.text=i18n.tooltips["reset_view"]
+        self.settings_tooltip.text=i18n.tooltips["open_set"]
+        if self.neutral_tooltip and self.compare_tooltip:
+            self.neutral_tooltip.text=i18n.tooltips["neutral_face"]
+            self.compare_tooltip.text=i18n.tooltips["compare_face"]
 
     def display(self, animate):
         self.canvas_3d.animate = animate
 
+    def show_comparison_images(self):
+        # Load the images into tkinter-compatible format
+        image_frame = CustomFrame(self.viewer_frame)
+        neutral_face_img_tk = CustomTkImage(
+            light_image=Image.open(self.neutral_face_img),
+            dark_image=Image.open(self.neutral_face_img),
+            size=(100, 100))
+        compare_face_img_tk = CustomTkImage(
+            light_image=Image.open(self.compare_face_img),
+            dark_image=Image.open(self.compare_face_img),
+            size=(100, 100))
+
+        # Create labels to display the images
+        neutral_label = CustomLabel(image_frame, image=neutral_face_img_tk)
+        compare_label = CustomLabel(image_frame, image=compare_face_img_tk)
+
+        # Position the images in the top right corner above the 3D canvas
+        # Pack the labels side by side in the frame
+        neutral_label.pack(side="left")
+        compare_label.pack(side="left")
+        self.neutral_tooltip = CustomTooltip(neutral_label, text=i18n.tooltips["neutral_face"])
+        self.compare_tooltip = CustomTooltip(compare_label, text=i18n.tooltips["compare_face"])
+
+        # Pack the frame above the existing content
+        image_frame.pack(side="top", anchor="ne", padx=10, pady=10)
+
 
 class Frame3DGl(OpenGLFrame):
-    def __init__(self, placeholder, obj: OBJ = None):
+    def __init__(self, placeholder, obj: OBJ = None, is_comparison=False):
         super().__init__(placeholder)  # FPS counter
         self.fps_counter = FPSCounter(self)
         self._canvas_color = hex_to_float_rgba(str(nect_config[VIEWER][CANVAS_COLOR]))
@@ -228,7 +293,7 @@ class Frame3DGl(OpenGLFrame):
             "useVertexColor": {
                 GL_U_TYPE: "bool",
                 GL_U_POINTER: None,
-                GL_U_VALUE: False,
+                GL_U_VALUE: is_comparison,
             },
             "skyColor": {
                 GL_U_TYPE: "vec3",

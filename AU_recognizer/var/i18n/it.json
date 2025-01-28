@@ -79,7 +79,9 @@
   },
   "tooltips": {
     "reset_view": "ripristina camera",
-    "open_set": "apri impostazioni"
+    "open_set": "apri impostazioni",
+    "neutral_face": "faccia neutra",
+    "compare_face": "faccia con espressione"
   },
   "entry_buttons": {
     "no_text": "",

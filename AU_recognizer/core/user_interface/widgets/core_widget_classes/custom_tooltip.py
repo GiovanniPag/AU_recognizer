@@ -127,7 +127,7 @@ class CustomTooltip(CustomToplevel):
             self.mouse_offset = kwargs.pop("mouse_offset")
             require_redraw = True
         self.kwargs = kwargs
-        if self.winfo_exists() and self.winfo_ismapped() and require_redraw:
+        if require_redraw:
             self.hide()
             self.show()
 

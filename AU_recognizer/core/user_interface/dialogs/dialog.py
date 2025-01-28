@@ -1,3 +1,4 @@
+import configparser
 import copy
 from abc import abstractmethod
 from pprint import pprint
@@ -436,7 +437,6 @@ class SelectMeshDialog(Dialog):
         neutral_face_path = Path(neutral_face_path)
         neutral_obj = OBJ(filepath=neutral_face_path / "mesh_coarse.obj")
         n_verts = neutral_obj.get_vertices()
-        flame_faces = neutral_obj.get_faces_indices()
         neutral_pose = np.load(neutral_face_path / 'pose.npy')
         # load emoca model
         path_to_models = Path(nect_config[CONFIG][MODEL_FOLDER])
@@ -479,7 +479,30 @@ class SelectMeshDialog(Dialog):
             compare_obj = copy.deepcopy(neutral_obj)
             compare_obj.set_vertex_colors(vertex_colors)
             compare_obj.save(output_path / f"{face_path.name}_with_heatmap.obj")
+        self.log_face_comparisons(neutral_face_path, compare_list_paths)
 
+    def log_face_comparisons(self, neutral_face_path, compare_list_paths):
+        logger.debug(f"Logging comparison between {neutral_face_path} and {compare_list_paths}")
+        output_path = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / F_COMPARE
+        output_path.mkdir(parents=True, exist_ok=True)
+        # Set up the log file path
+        log_file = output_path / "face_comparisons.ini"
+        # Create configparser object to write to ini file
+        config = configparser.ConfigParser()
+        # Load the existing file if it exists, to avoid overwriting previous logs
+        if log_file.exists():
+            config.read(log_file)
+        # Create a new section for the neutral face comparison
+        neutral_face_name = neutral_face_path.name
+        config[neutral_face_name] = {}
+        # Log the neutral face's comparison to each face in compare_list_paths
+        for i, compare_face_path in enumerate(compare_list_paths):
+            compare_face_name = Path(compare_face_path).name
+            config[neutral_face_name][f"compared_face_{i + 1}"] = str(compare_face_name)
+        # Save the log to the .ini file
+        with open(log_file, 'w') as log:
+            config.write(log)
+        logger.debug(f"Comparison log saved to {log_file}")
 
 class SettingsDialog(Dialog):
     def __init__(self, master, page=""):

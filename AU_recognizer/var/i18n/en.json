@@ -79,7 +79,9 @@
   },
   "tooltips": {
     "reset_view": "reset camera",
-    "open_set": "open settings"
+    "open_set": "open settings",
+    "neutral_face": "neutral face",
+    "compare_face": "activated face"
   },
   "entry_buttons": {
     "no_text": "",
@@ -280,63 +282,64 @@
       "columns": {
         "mesh_neutral": "mesh neutral face",
         "mesh_compare": "mesh compare face"
-      },
-      "image_selection": {
-        "columns": {
-          "images": "Images",
-          "fitted": "Fitted"
-        },
-        "data": {
-          "fitted": "Fitted",
-          "not_fitted": "Not fitted"
-        },
-        "hide_fitted": "Hide fitted images"
       }
     },
-    "tree_view": {
+    "image_selection": {
       "columns": {
-        "name": "Name",
-        "size": "Size",
-        "modified": "Modified",
         "images": "Images",
         "fitted": "Fitted"
-      }
-    },
-    "selected_file": {
-      "file": "File name:",
-      "suffix": "File type:",
-      "open_s": "Open on system",
-      "no_file": "No file selected",
-      "type": {
-        "unknown": "File",
-        ".ini": "Configuration file",
-        ".odt": "Text file",
-        ".jpg": "Image file",
-        ".bmp": "Image file",
-        ".png": "Image file",
-        ".mtl": "Material Template Library",
-        ".obj": "File for 3D geometries",
-        ".npy": "Binary file of a numpy array",
-        "folder": "Folder"
-      }
-    },
-    "selected_project": {
-      "name": "Name",
-      "path": "Path",
-      "fit": "3dmm fit",
-      "au_rec": "AU Recognition",
-      "done": "Done",
-      "not_done": "Not done",
-      "no_project": "No project selected"
-    },
-    "project_actions": {
-      "fit": {
-        "name": "3dmm fit",
-        "select_img": "Select images"
       },
-      "au_rec": {
-        "name": "AU Recognition",
-        "select_mesh": "Select mesh"
-      }
+      "data": {
+        "fitted": "Fitted",
+        "not_fitted": "Not fitted"
+      },
+      "hide_fitted": "Hide fitted images"
+    }
+  },
+  "tree_view": {
+    "columns": {
+      "name": "Name",
+      "size": "Size",
+      "modified": "Modified",
+      "images": "Images",
+      "fitted": "Fitted"
+    }
+  },
+  "selected_file": {
+    "file": "File name:",
+    "suffix": "File type:",
+    "open_s": "Open on system",
+    "no_file": "No file selected",
+    "type": {
+      "unknown": "File",
+      ".ini": "Configuration file",
+      ".odt": "Text file",
+      ".jpg": "Image file",
+      ".bmp": "Image file",
+      ".png": "Image file",
+      ".mtl": "Material Template Library",
+      ".obj": "File for 3D geometries",
+      ".npy": "Binary file of a numpy array",
+      "folder": "Folder"
+    }
+  },
+  "selected_project": {
+    "name": "Name",
+    "path": "Path",
+    "fit": "3dmm fit",
+    "au_rec": "AU Recognition",
+    "done": "Done",
+    "not_done": "Not done",
+    "no_project": "No project selected"
+  },
+  "project_actions": {
+    "fit": {
+      "name": "3dmm fit",
+      "select_img": "Select images"
+    },
+    "au_rec": {
+      "name": "AU Recognition",
+      "select_mesh": "Select mesh"
     }
   }
+}
