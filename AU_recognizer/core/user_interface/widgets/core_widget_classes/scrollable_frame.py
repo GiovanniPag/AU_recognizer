@@ -299,7 +299,7 @@ class ScrollableFrame(tkinter.Frame, CustomAppearanceModeBaseClass, CustomScalin
             elif sys.platform == "darwin":
                 delta = -event.delta
             else:
-                delta = -1 if event.num == 5 else 1  # Button-5 (down) or Button-4 (up)
+                delta = 1 if event.num == 5 else -1  # Button-5 (down) or Button-4 (up)
             # Determine the scroll direction (horizontal/vertical)
             if self._shift_pressed:  # Horizontal scroll
                 if self._parent_canvas.xview() != (0.0, 1.0):

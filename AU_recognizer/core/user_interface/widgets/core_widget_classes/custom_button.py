@@ -208,7 +208,7 @@ class CustomButton(CustomTKBaseClass):
                                         outline=self._apply_appearance_mode(self._fg_color),
                                         fill=self._apply_appearance_mode(self._fg_color))
         # create text label if text given
-        if self._text is not None and self._text != "":
+        if self._text is not None and self._text != "" or self._textvariable is not None and self._textvariable.get() != "":
             if self._text_label is None:
                 self._text_label = tkinter.Label(master=self,
                                                  font=self._apply_font_scaling(self._font),

@@ -60,6 +60,7 @@ P_FALSE = "false"
 # project folders
 F_INPUT = "input"
 F_OUTPUT = "output"
+F_COMPARE = "compare"
 
 # tk icons
 BASENAME_ICON = "::tk::icons::"
@@ -83,6 +84,7 @@ I18N_SAVE_BUTTON = "save"
 I18N_CLOSE_BUTTON = "close"
 I18N_FIT_SEL_BUTTON = "fit_sel"
 I18N_FIT_ALL_BUTTON = "fit_all"
+I18N_COMPARE_SEL_BUTTON = "com_sel"
 
 # menu options
 M_UNDERLINE = "underline"
@@ -151,6 +153,8 @@ TM_FILE_PATH = "file_path"
 TD_FITTED = "fitted"
 TD_IMAGES = "images"
 TD_HIDE_FITTED = "hide_fitted"
+TD_MESH_N = "mesh_neutral"
+TD_MESH_C = "mesh_compare"
 
 # project view strings
 PV_PATH = "path"
@@ -184,6 +188,8 @@ MF_SAVE_IMAGES = "save_images"
 MF_SAVE_CODES = "save_codes"
 MF_SAVE_MESH = "save_mesh"
 MF_FIT_MODE = "fit_mode"
+
+AU_SELECT_MESH = "select_mesh"
 
 # Setting Dialog
 GENERAL_TAB = "general_tab"

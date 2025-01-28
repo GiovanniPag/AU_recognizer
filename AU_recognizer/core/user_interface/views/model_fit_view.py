@@ -17,7 +17,7 @@ class ModelFitView(View):
         self.master = master
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.scrollFrame = ScrollableFrame(self)  # add a new scrollable frame
+        self.scrollFrame = ScrollableFrame(self, orientation="both")  # add a new scrollable frame
         self.scrollFrame.rowconfigure(0, weight=1)
         self.scrollFrame.columnconfigure(0, weight=1)
         self._project_info: Optional[ConfigParser] = None
@@ -27,11 +27,13 @@ class ModelFitView(View):
                                          values=[str(file_name.stem) for file_name in models], state="readonly")
         self.save_images_text = StringVar(value=i18n.entry_buttons["c_simages"])
         self.save_images = CustomCheckBox(master=self.scrollFrame, text="c_simages", textvariable=self.save_images_text,
-                                          check_state=True)
+                                          check_state=False)
         self.save_codes_text = StringVar(value=i18n.entry_buttons["c_scodes"])
-        self.save_codes = CustomCheckBox(master=self.scrollFrame, text="c_scodes", textvariable=self.save_codes_text)
+        self.save_codes = CustomCheckBox(master=self.scrollFrame, text="c_scodes", textvariable=self.save_codes_text,
+                                         check_state=True)
         self.save_mesh_text = StringVar(value=i18n.entry_buttons["c_smesh"])
-        self.save_mesh = CustomCheckBox(master=self.scrollFrame, text="c_smesh", textvariable=self.save_mesh_text)
+        self.save_mesh = CustomCheckBox(master=self.scrollFrame, text="c_smesh", textvariable=self.save_mesh_text,
+                                        check_state=True)
         self.fit_mode = RadioList(master=self.scrollFrame, list_title="mode_radio", default=R_DETAIL,
                                   data=[R_DETAIL, R_COARSE])
 

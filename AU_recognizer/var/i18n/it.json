@@ -77,8 +77,8 @@
       "normal_map": "Mappa normale"
     }
   },
-    "tooltips": {
-    "reset_view": "ripristina camera" ,
+  "tooltips": {
+    "reset_view": "ripristina camera",
     "open_set": "apri impostazioni"
   },
   "entry_buttons": {
@@ -202,6 +202,16 @@
         "message": "Errore di selezione",
         "title": "AU recognition - Errore selezione",
         "detail": "Nessuna immagine selezionata."
+      },
+      "no_neutral_selected": {
+        "message": "Errore di selezione",
+        "title": "AU recognition - Errore selezione",
+        "detail": "Volto neutrale non selezionato."
+      },
+      "no_compare_selected": {
+        "message": "Errore di selezione",
+        "title": "AU recognition - Errore selezione",
+        "detail": "Volto da comparare non selezionato."
       }
     },
     "confirmation_dialog": {
@@ -264,7 +274,14 @@
       "yes": "Si",
       "no": "No",
       "fit_all": "Adatta tutte",
-      "fit_sel": "Adatta selezionate"
+      "fit_sel": "Adatta selezionate",
+      "com_sel": "Compara selezionate"
+    },
+    "mesh_selection": {
+      "columns": {
+        "mesh_neutral": "mesh volto neutrale",
+        "mesh_compare": "mesh volti comparare"
+      }
     },
     "image_selection": {
       "columns": {
@@ -319,7 +336,8 @@
       "select_img": "Seleziona immagini"
     },
     "au_rec": {
-      "name": "Individuazione AU"
+      "name": "Individuazione AU",
+      "select_mesh": "Seleziona mesh"
     }
   }
 }

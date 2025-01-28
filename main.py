@@ -1,6 +1,6 @@
 # main that starts the GUI, the program has two parts
 # 1) load an image and make a fitting with a 3dmm
-# 2) take the fitted mesh and recognize activated AU
+# 2) take the fitted mesh and generate difference heatmap with neutral pose
 from AU_recognizer.AURecognizer import AURecognizer
 
 if __name__ == "__main__":
@@ -10,4 +10,3 @@ if __name__ == "__main__":
     app.mainloop()
 
 # TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
-# TODO: model fit view scrambled ui

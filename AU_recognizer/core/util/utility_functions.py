@@ -152,6 +152,31 @@ def check_kwargs_empty(kwargs_dict, raise_error=False) -> bool:
         return False
 
 
+def gray_to_hex(gray_string):
+    # Extract the percentage from the string (assuming format like "gray50")
+    percentage = int(gray_string[4:])  # Grab the number after "gray"
+
+    # Calculate the RGB value
+    value = round(255 * (percentage / 100))
+
+    # Convert to hex
+    return f"#{value:02X}{value:02X}{value:02X}"
+
+def lighten_color(hex_color, percentage):
+    # Strip '#' if present
+    hex_color = hex_color.lstrip('#')
+
+    # Convert hex to RGB
+    r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+
+    # Calculate the new RGB values
+    r = min(255, int(r + (255 - r) * (percentage / 100)))
+    g = min(255, int(g + (255 - g) * (percentage / 100)))
+    b = min(255, int(b + (255 - b) * (percentage / 100)))
+
+    # Convert back to hex and return
+    return f"#{r:02X}{g:02X}{b:02X}"
+
 def rename_path(path_to_rename,
                 new_name):
     path = Path(path_to_rename)

@@ -32,11 +32,15 @@ class ProjectActionView(CustomTabview, View):
     def create_view(self):
         logger.debug(f"create view in project action view")
         _mf_frame = self.add(name=i18n.project_actions_fit[PA_NAME])
+        _mf_frame.rowconfigure(0, weight=1)
+        _mf_frame.columnconfigure(0, weight=1)
         self._model_fit_frame = ModelFitView(_mf_frame)
-        self._model_fit_frame.grid(row=0, column=0)
+        self._model_fit_frame.grid(row=0, column=0, sticky="nsew")
         _aur_frame = self.add(name=i18n.project_actions_au_rec[PA_NAME])
+        _aur_frame.rowconfigure(0, weight=1)
+        _aur_frame.columnconfigure(0, weight=1)
         self._au_recognition_frame = AURecognitionView(_aur_frame)
-        self._au_recognition_frame.grid(row=0, column=0)
+        self._au_recognition_frame.grid(row=0, column=0, sticky="nsew")
         self.__update_view()
 
     def __update_view(self):

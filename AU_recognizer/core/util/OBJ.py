@@ -16,7 +16,8 @@ import numpy as np
 
 class OBJ:
     def __init__(self, filepath=None):
-        self.vertices = []  # 3D vertices (x, y, z) and (r, g, b)
+        self.vertices = []  # 3D vertices (x, y, z)
+        self.vertex_colors = []  # 3D vertices colors (r, g, b)
         self.texcoords = []  # 2D texture coordinates (u, v)
         self.normals = []  # 3D normals (nx, ny, nz)
         self.faces = []  # Faces will store vertex indices and texcoord indices and normal indices
@@ -30,17 +31,30 @@ class OBJ:
     def has_texture(self):
         return bool(self.texcoords)
 
-    def has_color(self):
-        return any(len(vertex) > 3 for vertex in self.vertices)
+    def set_vertex_colors(self, colors):
+        """Assign colors to vertices."""
+        if len(colors) != len(self.vertices):
+            raise ValueError("Number of colors must match the number of vertices.")
+        self.vertex_colors = colors
 
     def load(self, filepath):
         self.file = Path(filepath)
         has_normals = False
+        self.current_material = None
         with self.file.open() as f:
             for line in f:
                 if line.startswith('v '):  # Vertex position
+                    # Split the line into parts
+                    parts = list(map(float, line.split()[1:]))  # Convert to floats starting from index 1
                     # The first 3 components are vertex positions (x, y, z)
-                    self.vertices.append(list(map(float, line.split()[1:])))
+                    self.vertices.append(parts[:3])
+                    # Check if RGB values exist (line has 6 values)
+                    if len(parts) > 3:
+                        # Next three values are RGB
+                        self.vertex_colors.append(parts[3:])
+                    else:
+                        # If RGB is missing, assign a default color (e.g., white)
+                        self.vertex_colors.append([1.0, 1.0, 1.0])
                 elif line.startswith('vt '):  # Texture coordinate
                     self.texcoords.append(list(map(float, line[3:].split())))
                 elif line.startswith('vn '):  # Vertex normal
@@ -153,6 +167,9 @@ class OBJ:
     def get_faces(self):
         return self.faces
 
+    def get_faces_indices(self):
+        return np.array([face[0] for face in self.faces], dtype=np.int32)
+
     def get_materials(self):
         return self.materials
 
@@ -189,9 +206,7 @@ class OBJ:
                 # Add vertex positions
                 verts = []
                 verts.extend(self.vertices[vertex_index])
-                if not len(self.vertices[vertex_index]) > 3:
-                    # did not have color stored, had placeholder for color
-                    verts.extend([-1, -1, -1])
+                verts.extend(self.vertex_colors[vertex_index])
                 # Add texture coordinates (if available)
                 if texcoord_indices[i] != -1:
                     verts.extend(self.texcoords[texcoord_indices[i]])
@@ -213,6 +228,22 @@ class OBJ:
             interleaved_data[material]['index_data'] = np.array(interleaved_data[material]['index_data'],
                                                                 dtype=np.uint32)
         return interleaved_data, self.materials
+
+    def save(self, output_path):
+        """Save OBJ with vertex colors."""
+        with open(output_path, 'w') as file:
+            for i, vertex in enumerate(self.vertices):
+                line = f"v {' '.join(map(str, vertex))}"
+                line += f" {' '.join(map(str, self.vertex_colors[i]))}"
+                file.write(line + '\n')
+
+            for face in self.faces:
+                face_indices, texcoord_indices, normal_indices, material = face
+                face_str = ' '.join(
+                    f"{vi + 1}"  # Add 1 to make it 1-indexed
+                    for vi in face_indices  # Iterate over face_indices directly
+                )
+                file.write(f"f {face_str}\n")
 
 
 class Material:
