@@ -408,6 +408,7 @@ class CustomTabview(CustomTKBaseClass):
         # update current_name, so we don't lose the connection to the frame
         if self._current_name == old_name:
             self._current_name = new_name
+            self._segmented_button.set(new_name)
 
         # tab dictionary
         self._tab_dict[new_name] = self._tab_dict.pop(old_name)

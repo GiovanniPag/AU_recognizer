@@ -273,23 +273,31 @@ class SettingsDialog(Dialog):
                                              selected=self.language)
         # viewer tab
         self._fill_color = ColorPickerLabel(master=self.viewer_frame, label_text="fill_color",
-                                            default=nect_config[VIEWER][FILL_COLOR])
+                                            default=nect_config[VIEWER][FILL_COLOR],
+                                            on_change=lambda: self.save_viewer_config())
         self._line_color = ColorPickerLabel(master=self.viewer_frame, label_text="line_color",
-                                            default=nect_config[VIEWER][LINE_COLOR])
+                                            default=nect_config[VIEWER][LINE_COLOR],
+                                            on_change=lambda: self.save_viewer_config())
         self._canvas_color = ColorPickerLabel(master=self.viewer_frame, label_text="canvas_color",
-                                              default=nect_config[VIEWER][CANVAS_COLOR])
+                                              default=nect_config[VIEWER][CANVAS_COLOR],
+                                              on_change=lambda: self.save_viewer_config())
         self._point_color = ColorPickerLabel(master=self.viewer_frame, label_text="point_color",
-                                             default=nect_config[VIEWER][POINT_COLOR])
+                                             default=nect_config[VIEWER][POINT_COLOR],
+                                             on_change=lambda: self.save_viewer_config())
         self._point_size = NumberPicker(master=self.viewer_frame, label_text="point_size",
                                         default=nect_config[VIEWER][POINT_SIZE], min_value=1, max_value=20, increment=1,
-                                        is_float=False)
+                                        is_float=False,
+                                        on_change=lambda: self.save_viewer_config())
         self._ground_color = ColorPickerLabel(master=self.viewer_frame, label_text="ground_color",
-                                              default=nect_config[VIEWER][GROUND_COLOR])
+                                              default=nect_config[VIEWER][GROUND_COLOR],
+                                              on_change=lambda: self.save_viewer_config())
         self._sky_color = ColorPickerLabel(master=self.viewer_frame, label_text="sky_color",
-                                           default=nect_config[VIEWER][SKY_COLOR])
+                                           default=nect_config[VIEWER][SKY_COLOR],
+                                           on_change=lambda: self.save_viewer_config())
         self._moving_step = NumberPicker(master=self.viewer_frame, label_text="moving_step",
                                          default=nect_config[VIEWER][MOVING_STEP], min_value=0.01, max_value=1,
-                                         increment=0.01, is_float=True)
+                                         increment=0.01, is_float=True,
+                                         on_change=lambda: self.save_viewer_config())
 
     def create_view(self):
         logger.debug(f"{self.__class__.__name__} create view method")
@@ -336,11 +344,33 @@ class SettingsDialog(Dialog):
         for key, value in new_viewer_value.items():
             if str(nect_config[VIEWER][key]) != str(value):
                 nect_config[VIEWER][key] = str(value)
+
         write_config()
         self.close()
 
+    def save_viewer_config(self):
+        print("sadsadads")
+        new_viewer_value = {
+            FILL_COLOR: self._fill_color.get_value(),
+            LINE_COLOR: self._line_color.get_value(),
+            CANVAS_COLOR: self._canvas_color.get_value(),
+            POINT_COLOR: self._point_color.get_value(),
+            GROUND_COLOR: self._ground_color.get_value(),
+            SKY_COLOR: self._sky_color.get_value(),
+            POINT_SIZE: self._point_size.get_value(),
+            MOVING_STEP: self._moving_step.get_value()
+        }
+        for key, value in new_viewer_value.items():
+            if str(nect_config[VIEWER][key]) != str(value):
+                nect_config[VIEWER][key] = str(value)
+        write_config()
+        self.update_viewer()
+
     def ask_value(self):
         logger.debug(f"{self.__class__.__name__} ask value")
+        self.update_viewer()
+
+    def update_viewer(self):
         self.master.event_generate("<<ViewerChange>>")
 
     def dismiss_method(self):

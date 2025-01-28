@@ -10,5 +10,4 @@ if __name__ == "__main__":
     app.mainloop()
 
 # TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
-# TODO: UPDATE REAL TIME FROM SETTINGS TO 3D
-# TODO: project action view selected tab and language change error
+# TODO: model fit view scrambled ui

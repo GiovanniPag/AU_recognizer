@@ -1,5 +1,6 @@
 import colorsys
 import tkinter as tk
+from typing import Callable
 
 import numpy as np
 from PIL import Image, ImageTk
@@ -21,6 +22,7 @@ class AskColor(CustomToplevel):
                  text: str = "OK",
                  corner_radius: int = 24,
                  slider_border: int = 1,
+                 command: Callable = None,
                  **button_kwargs):
 
         super().__init__(master=master)
@@ -41,6 +43,7 @@ class AskColor(CustomToplevel):
         self.button_hover_color = self._apply_appearance_mode(
             ThemeManager.theme["CustomButton"]["hover_color"]) if button_hover_color is None else button_hover_color
         self.button_text = text
+        self.command = command
         self.corner_radius = corner_radius
         self.slider_border = min(10, slider_border)
         self.configure(bg_color=self.bg_color)
@@ -138,6 +141,8 @@ class AskColor(CustomToplevel):
         self.update_fields()
         # Update targets
         self.update_targets()
+        if self.command:
+            self.command(self.hsv_to_hex(self.hue, self.saturation, self.value))
 
     def update_preview(self):
         """Update the preview frame to show the current color."""
@@ -311,7 +316,7 @@ class AskColor(CustomToplevel):
         self.destroy()
 
     def _on_closing(self):
-        self._color = None
+        self._color = self.hsv_to_hex(self.hue, self.saturation, self.value)
         self.grab_release()
         self.destroy()
 
@@ -343,8 +348,8 @@ class AskColor(CustomToplevel):
         return colorsys.rgb_to_hls(r, g, b)
 
     @staticmethod
-    def rgb_to_hsv(r, g, b): # rgb normalized to [0,1]
-        return colorsys.rgb_to_hsv(r , g , b )
+    def rgb_to_hsv(r, g, b):  # rgb normalized to [0,1]
+        return colorsys.rgb_to_hsv(r, g, b)
 
     # Color conversion helpers
     @staticmethod

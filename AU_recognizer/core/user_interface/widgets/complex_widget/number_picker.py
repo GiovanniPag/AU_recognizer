@@ -1,5 +1,5 @@
 import tkinter as tk
-from typing import Union
+from typing import Union, Callable
 
 from AU_recognizer.core.user_interface import CustomLabel
 from AU_recognizer.core.user_interface.views import View
@@ -10,6 +10,7 @@ from AU_recognizer.core.util import i18n
 class NumberPicker(View):
     def __init__(self, master=None, label_text="no_text", default: float = 0, min_value: float = 0,
                  max_value: float = 100, increment: float = 1, is_float: bool = False,
+                 on_change: Union[Callable, None] = None,
                  **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
@@ -21,12 +22,13 @@ class NumberPicker(View):
         self.min_value = min_value
         self.max_value = max_value
         self.increment = increment
+        self.on_change = on_change
         self.update_language()
 
     def create_view(self):
         CustomLabel(self, textvariable=self._label_info).pack(side=tk.LEFT)
         self.spinbox = CustomSpinbox(self, min_value=self.min_value, max_value=self.max_value, step_size=self.increment,
-                                     default=self.default, use_float=self.is_float)
+                                     default=self.default, use_float=self.is_float, command=self.on_change)
         self.spinbox.pack(side=tk.LEFT)
 
     def get_value(self):
