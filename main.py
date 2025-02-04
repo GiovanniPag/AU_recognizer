@@ -10,3 +10,10 @@ if __name__ == "__main__":
     app.mainloop()
 
 # TODO: show fitting process, and return message, also check error on coarse fitting, return nulls and crashes
+# TODO: show compare process, and return message
+# TODO: refactor compare code, and add pose and identity normalization identity
+# TODO: try other dataset
+# TODO: save displacement in numypy file as 5023 values in file ID_AUN
+# TODO: scegli AU e individuare il muscolo che la attiva segnarlo come overlay
+#  sulla texture e vedere su che parte della mesh finisce cosi da mappare i punti della mesh che finiscono nel overlay
+#  del muscolo

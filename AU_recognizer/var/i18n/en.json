@@ -214,6 +214,16 @@
         "message": "Selection Error",
         "title": "AU recognition - Selection Error",
         "detail": "No face to compare selected."
+      },
+      "fitting_success": {
+        "message": "Fitting completed with success",
+        "title": "AU recognition - Fitting Completed",
+        "detail": "Fitting completed with success."
+      },
+      "fitting_failure": {
+        "message": "Fitting completed with errors",
+        "title": "AU recognition - Fitting Completed",
+        "detail": "Fitting completed with errors."
       }
     },
     "confirmation_dialog": {

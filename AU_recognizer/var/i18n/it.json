@@ -214,6 +214,16 @@
         "message": "Errore di selezione",
         "title": "AU recognition - Errore selezione",
         "detail": "Volto da comparare non selezionato."
+      },
+      "fitting_success": {
+        "message": "Fitting completato con successo",
+        "title": "AU recognition - Fitting completato",
+        "detail": "Fitting completato con successo."
+      },
+      "fitting_failure": {
+        "message": "Fitting completato con Errore",
+        "title": "AU recognition - Fitting completato",
+        "detail": "Fitting completato con errori."
       }
     },
     "confirmation_dialog": {

@@ -1,10 +1,10 @@
 import tkinter as tk
 from typing import Callable, Union
 
-from AU_recognizer.core.user_interface import CustomLabel, CustomFrame, CustomButton
-from AU_recognizer.core.user_interface.dialogs.color_picker_dial import AskColor
-from AU_recognizer.core.user_interface.views import View
-from AU_recognizer.core.util import logger, i18n
+from .....core.user_interface import CustomLabel, CustomFrame, CustomButton
+from .....core.user_interface.dialogs.color_picker_dial import AskColor
+from .....core.user_interface.views import View
+from .....core.util import logger, i18n
 
 
 class ColorPickerLabel(View):

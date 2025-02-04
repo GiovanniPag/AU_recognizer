@@ -15,7 +15,7 @@ import numpy as np
 
 
 class OBJ:
-    def __init__(self, filepath=None):
+    def __init__(self, filepath=None, generate_normals=True):
         self.vertices = []  # 3D vertices (x, y, z)
         self.vertex_colors = []  # 3D vertices colors (r, g, b)
         self.texcoords = []  # 2D texture coordinates (u, v)
@@ -26,7 +26,7 @@ class OBJ:
         self.current_material = None
         self.file = None
         if filepath:
-            self.load(filepath)
+            self.load(filepath, generate_normals)
 
     def has_texture(self):
         return bool(self.texcoords)
@@ -37,7 +37,7 @@ class OBJ:
             raise ValueError("Number of colors must match the number of vertices.")
         self.vertex_colors = colors
 
-    def load(self, filepath):
+    def load(self, filepath, generate_normals=True):
         self.file = Path(filepath)
         has_normals = False
         self.current_material = None
@@ -78,9 +78,10 @@ class OBJ:
                         texcoord_indices.append(int(parts[1]) - 1 if len(parts) > 1 and parts[1] else -1)
                         normal_indices.append(int(parts[2]) - 1 if len(parts) > 2 and parts[2] else -1)
                     self.faces.append((face_indices, texcoord_indices, normal_indices, self.current_material))
-        if not has_normals:
-            self.calculate_normals()
-        self.calculate_tangents()
+        if generate_normals:
+            if not has_normals:
+                self.calculate_normals()
+            self.calculate_tangents()
 
     def load_mtl(self, mtl_filepath):
         current_material = None

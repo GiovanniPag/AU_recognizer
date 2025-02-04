@@ -7,7 +7,7 @@ from AU_recognizer.core.util import (i18n, logger, config, call_by_ws, nect_conf
 from AU_recognizer.core.user_interface import *
 from AU_recognizer.core.user_interface.views import (View, MenuBar, ProjectTreeView, ProjectInfoView,
                                                      ProjectActionView, Viewer3DView, TreeViewMenu)
-from AU_recognizer.core.user_interface.dialogs.dialog import SettingsDialog
+from AU_recognizer.core.user_interface.dialogs.complex_dialog import SettingsDialog
 from AU_recognizer.core.controllers import Controller, MenuController, TreeViewMenuController, TreeController, \
     Viewer3DController, SelectedFileController, SelectedProjectController, ProjectActionController
 from AU_recognizer.core.user_interface.views.selected_file_view import SelectedFileView

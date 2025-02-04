@@ -1,5 +1,5 @@
 from AU_recognizer.core.controllers.base_controller import Controller
-from AU_recognizer.core.user_interface.dialogs.dialog import SelectMeshDialog
+from AU_recognizer.core.user_interface.dialogs.complex_dialog import SelectMeshDialog
 from AU_recognizer.core.user_interface.views import AURecognitionView
 from AU_recognizer.core.util import logger
 

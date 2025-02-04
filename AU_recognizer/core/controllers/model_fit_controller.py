@@ -1,5 +1,5 @@
 from AU_recognizer.core.controllers.base_controller import Controller
-from AU_recognizer.core.user_interface.dialogs.dialog import SelectFitImageDialog
+from AU_recognizer.core.user_interface.dialogs.complex_dialog import SelectFitImageDialog
 from AU_recognizer.core.user_interface.views import ModelFitView
 from AU_recognizer.core.util import logger
 
