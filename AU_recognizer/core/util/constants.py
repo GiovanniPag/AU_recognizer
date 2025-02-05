@@ -155,6 +155,8 @@ TD_IMAGES = "images"
 TD_HIDE_FITTED = "hide_fitted"
 TD_MESH_N = "mesh_neutral"
 TD_MESH_C = "mesh_compare"
+MESH_POSE = "normalize_pose"
+MESH_IDENTITY = "normalize_identity"
 
 # project view strings
 PV_PATH = "path"

@@ -1,7 +1,8 @@
 import configparser
 import copy
+import re
 from pathlib import Path
-from tkinter import BooleanVar, StringVar, BOTH, BOTTOM, X, LEFT, Y, RIGHT, END, NSEW, E, EW
+from tkinter import BooleanVar, StringVar, BOTH, BOTTOM, X, LEFT, Y, RIGHT, END, NSEW, E, EW, TOP
 from tkinter.ttk import Treeview
 
 import numpy as np
@@ -13,6 +14,7 @@ from AU_recognizer.core.user_interface import CustomFrame, CustomButton, CustomC
     CustomTabview
 from AU_recognizer.core.user_interface.dialogs import Dialog
 from AU_recognizer.core.user_interface.dialogs.dialog import DialogMessage
+from AU_recognizer.core.user_interface.dialogs.dialog_util import open_message_dialog
 from AU_recognizer.core.user_interface.widgets.complex_widget import EntryButton, ComboLabel, ColorPickerLabel, \
     NumberPicker
 from AU_recognizer.core.util import i18n, PA_NAME, TD_IMAGES, TD_FITTED, TD_HIDE_FITTED, logger, T_CENTER, T_COLUMNS, \
@@ -20,7 +22,7 @@ from AU_recognizer.core.util import i18n, PA_NAME, TD_IMAGES, TD_FITTED, TD_HIDE
     I18N_MESSAGE, I18N_DETAIL, INFORMATION_ICON, TD_MESH_N, TD_MESH_C, I18N_COMPARE_SEL_BUTTON, F_COMPARE, OBJ, \
     nect_config, CONFIG, MODEL_FOLDER, GENERAL_TAB, VIEWER_TAB, I18N_PATH, LOGGER_PATH, LOG_FOLDER, PROJECTS_FOLDER, \
     LANGUAGE, retrieve_files_from_path, VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_COLOR, POINT_SIZE, \
-    GROUND_COLOR, SKY_COLOR, MOVING_STEP, I18N_SAVE_BUTTON, write_config
+    GROUND_COLOR, SKY_COLOR, MOVING_STEP, I18N_SAVE_BUTTON, write_config, MESH_POSE, MESH_IDENTITY
 from AU_recognizer.core.util.utility_functions import lighten_color, gray_to_hex
 from gdl.models.DecaFLAME import FLAME_mediapipe
 from gdl_apps.EMOCA.utils.load import load_model
@@ -230,9 +232,12 @@ class SelectMeshDialog(Dialog):
         self.project = project
         self._project_name = str(self.project.sections()[0])
         self.selected_images = []
+        self.normalize_pose_var = BooleanVar(value=True)
+        self.normalize_identity_var = BooleanVar(value=False)
         self.main_frame = CustomFrame(self)
         self.neutral_frame = CustomFrame(self.main_frame)
         self.compare_frame = CustomFrame(self.main_frame)
+        self.instructions_frame = CustomFrame(self.main_frame)
         self.bottom_frame = CustomFrame(self)
         self.mesh_treeview_neutral = Treeview(self.neutral_frame, columns=TD_MESH_N, selectmode='browse')
         # Entry widget for filter text
@@ -281,7 +286,7 @@ class SelectMeshDialog(Dialog):
         self.mesh_treeview_neutral.pack(fill=BOTH, expand=True)
         self.filter_entry_neutral.pack(fill=X, padx=5, pady=5)  # Filter text box
         # compare right frame
-        self.compare_frame.pack(side=RIGHT, fill=BOTH, expand=True)
+        self.compare_frame.pack(side=LEFT, fill=BOTH, expand=True)
         # Treeview for images
         self.mesh_treeview_compare.column(TD_MESH_C, anchor=T_CENTER, minwidth=300, width=300)
         self.mesh_treeview_compare.heading(TD_MESH_C, text=i18n.mesh_sel_dialog[T_COLUMNS][TD_MESH_C])
@@ -293,6 +298,21 @@ class SelectMeshDialog(Dialog):
         self.mesh_treeview_compare["show"] = "headings"
         self.mesh_treeview_compare.pack(fill=BOTH, expand=True)
         self.filter_entry_compare.pack(fill=X, padx=5, pady=5)  # Filter text box
+        self.instructions_frame.pack(side=RIGHT, fill=BOTH, expand=True)
+        # Checkbox for Pose Normalization
+        self.pose_checkbox = CustomCheckBox(
+            self.instructions_frame,
+            text=i18n.mesh_sel_dialog[MESH_POSE],
+            variable=self.normalize_pose_var
+        )
+        self.pose_checkbox.pack(side=TOP, padx=5, pady=5)
+        # Checkbox for Identity Normalization
+        self.identity_checkbox = CustomCheckBox(
+            self.instructions_frame,
+            text=i18n.mesh_sel_dialog[MESH_IDENTITY],
+            variable=self.normalize_identity_var
+        )
+        self.identity_checkbox.pack(side=TOP, padx=5, pady=5)
         # Bottom frame for buttons
         self.bottom_frame.pack(side=BOTTOM, fill=X, expand=True)
         # Buttons
@@ -386,6 +406,7 @@ class SelectMeshDialog(Dialog):
                           icon=INFORMATION_ICON).show()
             return
         self.compare_faces(neutral_face_path=neutral_face, compare_list_paths=faces_compare)
+        open_message_dialog(master=self, message="compare_success")
         logger.debug("<<UpdateTreeSmall>> event generation")
         self.master.event_generate("<<UpdateTreeSmall>>")
 
@@ -405,10 +426,17 @@ class SelectMeshDialog(Dialog):
         neutral_obj = OBJ(filepath=neutral_face_path / "mesh_coarse.obj", generate_normals=False)
         n_verts = neutral_obj.get_vertices()
         neutral_pose = np.load(neutral_face_path / 'pose.npy')
+        neutral_shape = np.load(neutral_face_path / 'shape.npy')
         # load emoca model
         path_to_models = Path(nect_config[CONFIG][MODEL_FOLDER])
         model_name = "EMOCA_v2_lr_mse_20"
         mode = "detail"
+        # Build a suffix string based on normalization options
+        suffix = ""
+        if self.normalize_pose_var.get():
+            suffix += "_normPose"
+        if self.normalize_identity_var.get():
+            suffix += "_normIdentity"
         # 0) clear memory
         torch.cuda.empty_cache()  # Clear any cached GPU memory
         # 1) Load the model
@@ -419,11 +447,11 @@ class SelectMeshDialog(Dialog):
             face_path = Path(face_path)
             face_obj = OBJ(filepath=face_path / "mesh_coarse.obj", generate_normals=False)
             f_exp = np.load(face_path / 'exp.npy')
-            # f_pose = np.load(face_path / 'pose.npy')
+            f_pose = np.load(face_path / 'pose.npy')
             f_shape = np.load(face_path / 'shape.npy')
-            shape = torch.from_numpy(f_shape)
+            shape = torch.from_numpy(neutral_shape if self.normalize_identity_var.get() else f_shape)
             exp = torch.from_numpy(f_exp)
-            pose = torch.from_numpy(neutral_pose)
+            pose = torch.from_numpy(neutral_pose if self.normalize_pose_var.get() else f_pose)
             shape = shape.unsqueeze(0)  # Shape: [1, 100]
             exp = exp.unsqueeze(0)  # Shape: [1, 50]
             pose = pose.unsqueeze(0)  # Shape: [1, 6]
@@ -446,7 +474,11 @@ class SelectMeshDialog(Dialog):
             vertex_colors = colormap(normalized_diffs)[:, :3]  # RGB values for each vertex
             compare_obj = copy.deepcopy(face_obj)
             compare_obj.set_vertex_colors(vertex_colors)
-            compare_obj.save(output_path / f"{face_path.name}_with_heatmap.obj")
+            compare_obj.save(output_path / f"{face_path.name[:-2]}_with_heatmap{suffix}.obj")
+            # save diff
+            # Usa una regex per inserire un "_" tra lettere e numeri
+            modified_name = re.sub(r'([A-Za-z]+)(\d)', r'\1_\2', face_path.name[:-2])
+            np.save(output_path / f"{modified_name}_diffs{suffix}.npy", diffs)  # Save as binary
         self.log_face_comparisons(neutral_face_path, compare_list_paths)
 
     def log_face_comparisons(self, neutral_face_path, compare_list_paths):
@@ -461,11 +493,11 @@ class SelectMeshDialog(Dialog):
         if log_file.exists():
             config.read(log_file)
         # Create a new section for the neutral face comparison
-        neutral_face_name = neutral_face_path.name
+        neutral_face_name = neutral_face_path.name[:-2]
         config[neutral_face_name] = {}
         # Log the neutral face's comparison to each face in compare_list_paths
         for i, compare_face_path in enumerate(compare_list_paths):
-            compare_face_name = Path(compare_face_path).name
+            compare_face_name = Path(compare_face_path).name[:-2]
             config[neutral_face_name][f"compared_face_{i + 1}"] = str(compare_face_name)
         # Save the log to the .ini file
         with open(log_file, 'w') as log:

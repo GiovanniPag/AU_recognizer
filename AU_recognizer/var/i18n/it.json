@@ -224,6 +224,12 @@
         "message": "Fitting completato con Errore",
         "title": "AU recognition - Fitting completato",
         "detail": "Fitting completato con errori."
+      },
+
+      "compare_success": {
+        "message": "Comparazione completata con successo",
+        "title": "AU recognition - Comparazione Completata",
+        "detail": "Comparazione completata con successo."
       }
     },
     "confirmation_dialog": {
@@ -293,7 +299,9 @@
       "columns": {
         "mesh_neutral": "mesh volto neutrale",
         "mesh_compare": "mesh volti comparare"
-      }
+      },
+      "normalize_pose": "Normalizza Posa",
+      "normalize_identity": "Normalizza identità"
     },
     "image_selection": {
       "columns": {

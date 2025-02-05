@@ -2,6 +2,7 @@ import configparser
 import platform as pf
 import time
 from pathlib import Path
+from pprint import pprint
 from tkinter import BOTH, StringVar, Canvas
 
 import numpy as np
@@ -89,9 +90,9 @@ class Viewer3DGl(View):
             # Check if the object is in the comparison data
             for neutral_face in config.sections():
                 for key, value in config[neutral_face].items():
-                    if value == obj_file_path.name[:obj_file_path.name.find("_with_heatmap.obj")]:
-                        self.neutral_face_img = [file for file in input_folder.glob(f"{neutral_face[:-2]}.*")][0]
-                        self.compare_face_img = [file for file in input_folder.glob(f"{value[:-2]}.*")][0]
+                    if value == obj_file_path.name.rsplit("_with_heatmap", 1)[0]:
+                        self.neutral_face_img = [file for file in input_folder.glob(f"{neutral_face}.*")][0]
+                        self.compare_face_img = [file for file in input_folder.glob(f"{value}.*")][0]
 
     def _toggle_light(self):
         self.canvas_3d.update_shader_uniforms([("useLight", self.lighting_checkbox.get())], start_shader=True)
