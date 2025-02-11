@@ -357,7 +357,8 @@
     },
     "au_rec": {
       "name": "AU Recognition",
-      "select_mesh": "Select mesh"
+      "select_mesh": "Select mesh",
+      "tag_mesh": "Tag mesh by differences"
     }
   }
 }

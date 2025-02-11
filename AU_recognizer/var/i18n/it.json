@@ -357,7 +357,8 @@
     },
     "au_rec": {
       "name": "Individuazione AU",
-      "select_mesh": "Seleziona mesh"
+      "select_mesh": "Seleziona mesh",
+      "tag_mesh": "Etichetta mesh tramite differenze"
     }
   }
 }

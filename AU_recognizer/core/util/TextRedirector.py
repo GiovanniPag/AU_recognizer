@@ -12,7 +12,7 @@ class TextRedirector:
     def write(self, message):
         """Write the message to the text widget and auto-scroll."""
         self.text_widget.configure(state="normal")
-        self.text_widget.insert(tk.END, f"{message} + \n", (self.tag,))
+        self.text_widget.insert(tk.END, f"{message} \n", (self.tag,))
         self.text_widget.configure(state="disabled")
         self.text_widget.yview(tk.END)  # Auto-scroll to the bottom
 

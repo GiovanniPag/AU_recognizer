@@ -192,6 +192,7 @@ MF_SAVE_MESH = "save_mesh"
 MF_FIT_MODE = "fit_mode"
 
 AU_SELECT_MESH = "select_mesh"
+AU_TAG_MESH = "tag_mesh"
 
 # Setting Dialog
 GENERAL_TAB = "general_tab"
