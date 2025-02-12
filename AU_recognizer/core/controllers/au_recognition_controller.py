@@ -1,5 +1,5 @@
 from AU_recognizer.core.controllers.base_controller import Controller
-from AU_recognizer.core.user_interface.dialogs.complex_dialog import SelectMeshDialog
+from AU_recognizer.core.user_interface.dialogs.complex_dialog import SelectMeshDialog, TagMeshDialog
 from AU_recognizer.core.user_interface.views import AURecognitionView
 from AU_recognizer.core.util import logger
 
@@ -17,6 +17,7 @@ class AURecognitionController(Controller):
         self.view = v
         self.view.create_view()
         self.view._au_button.configure(command=lambda: self.open_mesh_select_dialog())
+        self.view._tag_button.configure(command=lambda: self.open_mesh_tag_dialog())
 
     def update_selected(self, data):
         logger.debug(f"update selected in AURecognition controller")
@@ -28,3 +29,8 @@ class AURecognitionController(Controller):
         logger.debug("open select images for fit dialog")
         if self.data:
             SelectMeshDialog(master=self.master, project=self.data).show()
+
+    def open_mesh_tag_dialog(self):
+        logger.debug("open select images for fit dialog")
+        if self.data:
+            TagMeshDialog(master=self.master, project=self.data).show()

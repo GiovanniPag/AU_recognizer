@@ -37,6 +37,10 @@ class OBJ:
             raise ValueError("Number of colors must match the number of vertices.")
         self.vertex_colors = colors
 
+    def get_vertex_colors(self):
+        """Assign colors to vertices."""
+        return self.vertex_colors
+
     def load(self, filepath, generate_normals=True):
         self.file = Path(filepath)
         has_normals = False

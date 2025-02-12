@@ -99,6 +99,8 @@ class I18N:
                 self.im_sel_dialog = data['dialog']["image_selection"]
                 # select mesh dialog
                 self.mesh_sel_dialog = data['dialog']["mesh_selection"]
+                # tag dialog
+                self.mesh_tag_dialog = data['dialog']["mesh_tag"]
 
                 # open gl viewer
                 self.gl_viewer = data['gl_viewer']

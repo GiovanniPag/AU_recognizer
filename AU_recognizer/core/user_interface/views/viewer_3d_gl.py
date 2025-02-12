@@ -1,9 +1,9 @@
 import configparser
+import json
 import platform as pf
 import time
 from pathlib import Path
-from pprint import pprint
-from tkinter import BOTH, StringVar, Canvas
+from tkinter import BOTH, StringVar
 
 import numpy as np
 from OpenGL.GL import *
@@ -11,7 +11,6 @@ from OpenGL.GL.shaders import compileProgram
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from PIL import Image
-from PIL.ImageTk import PhotoImage
 from pyopengltk import OpenGLFrame
 
 from AU_recognizer.core.user_interface import CustomFrame, CustomCheckBox, CustomButton, CustomTkImage, CustomTooltip, \
@@ -29,22 +28,29 @@ from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quater
 
 
 class Viewer3DGl(View):
-    def __init__(self, master, placeholder, obj_file_path=None):
+    def __init__(self, master, placeholder, obj_file_path=None, tag=False):
         super().__init__(placeholder)
         self.compare_face_img = None
         self.neutral_face_img = None
+        self.vertex_tag_map = {}
         self.master = master
+        self.tag = tag
+        if tag is True:
+            self.load_json_data(obj_file_path)
+            obj_file_path = asset("neutral_face.obj")
         self.is_comparison = self.check_if_compare(obj_file_path)
         self.obj = OBJ(filepath=obj_file_path)
         self.viewer_frame = CustomFrame(self)
         self.control_frame = CustomFrame(self)
-        self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj, is_comparison=self.is_comparison)
+        self.canvas_3d = Frame3DGl(placeholder=self.viewer_frame, obj=self.obj, is_comparison=self.is_comparison,
+                                   is_tag=self.tag)
         self.render_combobox = ComboLabel(master=self.control_frame, label_text="gl_combo",
                                           selected=i18n.gl_viewer["combo"][GL_SOLID],
                                           values=list(i18n.gl_viewer['combo'].values()), state="readonly")
         self.color_combobox = ComboLabel(master=self.control_frame, label_text="gl_color",
                                          selected=i18n.gl_viewer["color_combo"][
-                                             GL_DEFAULT] if not self.is_comparison else i18n.gl_viewer["color_combo"][
+                                             GL_DEFAULT] if not self.is_comparison or self.tag else
+                                         i18n.gl_viewer["color_combo"][
                                              GL_V_COLOR],
                                          values=list(i18n.gl_viewer['color_combo'].values()), state="readonly")
         self.normal_combobox = ComboLabel(master=self.control_frame, label_text="gl_normal",
@@ -68,7 +74,10 @@ class Viewer3DGl(View):
                                             fg_color="transparent", image=self.settings_icon,
                                             command=self.open_settings)
         self.settings_tooltip = CustomTooltip(self.reset_button, text=i18n.tooltips["open_set"])
-
+        if tag:
+            self.tag_combobox = ComboLabel(master=self.control_frame, label_text="gl_tags",
+                                           selected=list(self.vertex_tag_map.keys())[0],
+                                           values=list(self.vertex_tag_map.keys()), state="readonly")
         # New attributes to track the face comparison data
         if self.is_comparison:
             self.load_comparison_data(obj_file_path)
@@ -78,6 +87,18 @@ class Viewer3DGl(View):
     @staticmethod
     def check_if_compare(obj_file_path):
         return Path(obj_file_path).parent.name == F_COMPARE
+
+    def load_json_data(self, json_path):
+        """Loads the JSON file containing vertex-tag data."""
+        if not json_path:
+            return
+        with open(json_path, 'r') as file:
+            data = json.load(file)
+        for vertex_id, tags in enumerate(data):
+            for tag in tags:
+                if tag not in self.vertex_tag_map:
+                    self.vertex_tag_map[tag] = []
+                self.vertex_tag_map[tag].append(int(vertex_id))
 
     def load_comparison_data(self, obj_file_path):
         # Check if the object file is in the compare folder
@@ -147,6 +168,18 @@ class Viewer3DGl(View):
             self.canvas_3d.update_shader_uniforms([("isPoints", True),
                                                    ("isWireframe", False), ], start_shader=True)
 
+    def _change_tag_overlay(self, new_code):
+        """ Apply a colored overlay to the vertices associated with the selected tag. """
+        num_vertices = len(self.obj.get_vertex_colors())
+        colors = [(1, 1, 1)] * num_vertices  # Default all to white
+
+        if new_code in self.vertex_tag_map:
+            vertex_indices = self.vertex_tag_map[new_code]
+            for idx in vertex_indices:
+                colors[idx] = (1, 0, 0)  # Set selected vertices to red
+        self.obj.set_vertex_colors(colors)  # Update the vertex colors
+        self.canvas_3d.update_obj_data()
+
     def create_view(self):
         self.rowconfigure(0, weight=7)  # make grid cell expandable
         self.rowconfigure(1, weight=1)  # make grid cell expandable
@@ -171,6 +204,10 @@ class Viewer3DGl(View):
         self.reset_button.grid(row=5, column=1, sticky='e')
         # Button to open settings
         self.settings_button.grid(row=5, column=2, sticky='e')
+        if self.tag:
+            self.tag_combobox.create_view()
+            self.tag_combobox.grid(row=6, column=0, columnspan=3, sticky='e')
+            self.tag_combobox.bind_combobox_event(self._change_tag_overlay)
         self.render_combobox.bind_combobox_event(self._change_render_mode)
         self.color_combobox.bind_combobox_event(self._change_color_mode)
         self.normal_combobox.bind_combobox_event(self._change_normal_mode)
@@ -179,7 +216,7 @@ class Viewer3DGl(View):
         self.render_combobox.update_language(sel=i18n.gl_viewer["combo"][GL_SOLID],
                                              values=list(i18n.gl_viewer['combo'].values()))
         self.color_combobox.update_language(sel=i18n.gl_viewer["color_combo"][
-            GL_DEFAULT] if not self.is_comparison else i18n.gl_viewer["color_combo"][
+            GL_DEFAULT] if not self.is_comparison or self.tag else i18n.gl_viewer["color_combo"][
             GL_V_COLOR],
                                             values=list(i18n.gl_viewer['color_combo'].values()))
         self.normal_combobox.update_language(sel=i18n.gl_viewer["normal_combo"][GL_NO],
@@ -187,11 +224,11 @@ class Viewer3DGl(View):
         self.lighting_checkbox.update_language()
         self.reset_button.update_language()
         self.settings_button.update_language()
-        self.reset_tooltip.text=i18n.tooltips["reset_view"]
-        self.settings_tooltip.text=i18n.tooltips["open_set"]
+        self.reset_tooltip.text = i18n.tooltips["reset_view"]
+        self.settings_tooltip.text = i18n.tooltips["open_set"]
         if self.neutral_tooltip and self.compare_tooltip:
-            self.neutral_tooltip.text=i18n.tooltips["neutral_face"]
-            self.compare_tooltip.text=i18n.tooltips["compare_face"]
+            self.neutral_tooltip.text = i18n.tooltips["neutral_face"]
+            self.compare_tooltip.text = i18n.tooltips["compare_face"]
 
     def display(self, animate):
         self.canvas_3d.animate = animate
@@ -224,7 +261,7 @@ class Viewer3DGl(View):
 
 
 class Frame3DGl(OpenGLFrame):
-    def __init__(self, placeholder, obj: OBJ = None, is_comparison=False):
+    def __init__(self, placeholder, obj: OBJ = None, is_comparison=False, is_tag=False):
         super().__init__(placeholder)  # FPS counter
         self.fps_counter = FPSCounter(self)
         self._canvas_color = hex_to_float_rgba(str(nect_config[VIEWER][CANVAS_COLOR]))
@@ -294,7 +331,7 @@ class Frame3DGl(OpenGLFrame):
             "useVertexColor": {
                 GL_U_TYPE: "bool",
                 GL_U_POINTER: None,
-                GL_U_VALUE: is_comparison,
+                GL_U_VALUE: is_comparison or is_tag,
             },
             "skyColor": {
                 GL_U_TYPE: "vec3",
@@ -704,6 +741,18 @@ class Frame3DGl(OpenGLFrame):
     def __end_pan(self, _event):
         """End panning on right-click release"""
         self._is_right_mouse_button_down = False
+
+    def update_obj_data(self):
+        """ Updates the OBJ model data and rerenders it correctly """
+        batched_data, materials = self.obj.prepare_opengl_data()  # Prepare new OpenGL data
+        self.model = {'batched_data': batched_data, 'materials': materials}  # Update model storage
+        # If necessary, delete old VAOs and buffers before creating new ones
+        if self.vertex_array_object:
+            for vao in self.vertex_array_object.values():
+                glDeleteVertexArrays(1, [vao])
+        glUseProgram(0)  # Deactivate the shader program
+        self.vertex_array_object = self.create_object()  # Recreate VAOs
+        self.redraw()  # Trigger re-render
 
 
 # Avoiding glitches in pyopengl-3.0.x and python3.4

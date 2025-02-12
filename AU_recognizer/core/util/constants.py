@@ -61,6 +61,7 @@ P_FALSE = "false"
 F_INPUT = "input"
 F_OUTPUT = "output"
 F_COMPARE = "compare"
+F_TAG = "tag"
 
 # tk icons
 BASENAME_ICON = "::tk::icons::"
@@ -83,6 +84,7 @@ I18N_CANCEL_BUTTON = "cancel"
 I18N_SAVE_BUTTON = "save"
 I18N_CLOSE_BUTTON = "close"
 I18N_FIT_SEL_BUTTON = "fit_sel"
+I18N_TAG_SEL_BUTTON = "tag_sel"
 I18N_FIT_ALL_BUTTON = "fit_all"
 I18N_COMPARE_SEL_BUTTON = "com_sel"
 
@@ -157,6 +159,10 @@ TD_MESH_N = "mesh_neutral"
 TD_MESH_C = "mesh_compare"
 MESH_POSE = "normalize_pose"
 MESH_IDENTITY = "normalize_identity"
+TD_HIDE_NOT_NORM = "hide_normal"
+TD_THRESHOLD = "threshold"
+TD_HIDE_POSE = "hide_pose"
+TD_HIDE_IDENTITY = "hide_identity"
 
 # project view strings
 PV_PATH = "path"

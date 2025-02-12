@@ -97,6 +97,7 @@
     "gl_color": "Colore:",
     "gl_normal": "Normali:",
     "gl_light": "Luce:",
+    "gl_tags": "Tag overlay:",
     "mode_radio": "Modalità:",
     "c_simages": "Salva immagini",
     "c_scodes": "Salva Codici FLAME",
@@ -205,6 +206,11 @@
         "title": "AU recognition - Errore selezione",
         "detail": "Nessuna immagine selezionata."
       },
+      "no_diff_selected": {
+        "message": "Errore di selezione",
+        "title": "AU recognition - Errore selezione",
+        "detail": "Nessuna Differenza selezionata."
+      },
       "no_neutral_selected": {
         "message": "Errore di selezione",
         "title": "AU recognition - Errore selezione",
@@ -225,7 +231,6 @@
         "title": "AU recognition - Fitting completato",
         "detail": "Fitting completato con errori."
       },
-
       "compare_success": {
         "message": "Comparazione completata con successo",
         "title": "AU recognition - Comparazione Completata",
@@ -293,6 +298,7 @@
       "no": "No",
       "fit_all": "Adatta tutte",
       "fit_sel": "Adatta selezionate",
+      "tag_sel": "Etichetta selezionate",
       "com_sel": "Compara selezionate"
     },
     "mesh_selection": {
@@ -313,6 +319,15 @@
         "not_fitted": "Non adattata"
       },
       "hide_fitted": "Nascondi le immagini adattate"
+    },
+    "mesh_tag": {
+      "columns": {
+        "images": "Immagini"
+      },
+      "threshold": "Soglia",
+      "hide_normal": "Nascondi le immagini non normalizzate",
+      "hide_pose": "Nascondi le immagini con posa normalizzata",
+      "hide_identity": "Nascondi le immagini con identità normalizzata"
     }
   },
   "tree_view": {

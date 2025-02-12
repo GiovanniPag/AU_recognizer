@@ -97,6 +97,7 @@
     "gl_color": "Color:",
     "gl_normal": "Normals:",
     "gl_light": "Light:",
+    "gl_tags": "Tag overlay:",
     "mode_radio": "Mode:",
     "c_simages": "Save images",
     "c_scodes": "Save FLAME codes",
@@ -215,6 +216,11 @@
         "title": "AU recognition - Selection Error",
         "detail": "No face to compare selected."
       },
+      "no_diff_selected": {
+        "message": "Selection Error",
+        "title": "AU recognition - Selection Error",
+        "detail": "No difference selected."
+      },
       "fitting_success": {
         "message": "Fitting completed with success",
         "title": "AU recognition - Fitting Completed",
@@ -225,7 +231,6 @@
         "title": "AU recognition - Fitting Completed",
         "detail": "Fitting completed with errors."
       },
-
       "compare_success": {
         "message": "Comparison completed with success",
         "title": "AU recognition - Comparison completed",
@@ -292,7 +297,9 @@
       "yes": "Yes",
       "no": "No",
       "fit_all": "Fit all",
-      "fit_sel": "Fit selected"
+      "fit_sel": "Fit selected",
+      "tag_sel": "Tag selected",
+      "com_sel": "Compare selected"
     },
     "mesh_selection": {
       "columns": {
@@ -312,6 +319,15 @@
         "not_fitted": "Not fitted"
       },
       "hide_fitted": "Hide fitted images"
+    },
+    "mesh_tag": {
+      "columns": {
+        "images": "Images"
+      },
+      "threshold": "Threshold",
+      "hide_normal": "Hide not normalized images",
+      "hide_pose": "Hide normalized pose images",
+      "hide_identity": "Hide normalized identity images"
     }
   },
   "tree_view": {

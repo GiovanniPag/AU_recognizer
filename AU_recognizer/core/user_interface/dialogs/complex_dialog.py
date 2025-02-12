@@ -10,8 +10,9 @@ import torch
 from matplotlib import cm
 
 from AU_recognizer.core.projects import emoca_fit
+from AU_recognizer.core.projects.emoca_tag import emoca_tag
 from AU_recognizer.core.user_interface import CustomFrame, CustomButton, CustomCheckBox, CustomEntry, ThemeManager, \
-    CustomTabview
+    CustomTabview, CustomLabel
 from AU_recognizer.core.user_interface.dialogs import Dialog
 from AU_recognizer.core.user_interface.dialogs.dialog import DialogMessage
 from AU_recognizer.core.user_interface.dialogs.dialog_util import open_message_dialog
@@ -22,7 +23,8 @@ from AU_recognizer.core.util import i18n, PA_NAME, TD_IMAGES, TD_FITTED, TD_HIDE
     I18N_MESSAGE, I18N_DETAIL, INFORMATION_ICON, TD_MESH_N, TD_MESH_C, I18N_COMPARE_SEL_BUTTON, F_COMPARE, OBJ, \
     nect_config, CONFIG, MODEL_FOLDER, GENERAL_TAB, VIEWER_TAB, I18N_PATH, LOGGER_PATH, LOG_FOLDER, PROJECTS_FOLDER, \
     LANGUAGE, retrieve_files_from_path, VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_COLOR, POINT_SIZE, \
-    GROUND_COLOR, SKY_COLOR, MOVING_STEP, I18N_SAVE_BUTTON, write_config, MESH_POSE, MESH_IDENTITY
+    GROUND_COLOR, SKY_COLOR, MOVING_STEP, I18N_SAVE_BUTTON, write_config, MESH_POSE, MESH_IDENTITY, TD_HIDE_IDENTITY, \
+    TD_HIDE_POSE, TD_HIDE_NOT_NORM, I18N_TAG_SEL_BUTTON, F_TAG, TD_THRESHOLD
 from AU_recognizer.core.util.utility_functions import lighten_color, gray_to_hex
 from gdl.models.DecaFLAME import FLAME_mediapipe
 from gdl_apps.EMOCA.utils.load import load_model
@@ -95,6 +97,7 @@ class SelectFitImageDialog(Dialog):
         self.available_treeview.pack(fill=BOTH, expand=True)
         self.selected_treeview.pack(side=LEFT, fill=BOTH, expand=True)
         # Bottom frame for buttons
+        CustomLabel(master=self.left_frame, text=i18n.mesh_tag_dialog[TD_THRESHOLD]).pack()
         self.filter_entry.pack(fill=X, padx=5, pady=5)  # Filter text box
         # Buttons
         close_button = CustomButton(self.bottom_frame, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
@@ -154,7 +157,8 @@ class SelectFitImageDialog(Dialog):
 
     def fit_all(self):
         logger.debug(f"{self.__class__.__name__} fit all images")
-        emoca_fit(master=self, fit_data=self.fit_data, images_to_fit=Path(self.project[self._project_name][P_PATH]) / F_INPUT,
+        emoca_fit(master=self, fit_data=self.fit_data,
+                  images_to_fit=Path(self.project[self._project_name][P_PATH]) / F_INPUT,
                   project_data=self.project)
         logger.debug("<<UpdateTreeSmall>> event generation")
         self.master.event_generate("<<UpdateTreeSmall>>")
@@ -503,6 +507,230 @@ class SelectMeshDialog(Dialog):
         with open(log_file, 'w') as log:
             config.write(log)
         logger.debug(f"Comparison log saved to {log_file}")
+
+
+def validate_threshold(new_value):
+    """Validation function to ensure input is a float between 0 and 1."""
+    if new_value == "":  # Allow empty input while typing
+        return True
+    try:
+        value = float(new_value)
+        return 0.0 <= value <= 1.0  # Allow only values between 0 and 1
+    except ValueError:
+        return False  # Reject invalid input
+
+
+class TagMeshDialog(Dialog):
+    def __init__(self, master, project, title=i18n.project_actions_fit[PA_NAME]):
+        super().__init__(master)
+        super().title(title)
+        self.master = master
+        self.project = project
+        self._project_name = str(self.project.sections()[0])
+
+        self.main_frame = CustomFrame(self)
+        self.buttons_frame = CustomFrame(self.main_frame)
+        self.bottom_frame = CustomFrame(self.main_frame)
+        self.left_frame = CustomFrame(self.main_frame)
+        self.right_frame = CustomFrame(self.main_frame)
+        # Tabelle delle immagini
+        self.differences_treeview = Treeview(self.left_frame, columns=TD_IMAGES, selectmode='extended')
+        self.selected_treeview = Treeview(self.right_frame, columns=TD_IMAGES, selectmode='extended')
+        # between table buttons
+        self.move_all_right_button = CustomButton(self.buttons_frame, text=">>", command=self.move_all_to_selected,
+                                                  width=30)
+        self.move_right_button = CustomButton(self.buttons_frame, text=">", command=self.move_to_selected, width=30)
+        self.move_left_button = CustomButton(self.buttons_frame, text="<", command=self.move_to_available, width=30)
+        self.move_all_left_button = CustomButton(self.buttons_frame, text="<<", command=self.move_all_to_available,
+                                                 width=30)
+        # Variable for checkbox state
+        self.hide_not_norm = BooleanVar(value=False)
+        self.hide_norm_pose = BooleanVar(value=False)
+        self.hide_norm_identity = BooleanVar(value=False)
+        # Create the checkbox
+        self.hide_not_norm_checkbox = CustomCheckBox(
+            self.left_frame,
+            text=i18n.mesh_tag_dialog[TD_HIDE_NOT_NORM],
+            variable=self.hide_not_norm,
+            command=lambda: self.filter_images(None)  # Refresh the Treeview when toggled
+        )
+        self.hide_pose_checkbox = CustomCheckBox(
+            self.left_frame,
+            text=i18n.mesh_tag_dialog[TD_HIDE_POSE],
+            variable=self.hide_norm_pose,
+            command=lambda: self.filter_images(None)  # Refresh the Treeview when toggled
+        )
+        self.hide_identity_checkbox = CustomCheckBox(
+            self.left_frame,
+            text=i18n.mesh_tag_dialog[TD_HIDE_IDENTITY],
+            variable=self.hide_norm_identity,
+            command=lambda: self.filter_images(None)  # Refresh the Treeview when toggled
+        )
+        # Entry widget for filter text
+        self.filter_var = StringVar()  # StringVar to hold the filter input
+        self.filter_entry = CustomEntry(
+            self.left_frame,
+            textvariable=self.filter_var,
+            validate="key"
+        )
+        self.filter_entry.bind("<KeyRelease>", self.filter_images)
+        self.threshold_var = StringVar(value="0.2")  # StringVar to hold the filter input
+        self.threshold_entry = CustomEntry(
+            self.right_frame,
+            textvariable=self.threshold_var,
+            validate="key",
+            validatecommand=(self.register(validate_threshold), "%P")
+        )
+
+    def create_view(self):
+        logger.debug(f"{self.__class__.__name__} create view")
+        # Main frame
+        self.main_frame.pack(fill=BOTH, expand=True)
+        self.bottom_frame.pack(side=BOTTOM, fill=X)
+        self.left_frame.pack(side=LEFT, fill=Y, expand=True)
+        self.buttons_frame.pack(side=LEFT, padx=10)
+        self.right_frame.pack(side=LEFT, fill=BOTH, expand=True)
+        # Configurazione Treeview
+        for treeview in (self.differences_treeview, self.selected_treeview):
+            treeview.column(TD_IMAGES, anchor=T_CENTER, minwidth=300, width=300)
+            treeview.heading(TD_IMAGES, text=i18n.mesh_tag_dialog[T_COLUMNS][TD_IMAGES])
+            treeview["show"] = "headings"
+            # select mode
+            treeview["selectmode"] = "extended"
+            # displayColumns
+            treeview["displaycolumns"] = [TD_IMAGES]
+        # show
+        # Add the checkbox above the Treeview
+        self.hide_not_norm_checkbox.pack(anchor='w')
+        self.hide_pose_checkbox.pack(anchor='w')
+        self.hide_identity_checkbox.pack(anchor='w')
+        self.differences_treeview.pack(fill=BOTH, expand=True)
+        self.selected_treeview.pack(side=LEFT, fill=BOTH, expand=True)
+        # Bottom frame for buttons
+        self.filter_entry.pack(fill=X, padx=5, pady=5)  # Filter text box
+        self.threshold_entry.pack(fill=X, padx=5, pady=5)  # Filter text box
+        # Buttons
+        close_button = CustomButton(self.bottom_frame, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
+        close_button.pack(side=RIGHT, padx=5, pady=5)
+        tag_selected_button = CustomButton(self.bottom_frame, text=i18n.dialog_buttons[I18N_TAG_SEL_BUTTON],
+                                           command=self.tag_selected)
+        tag_selected_button.pack(side=RIGHT, padx=5, pady=5)
+        # arrows
+        self.move_all_right_button.pack(pady=5)
+        self.move_right_button.pack(pady=5)
+        self.move_left_button.pack(pady=5)
+        self.move_all_left_button.pack(pady=5)
+        self.differences_treeview.tag_configure('even', background=self._apply_appearance_mode(
+            ThemeManager.theme["CustomFrame"]["fg_color"]))
+        self.differences_treeview.tag_configure('odd',
+                                                background=lighten_color(gray_to_hex(self._apply_appearance_mode(
+                                                    ThemeManager.theme["CustomFrame"]["fg_color"])), 10))
+        self.selected_treeview.tag_configure('even', background=self._apply_appearance_mode(
+            ThemeManager.theme["CustomFrame"]["fg_color"]))
+        self.selected_treeview.tag_configure('odd',
+                                             background=lighten_color(gray_to_hex(self._apply_appearance_mode(
+                                                 ThemeManager.theme["CustomFrame"]["fg_color"])), 10))
+        # Populate the treeview with images
+        self.populate_available_treeview()
+        self.retag_treeview()
+
+    def filter_images(self, _event):
+        """This method will be triggered every time the user types in the filter Entry widget."""
+        self.populate_available_treeview()  # Repopulate treeview with filter applied
+        self.retag_treeview()
+
+    def populate_available_treeview(self):
+        logger.debug(f"{self.__class__.__name__} populate image treeview")
+        # Clear existing entries in the Treeview
+        self.differences_treeview.delete(*self.differences_treeview.get_children())
+        # List all image files in the folder_path
+        differences_path = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / F_COMPARE
+        # List of desired image suffixes
+        differences_suffixes = ['.npy']
+        hide_not_norm = self.hide_not_norm.get()
+        hide_pose = self.hide_norm_pose.get()
+        hide_identity = self.hide_norm_identity.get()
+        # Get the filter value from the Entry widget
+        filter_text = self.filter_var.get().lower()
+        selected_differences = {self.selected_treeview.item(item, 'values')[0] for item in
+                                self.selected_treeview.get_children()}
+        for idx, diff in enumerate(sorted(differences_path.iterdir(), key=lambda x: x.name.lower())):
+            if diff.suffix.lower() in differences_suffixes and filter_text in diff.name.lower():
+                # Apply filters
+                if diff.name in selected_differences:
+                    continue
+                if hide_not_norm and "norm" not in diff.name.lower():
+                    continue
+                if hide_pose and "pose" in diff.name.lower():
+                    continue
+                if hide_identity and "identity" in diff.name.lower():
+                    continue
+                self.differences_treeview.insert('', END, values=(diff.name))
+
+    def tag_selected(self):
+        logger.debug(f"{self.__class__.__name__} tag selected differences")
+        selected_items = self.selected_treeview.get_children()
+        diff_to_tag = []
+        for item in selected_items:
+            diff_name = self.selected_treeview.item(item, 'values')[0]
+            diff_to_tag.append(Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / F_COMPARE / diff_name)
+        if diff_to_tag:
+            emoca_tag(diff_to_tag=diff_to_tag, threshold=float(self.threshold_var.get())
+                      , project_data=self.project)
+        else:
+            logger.info("No diff  where selected.")
+            data = i18n.project_message["no_diff_selected"]
+            DialogMessage(master=self,
+                          title=data[I18N_TITLE],
+                          message=data[I18N_MESSAGE],
+                          detail=data[I18N_DETAIL],
+                          icon=INFORMATION_ICON).show()
+        logger.debug("<<UpdateTreeSmall>> event generation")
+        self.master.event_generate("<<UpdateTreeSmall>>")
+
+    def ask_value(self):
+        logger.debug(f"{self.__class__.__name__} ask value")
+        pass
+
+    def dismiss_method(self):
+        logger.debug(f"{self.__class__.__name__} dismiss method")
+        pass
+
+    def move_all_to_selected(self):
+        """Move all images from available to selected."""
+        for item in self.differences_treeview.get_children():
+            values = self.differences_treeview.item(item, 'values')
+            self.selected_treeview.insert('', END, values=values)
+        self.differences_treeview.delete(*self.differences_treeview.get_children())
+        self.retag_treeview()
+
+    def move_to_selected(self):
+        for item in self.differences_treeview.selection():
+            values = self.differences_treeview.item(item, 'values')
+            self.selected_treeview.insert('', END, values=values)
+            self.differences_treeview.delete(item)
+        self.retag_treeview()
+
+    def move_all_to_available(self):
+        """Move all images from selected back to available."""
+        self.selected_treeview.delete(*self.selected_treeview.get_children())
+        self.populate_available_treeview()
+        self.retag_treeview()
+
+    def move_to_available(self):
+        for item in self.selected_treeview.selection():
+            self.selected_treeview.delete(item)
+            self.populate_available_treeview()
+        self.retag_treeview()
+
+    def retag_treeview(self):
+        """Reapply 'even' and 'odd' tags after moving items."""
+        for idx, item in enumerate(self.selected_treeview.get_children()):
+            tag = 'even' if idx % 2 == 0 else 'odd'
+            self.selected_treeview.item(item, tags=(tag,))
+        for idx, item in enumerate(self.differences_treeview.get_children()):
+            tag = 'even' if idx % 2 == 0 else 'odd'
+            self.differences_treeview.item(item, tags=(tag,))
 
 
 class SettingsDialog(Dialog):

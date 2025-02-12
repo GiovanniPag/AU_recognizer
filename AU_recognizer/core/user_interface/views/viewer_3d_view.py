@@ -53,6 +53,14 @@ class Viewer3DView(View):
             self.__canvas_3d.create_view()
             self.__canvas_3d.pack(fill=BOTH, expand=True)
             self.__canvas_3d.display(animate=1)
+        elif type_of_file == "json":
+            logger.debug("show mesh in Viewer3D view")
+            # Create a new OpenGL window
+            self.__canvas_3d = Viewer3DGl(master=self.master, placeholder=self.__placeholder, obj_file_path=path,
+                                          tag=True)
+            self.__canvas_3d.create_view()
+            self.__canvas_3d.pack(fill=BOTH, expand=True)
+            self.__canvas_3d.display(animate=1)
         elif type_of_file == "npy":
             logger.debug("show npy contents in npy_view")
             self.__npy_v = NpyViewer(master=self.__placeholder, path=path)
@@ -74,6 +82,10 @@ class Viewer3DView(View):
             if path.suffix == ".obj":
                 self.data = data
                 self.__update_view(type_of_file="obj")
+            # is json of tags
+            if path.suffix == ".json":
+                self.data = data
+                self.__update_view(type_of_file="json")
             # is npy array
             if path.suffix == ".npy":
                 self.data = data

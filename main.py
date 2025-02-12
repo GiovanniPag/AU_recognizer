@@ -10,6 +10,5 @@ if __name__ == "__main__":
     app.mainloop()
 
 # TODO: check error on coarse fitting, return nulls and crashes
-# TODO: tagga tramite differenze
 # TODO: mappa texture con muscolo su mesh
 # TODO: individua muscolo su texture e tagga punti per AU
