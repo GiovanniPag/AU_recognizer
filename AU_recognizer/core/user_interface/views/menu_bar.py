@@ -4,8 +4,8 @@ from AU_recognizer.core.user_interface import AppearanceModeTracker, ThemeManage
 from AU_recognizer.core.user_interface.views.view import View
 from AU_recognizer.core.util import M_HELP, M_MASTER, M_FILE, M_INDEX, M_EDIT, M_NEW, M_OPEN, M_SETTINGS, \
     M_EXIT, M_LANGUAGE, M_ABOUT, M_LOGS, M_GUIDE, M_IT, M_RADIO, M_VARIABLE, M_VALUE, M_EN, logger, \
-    i18n, M_LABEL, M_UNDERLINE, M_DEFAULT_STATE, M_STATE_NORMAL, M_ACCELERATOR, M_STATE, M_COMMAND, nect_config, CONFIG, \
-    LANGUAGE
+    i18n, M_LABEL, M_UNDERLINE, M_DEFAULT_STATE, M_STATE_NORMAL, M_ACCELERATOR, M_STATE, M_COMMAND, nect_config, \
+    CONFIG, LANGUAGE
 
 
 class MenuBar(Menu, View):
@@ -136,7 +136,7 @@ class MenuBar(Menu, View):
                 self.__menu_names[cmd_name][M_MASTER] \
                     .add_radiobutton(label=info.get(M_LABEL, ""), underline=info.get(M_UNDERLINE, -1),
                                      state=info.get(M_DEFAULT_STATE, M_STATE_NORMAL),
-                                     variable=self.__menu_names[cmd_name][M_VARIABLE],
+                                     variable=self.__menu_names[cmd_name][M_VARIABLE],  # type: ignore
                                      value=self.__menu_names[cmd_name][M_VALUE],
                                      accelerator=info.get(M_ACCELERATOR, ""), command=...)
             else:

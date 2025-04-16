@@ -11,6 +11,8 @@ from matplotlib import cm
 
 from AU_recognizer.core.projects import emoca_fit
 from AU_recognizer.core.projects.emoca_tag import emoca_tag
+from AU_recognizer.core.projects.models.DecaFLAME import FLAME_mediapipe
+from AU_recognizer.core.projects.utils.utility import load_model
 from AU_recognizer.core.user_interface import CustomFrame, CustomButton, CustomCheckBox, CustomEntry, ThemeManager, \
     CustomTabview, CustomLabel
 from AU_recognizer.core.user_interface.dialogs import Dialog
@@ -24,10 +26,8 @@ from AU_recognizer.core.util import i18n, PA_NAME, TD_IMAGES, TD_FITTED, TD_HIDE
     nect_config, CONFIG, MODEL_FOLDER, GENERAL_TAB, VIEWER_TAB, I18N_PATH, LOGGER_PATH, LOG_FOLDER, PROJECTS_FOLDER, \
     LANGUAGE, retrieve_files_from_path, VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_COLOR, POINT_SIZE, \
     GROUND_COLOR, SKY_COLOR, MOVING_STEP, I18N_SAVE_BUTTON, write_config, MESH_POSE, MESH_IDENTITY, TD_HIDE_IDENTITY, \
-    TD_HIDE_POSE, TD_HIDE_NOT_NORM, I18N_TAG_SEL_BUTTON, F_TAG, TD_THRESHOLD
+    TD_HIDE_POSE, TD_HIDE_NOT_NORM, I18N_TAG_SEL_BUTTON, TD_THRESHOLD
 from AU_recognizer.core.util.utility_functions import lighten_color, gray_to_hex
-from gdl.models.DecaFLAME import FLAME_mediapipe
-from gdl_apps.EMOCA.utils.load import load_model
 
 
 class SelectFitImageDialog(Dialog):
@@ -195,14 +195,16 @@ class SelectFitImageDialog(Dialog):
         """Move all images from available to selected."""
         for item in self.available_treeview.get_children():
             values = self.available_treeview.item(item, 'values')
-            self.selected_treeview.insert('', END, values=values)
+            if isinstance(values, (list, tuple)):
+                self.selected_treeview.insert('', END, values=values)
         self.available_treeview.delete(*self.available_treeview.get_children())
         self.retag_treeview()
 
     def move_to_selected(self):
         for item in self.available_treeview.selection():
             values = self.available_treeview.item(item, 'values')
-            self.selected_treeview.insert('', END, values=values)
+            if isinstance(values, (list, tuple)):
+                self.selected_treeview.insert('', END, values=values)
             self.available_treeview.delete(item)
         self.retag_treeview()
 
@@ -231,6 +233,8 @@ class SelectFitImageDialog(Dialog):
 class SelectMeshDialog(Dialog):
     def __init__(self, master, project, title=i18n.project_actions_au_rec[PA_NAME]):
         super().__init__(master)
+        self.pose_checkbox = None
+        self.identity_checkbox = None
         super().title(title)
         self.master = master
         self.project = project
@@ -665,7 +669,7 @@ class TagMeshDialog(Dialog):
                     continue
                 if hide_identity and "identity" in diff.name.lower():
                     continue
-                self.differences_treeview.insert('', END, values=(diff.name))
+                self.differences_treeview.insert('', END, values=(diff.name,))
 
     def tag_selected(self):
         logger.debug(f"{self.__class__.__name__} tag selected differences")
@@ -700,14 +704,16 @@ class TagMeshDialog(Dialog):
         """Move all images from available to selected."""
         for item in self.differences_treeview.get_children():
             values = self.differences_treeview.item(item, 'values')
-            self.selected_treeview.insert('', END, values=values)
+            if isinstance(values, (list, tuple)):
+                self.selected_treeview.insert('', END, values=values)
         self.differences_treeview.delete(*self.differences_treeview.get_children())
         self.retag_treeview()
 
     def move_to_selected(self):
         for item in self.differences_treeview.selection():
             values = self.differences_treeview.item(item, 'values')
-            self.selected_treeview.insert('', END, values=values)
+            if isinstance(values, (list, tuple)):
+                self.selected_treeview.insert('', END, values=values)
             self.differences_treeview.delete(item)
         self.retag_treeview()
 

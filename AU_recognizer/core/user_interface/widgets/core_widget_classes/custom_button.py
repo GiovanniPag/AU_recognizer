@@ -162,8 +162,9 @@ class CustomButton(CustomTKBaseClass):
     def _update_image(self):
         if self._image_label is not None:
             if isinstance(self._image, CustomTkImage):
-                self._image_label.configure(image=self._image.create_scaled_photo_image(self._get_widget_scaling(),
-                                                                                        self._get_appearance_mode()))
+                self._image_label.configure(image=self._image.  # type: ignore
+                                            create_scaled_photo_image(self._get_widget_scaling(),
+                                                                      self._get_appearance_mode()))
             elif self._image is not None:
                 self._image_label.configure(image=self._image)
 
@@ -208,7 +209,8 @@ class CustomButton(CustomTKBaseClass):
                                         outline=self._apply_appearance_mode(self._fg_color),
                                         fill=self._apply_appearance_mode(self._fg_color))
         # create text label if text given
-        if self._text is not None and self._text != "" or self._textvariable is not None and self._textvariable.get() != "":
+        if (self._text is not None and self._text != "" or
+                self._textvariable is not None and self._textvariable.get() != ""):
             if self._text_label is None:
                 self._text_label = tkinter.Label(master=self,
                                                  font=self._apply_font_scaling(self._font),

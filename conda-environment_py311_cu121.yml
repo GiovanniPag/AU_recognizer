@@ -1,0 +1,46 @@
+name: au_env
+channels:
+  - pytorch
+  - 1adrianb
+  - nvidia
+  - defaults
+  - conda-forge
+  - huggingface
+  - fastai
+  - anaconda
+dependencies:
+  - python=3.11.11
+  - ninja
+  - numba
+  - pandas
+  - packaging
+  - pip
+  - pytorch
+  - pytorch-cuda=12.1
+  - pyopengl
+  - torchvision
+  - torchaudio
+  - scikit-image
+  - scikit-learn
+  - scikit-video
+  - tk[build=xft_*]
+  - tqdm
+  - compress-pickle
+  - face_alignment
+  - imgaug
+  - matplotlib
+  - munch
+  - numpy
+  - omegaconf
+  - opencv
+  - pillow
+  - scipy
+  - torchfile
+  - pytorch-lightning
+  - wandb
+  - hickle
+  - pip:
+      - adabound==0.0.5
+      - git+https://github.com/mattloper/chumpy@9b045ff5d6588a24a0bab52c83f032e2ba433e17
+      - pyopengltk==0.0.4
+      - Cython==0.29

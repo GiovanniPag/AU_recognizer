@@ -24,7 +24,7 @@ class ModelFitView(View):
         models = [x for x in Path(nect_config[CONFIG][MODEL_FOLDER]).iterdir() if x.is_dir()]
         self.model_combobox = ComboLabel(master=self.scrollFrame, label_text="m_combo",
                                          selected="EMOCA_v2_lr_mse_20",
-                                         values=[str(file_name.stem) for file_name in models], state="readonly")
+                                         values=[str(file_name.name) for file_name in models], state="readonly")
         self.save_images_text = StringVar(value=i18n.entry_buttons["c_simages"])
         self.save_images = CustomCheckBox(master=self.scrollFrame, text="c_simages", textvariable=self.save_images_text,
                                           check_state=False)

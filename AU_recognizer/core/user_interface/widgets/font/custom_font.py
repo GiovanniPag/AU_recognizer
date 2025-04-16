@@ -74,7 +74,8 @@ class CustomFont(Font):
         super().configure(**kwargs)
         # update style string for create_scaled_tuple() method
         self._tuple_style_string = (f"{super().cget('weight')} {super().cget('slant')} "
-                                    f"{'underline' if super().cget('underline') else ''} {'overstrike' if super().cget('overstrike') else ''}")
+                                    f"{'underline' if super().cget('underline') else ''} "
+                                    f"{'overstrike' if super().cget('overstrike') else ''}")
         # call all functions registered with add_size_configure_callback()
         for callback in self._size_configure_callback_list:
             callback()

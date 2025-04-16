@@ -13,7 +13,7 @@ class Dialog(CustomToplevel):
         logger.debug(f"show dialog")
         self.create_view()
         self.protocol("WM_DELETE_WINDOW", self.dismiss)  # intercept close button
-        self.transient(self.master)  # dialog window is related to main
+        self.transient(self.master)  # type: ignore # dialog window is related to main
         self.wait_visibility()  # can't grab until window appears, so we wait
         self.grab_set()  # ensure all input goes to our window
         self.master.wait_window(self)  # block until window is destroyed

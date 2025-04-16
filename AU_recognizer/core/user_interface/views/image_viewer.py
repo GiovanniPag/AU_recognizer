@@ -15,7 +15,7 @@ MAX_IMAGE_PIXELS = 1500000000  # maximum pixels in the image, use it carefully
 # canvas to Display and zoom image
 # noinspection PyPropertyAccess
 class CanvasImage:
-    def __init__(self, placeholder, path, can_grab_focus=True, **kwargs):
+    def __init__(self, placeholder, path, can_grab_focus=True):
         # Initialize the ImageFrame
         self.imscale = 1.0  # scale for the canvas image zoom, public for outer classes
         self.__delta = 1.3  # zoom magnitude
@@ -168,7 +168,8 @@ class CanvasImage:
             box_scroll[1] = box_img_int[1]
             box_scroll[3] = box_img_int[3]
         # Convert scroll region to tuple and to integer
-        self.canvas.configure(scrollregion=tuple(map(int, box_scroll)))  # set scroll region
+        self.canvas.configure(scrollregion=tuple(map(int, box_scroll)))  # type: ignore
+        # set scroll region
         x1 = max(box_canvas[0] - box_image[0], 0)  # get coordinates (x1,y1,x2,y2) of the image tile
         y1 = max(box_canvas[1] - box_image[1], 0)
         x2 = min(box_canvas[2], box_image[2]) - box_image[0]

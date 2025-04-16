@@ -1,16 +1,15 @@
 from pathlib import Path
-from tkinter import ttk, HORIZONTAL, VERTICAL, FALSE, NSEW, Menu
+from tkinter import ttk, HORIZONTAL, FALSE, NSEW, Menu
 from typing import Union
 
 from AU_recognizer.core.util import (i18n, logger, config, call_by_ws, nect_config, OPEN_PROJECTS,
                                      check_if_folder_exist, check_if_is_project, purge_option_config, P_PATH)
 from AU_recognizer.core.user_interface import *
-from AU_recognizer.core.user_interface.views import (View, MenuBar, ProjectTreeView, ProjectInfoView,
+from AU_recognizer.core.user_interface.views import (View, MenuBar, ProjectTreeView,
                                                      ProjectActionView, Viewer3DView, TreeViewMenu)
 from AU_recognizer.core.user_interface.dialogs.complex_dialog import SettingsDialog
 from AU_recognizer.core.controllers import Controller, MenuController, TreeViewMenuController, TreeController, \
-    Viewer3DController, SelectedFileController, SelectedProjectController, ProjectActionController
-from AU_recognizer.core.user_interface.views.selected_file_view import SelectedFileView
+    Viewer3DController, ProjectActionController
 
 set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -33,7 +32,6 @@ class AURecognizer(CustomTk):
         self.__create_gui()
         self.__create_controllers()
         self.__bind_controllers()
-
         logger.debug("make app full-screen")
         call_by_ws(x11_func=lambda: self.attributes('-zoomed', True), aqua_func=lambda: self.state("zoomed"),
                    win32_func=lambda: self.state("zoomed"))
@@ -86,7 +84,6 @@ class AURecognizer(CustomTk):
     # create all view classes
     def __create_gui(self):
         logger.debug("create gui")
-
         # create menu bar
         self.menu_bar = MenuBar(self)
         # create mainframe
@@ -94,31 +91,14 @@ class AURecognizer(CustomTk):
         mainframe = ttk.PanedWindow(self, orient=HORIZONTAL)
         mainframe.grid(column=0, row=0, sticky=NSEW)
         logger.debug("left frame initialization")
-        left_frame = ttk.PanedWindow(self, orient=VERTICAL)
-        logger.debug("right frame initialization")
-        right_frame = ttk.PanedWindow(self, orient=VERTICAL)
-        logger.debug("center frame initialization")
-        center_frame = ttk.PanedWindow(self, orient=VERTICAL)
-        # create views
-        # left views
         self.project_tree_view = ProjectTreeView(master=self)
-        self.selected_file = SelectedFileView(self)
-        left_frame.add(self.project_tree_view, weight=3)
-        left_frame.add(self.selected_file, weight=2)
-
-        # center views
-        self.project_info = ProjectInfoView(self)
+        mainframe.add(self.project_tree_view, weight=2)
+        logger.debug("center frame initialization")
         self.project_actions = ProjectActionView(self)
-        center_frame.add(self.project_info, weight=1)
-        center_frame.add(self.project_actions, weight=5)
-
-        # right views
+        mainframe.add(self.project_actions, weight=3)
+        logger.debug("right frame initialization")
         self.viewer = Viewer3DView(self)
-        right_frame.add(self.viewer, weight=5)
-
-        mainframe.add(left_frame, weight=2)
-        mainframe.add(center_frame, weight=3)
-        mainframe.add(right_frame, weight=15)
+        mainframe.add(self.viewer, weight=15)
         # create context menu
         self.tree_menu = TreeViewMenu(self.project_tree_view)
 
@@ -129,8 +109,6 @@ class AURecognizer(CustomTk):
         self.tree_menu_controller = TreeViewMenuController(self)
         self.tree_controller = TreeController(self.tree_menu_controller, self)
         self.viewer_controller = Viewer3DController(self)
-        self.selected_controller = SelectedFileController(self)
-        self.info_controller = SelectedProjectController(self)
         self.action_controller = ProjectActionController(self)
 
     def __bind_controllers(self):
@@ -141,8 +119,6 @@ class AURecognizer(CustomTk):
         self.__bind_menu(controller=self.tree_controller, menu=self.tree_menu_controller)
         self.__bind_controller(controller=self.tree_controller, view=self.project_tree_view)
         self.__bind_controller(controller=self.viewer_controller, view=self.viewer)
-        self.__bind_controller(controller=self.selected_controller, view=self.selected_file)
-        self.__bind_controller(controller=self.info_controller, view=self.project_info)
         self.__bind_controller(controller=self.action_controller, view=self.project_actions)
 
         # attach menu_bar
@@ -163,8 +139,6 @@ class AURecognizer(CustomTk):
         self.bind("<<selected_project>>", self.select_project)
         logger.debug("attach virtual event controllers for <<selected_file>>")
         self.bind("<<selected_item>>", self.select_file)
-        logger.debug("attach virtual event controllers for <<open_file>>")
-        self.bind("<<open_file>>", self.open_file)
 
     def select_project(self, event):
         project = self.tree_controller.get_last_selected_project()
@@ -174,7 +148,6 @@ class AURecognizer(CustomTk):
         try:
             self.selected_project = self.open_projects[str(path)] if path else None
             logger.debug(f"select project event {event} path {path}, selected project {self.selected_project}")
-            self.info_controller.update_view(self.selected_project)
             self.action_controller.select_project(self.selected_project)
         except KeyError as e:
             logger.error(f"Errore: {e}, file doesn't exist, update tree view")
@@ -187,12 +160,7 @@ class AURecognizer(CustomTk):
             logger.error(f"Errore: {file}, file doesn't exist, update tree view")
             self.event_generate("<<UpdateTree>>")
             file = None
-        self.selected_controller.update_view(file)
         self.viewer_controller.update_view(file)
-
-    def open_file(self, event):
-        logger.debug(f"open file event {event}")
-        self.selected_controller.open_file()
 
     def update_app_language(self):
         logger.debug("update app language")
@@ -201,8 +169,6 @@ class AURecognizer(CustomTk):
         self.tree_menu.update_language()
         self.project_tree_view.update_language()
         self.viewer.update_language()
-        self.selected_file.update_language()
-        self.project_info.update_language()
         self.project_actions.update_language()
 
     def can_grab_focus(self):

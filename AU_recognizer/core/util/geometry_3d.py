@@ -1,5 +1,3 @@
-import math
-
 import numba
 import numpy as np
 
@@ -69,7 +67,6 @@ def look_at(eye, target, up):
     r /= np.linalg.norm(r) if np.linalg.norm(r) != 0 else 1
     u = np.cross(f, r)
     u /= np.linalg.norm(u) if np.linalg.norm(u) != 0 else 1
-
     # Create the lookAt matrix
     m = np.eye(4)
     m[0, :3] = r
@@ -78,5 +75,4 @@ def look_at(eye, target, up):
     m[0, 3] = -np.dot(r, eye)
     m[1, 3] = -np.dot(u, eye)
     m[2, 3] = np.dot(f, eye)
-
     return m

@@ -16,8 +16,8 @@ class AURecognitionController(Controller):
         logger.debug(f"bind in AURecognition controller")
         self.view = v
         self.view.create_view()
-        self.view._au_button.configure(command=lambda: self.open_mesh_select_dialog())
-        self.view._tag_button.configure(command=lambda: self.open_mesh_tag_dialog())
+        self.view.au_button.configure(command=lambda: self.open_mesh_select_dialog())
+        self.view.tag_button.configure(command=lambda: self.open_mesh_tag_dialog())
 
     def update_selected(self, data):
         logger.debug(f"update selected in AURecognition controller")

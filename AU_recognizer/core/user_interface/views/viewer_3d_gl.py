@@ -8,7 +8,6 @@ from tkinter import BOTH, StringVar
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram
-from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from PIL import Image
 from pyopengltk import OpenGLFrame
@@ -30,6 +29,8 @@ from AU_recognizer.core.util.geometry_3d import axis_angle_to_quaternion, quater
 class Viewer3DGl(View):
     def __init__(self, master, placeholder, obj_file_path=None, tag=False):
         super().__init__(placeholder)
+        self.neutral_tooltip = None
+        self.compare_tooltip = None
         self.compare_face_img = None
         self.neutral_face_img = None
         self.vertex_tag_map = {}

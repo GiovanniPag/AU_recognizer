@@ -228,10 +228,12 @@ class OBJ:
                 index_data.append(len(vertex_data) - 1)
 
         for material in interleaved_data:
-            interleaved_data[material]['vertex_data'] = np.array(interleaved_data[material]['vertex_data'],
-                                                                 dtype=np.float32)
-            interleaved_data[material]['index_data'] = np.array(interleaved_data[material]['index_data'],
-                                                                dtype=np.uint32)
+            interleaved_data[material]['vertex_data'] = (np.  # type: ignore
+                                                         array(interleaved_data[material]['vertex_data'],
+                                                               dtype=np.float32))
+            interleaved_data[material]['index_data'] = (np.  # type: ignore
+                                                        array(interleaved_data[material]['index_data'],
+                                                              dtype=np.uint32))
         return interleaved_data, self.materials
 
     def save(self, output_path):

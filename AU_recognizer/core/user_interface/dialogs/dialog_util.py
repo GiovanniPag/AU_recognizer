@@ -2,8 +2,9 @@ import shutil
 from pathlib import Path
 
 from AU_recognizer.core.user_interface.dialogs.dialog import DialogMessage, DialogAsk, DialogPathRename
-from AU_recognizer.core.util import INFORMATION_ICON, logger, i18n, I18N_TITLE, I18N_MESSAGE, I18N_DETAIL, WARNING_ICON, \
-    I18N_NO_BUTTON, I18N_YES_BUTTON, check_if_folder_exist, check_if_file_exist, rename_path, ERROR_ICON
+from AU_recognizer.core.util import (INFORMATION_ICON, logger, i18n, I18N_TITLE, I18N_MESSAGE, I18N_DETAIL,
+                                     WARNING_ICON, I18N_NO_BUTTON, I18N_YES_BUTTON, check_if_folder_exist,
+                                     check_if_file_exist, rename_path, ERROR_ICON)
 
 
 def open_message_dialog(master, message, icon=INFORMATION_ICON):

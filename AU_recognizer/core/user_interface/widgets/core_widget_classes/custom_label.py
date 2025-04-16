@@ -125,8 +125,9 @@ class CustomLabel(CustomTKBaseClass):
 
     def _update_image(self):
         if isinstance(self._image, CustomTkImage):
-            self._label.configure(image=self._image.create_scaled_photo_image(self._get_widget_scaling(),
-                                                                              self._get_appearance_mode()))
+            self._label.configure(image=self._image.  # type: ignore
+                                  create_scaled_photo_image(self._get_widget_scaling(),
+                                                            self._get_appearance_mode()))
         elif self._image is not None:
             self._label.configure(image=self._image)
 

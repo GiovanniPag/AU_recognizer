@@ -1,4 +1,0 @@
-# @package model
-emodeca_type: EmoNetModule
-load_pretrained_emonet: False
-

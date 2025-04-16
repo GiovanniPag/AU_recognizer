@@ -1,7 +1,6 @@
 var/guide.pdf
 var/.logs/*
 var/asset/models/*
-/var/asset/models/
 var/asset/models/**/*
 projects/*
 var/.conf/AU_rec.ini

@@ -1,4 +1,0 @@
-# @package learning
-learning_rate_patience: 10
-lr_sched_mode: min
-learning_rate_decay: 0.1

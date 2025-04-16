@@ -1,6 +1,5 @@
 from tkinter import Menu
 
-from AU_recognizer.core.user_interface.views.view import View
 from AU_recognizer.core.util import (MT_SEL_P, M_MASTER, M_INDEX, MT_ADD_IMAGES, MT_SELECT_P, MT_CLOSE_P, MT_DELETE_P,
                                      MT_SEL_F, MT_OPEN_F, MT_RENAME_F, MT_DELETE_F, logger, i18n, M_LABEL, M_UNDERLINE,
                                      M_DEFAULT_STATE, M_STATE_NORMAL, M_ACCELERATOR, M_STATE, M_COMMAND)

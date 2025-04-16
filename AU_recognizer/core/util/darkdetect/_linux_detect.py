@@ -14,7 +14,8 @@ def theme():
                 ['gsettings', 'get', 'org.gnome.desktop.interface', 'gtk-theme'],
                 capture_output=True)
             stdout = out.stdout.decode()
-    except Exception:
+    except Exception as err:
+        print(err)
         return 'Light'
     # we have a string, now remove start and end quote
     theme_ = stdout.lower().strip()[1:-1]

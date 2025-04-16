@@ -26,6 +26,14 @@ class AskColor(CustomToplevel):
                  **button_kwargs):
 
         super().__init__(master=master)
+        self.r_label = None
+        self.r_entry = None
+        self.g_label = None
+        self.g_entry = None
+        self.b_label = None
+        self.b_entry = None
+        self.switch_mode_button = None
+        self._color = None
         self.title(title)
         self.resizable(width=False, height=False)
         self.transient(self.master)
@@ -108,10 +116,10 @@ class AskColor(CustomToplevel):
         saturation = x / width  # Saturation for each x
         value = 1 - y / height  # Value for each y
         # Now mesh the saturation and value grids
-        S, V = np.meshgrid(saturation, value)
+        s, v = np.meshgrid(saturation, value)
         # Vectorize the HSV to RGB conversion
         # Apply the vectorized function over the meshgrid
-        r, g, b = self.hsv_to_rgb_vec(self.hue, S, V)
+        r, g, b = self.hsv_to_rgb_vec(self.hue, s, v)
         # Scale RGB values to the range [0, 255] and fill the gradient array
         gradient_array = np.dstack((r, g, b)) * 255
         gradient_array = gradient_array.astype(np.uint8)
@@ -187,7 +195,7 @@ class AskColor(CustomToplevel):
         self.switch_mode_button = CustomButton(self.input_frame, text="RGB ↕", command=self.switch_mode)
         self.switch_mode_button.pack(pady=10, fill="both")
 
-    def update_from_entries(self, event=None):
+    def update_from_entries(self, _=None):
         """Update the color based on the current input fields."""
         try:
             if self.mode == "RGB":
@@ -211,13 +219,13 @@ class AskColor(CustomToplevel):
                 # Validate and update color from HSL entries
                 h = float(self.r_entry.get())
                 s = float(self.g_entry.get())
-                l = float(self.b_entry.get())
+                light = float(self.b_entry.get())
                 # Normalize HSL values to 0-1 range
                 h = h / 360
                 s = s / 100
-                l = l / 100
-                if 0 <= h <= 1 and 0 <= s <= 1 and 0 <= l <= 1:
-                    self.set_color(hls=(h, l, s), update_gradient=True)
+                light = light / 100
+                if 0 <= h <= 1 and 0 <= s <= 1 and 0 <= light <= 1:
+                    self.set_color(hls=(h, light, s), update_gradient=True)
                 else:
                     raise ValueError
         except ValueError:
@@ -256,13 +264,13 @@ class AskColor(CustomToplevel):
             self.r_entry.delete(0, tk.END)
             self.g_entry.delete(0, tk.END)
             self.b_entry.delete(0, tk.END)
-            h, l, s = self.hsv_to_hls(self.hue, self.saturation, self.value)
+            h, light, s = self.hsv_to_hls(self.hue, self.saturation, self.value)
             h = int(h * 360)  # Hue in degrees
             s = int(s * 100)  # Saturation in percentage
-            l = int(l * 100)  # Lightness in percentage
+            light = int(light * 100)  # Lightness in percentage
             self.r_entry.insert(0, h)
             self.g_entry.insert(0, s)
-            self.b_entry.insert(0, l)
+            self.b_entry.insert(0, light)
 
     def update_input_fields(self, mode):
         """Update the input fields to match the selected mode."""
@@ -297,13 +305,13 @@ class AskColor(CustomToplevel):
             self.r_entry.delete(0, tk.END)
             self.g_entry.delete(0, tk.END)
             self.b_entry.delete(0, tk.END)
-            h, l, s = self.hsv_to_hls(self.hue, self.saturation, self.value)
+            h, light, s = self.hsv_to_hls(self.hue, self.saturation, self.value)
             h = int(h * 360)  # Hue in degrees
             s = int(s * 100)  # Saturation in percentage
-            l = int(l * 100)  # Lightness in percentage
+            light = int(light * 100)  # Lightness in percentage
             self.r_entry.insert(0, h)
             self.g_entry.insert(0, s)
-            self.b_entry.insert(0, l)
+            self.b_entry.insert(0, light)
 
     def get(self):
         self._color = self.hsv_to_hex(self.hue, self.saturation, self.value)
@@ -336,9 +344,9 @@ class AskColor(CustomToplevel):
         self.set_color(hsv=(self.hue, self.saturation, self.value))
 
     @staticmethod
-    def hls_to_hsv(h, l, s):
+    def hls_to_hsv(h, light, s):
         # Convert HSL to RGB
-        r, g, b = colorsys.hls_to_rgb(h, l, s)
+        r, g, b = colorsys.hls_to_rgb(h, light, s)
         return colorsys.rgb_to_hsv(r, g, b)
 
     @staticmethod

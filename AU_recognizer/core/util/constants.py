@@ -1,6 +1,4 @@
-from colorsys import hsv_to_rgb
 from pathlib import Path
-from tkinter import PhotoImage
 
 # Desktops
 DESKTOP_LIST = ["Desktop", "Scrivania"]
@@ -26,7 +24,7 @@ LOGGER_DEFAULT = "AULogger"
 LOGGER_PATH_DEFAULT = "AU_recognizer/var/.conf/logging.ini"
 LOG_FOLDER_DEFAULT = "AU_recognizer/var/.logs/"
 PROJECTS_FOLDER_DEFAULT = "AU_recognizer/projects/"
-MODEL_FOLDER_DEFAULT = "AU_recognizer/../emoca/assets/EMOCA/models"
+MODEL_FOLDER_DEFAULT = "AU_recognizer/var/asset/models/EMOCA/models"
 GUIDE_FILE_DEFAULT = "AU_recognizer/var/guide.pdf"
 # config file viewer section items
 FILL_COLOR = "fill_color"

@@ -162,6 +162,7 @@ def gray_to_hex(gray_string):
     # Convert to hex
     return f"#{value:02X}{value:02X}{value:02X}"
 
+
 def lighten_color(hex_color, percentage):
     # Strip '#' if present
     hex_color = hex_color.lstrip('#')
@@ -176,6 +177,7 @@ def lighten_color(hex_color, percentage):
 
     # Convert back to hex and return
     return f"#{r:02X}{g:02X}{b:02X}"
+
 
 def rename_path(path_to_rename,
                 new_name):
@@ -274,4 +276,3 @@ def sizeof_fmt(num, suffix="B"):
             return f"{num:3.1f} {unit}{suffix}"
         num /= 1024.0
     return f"{num:.1f} Yi{suffix}"
-
