@@ -25,7 +25,7 @@ class ProjectActionView(View):
         self.model_combobox = ComboLabel(master=self.top_frame, label_text="m_combo",
                                          selected=nect_config[CONFIG][MODEL],
                                          values=files, state="readonly")
-        self.tab_view = CustomTabview(master=self)
+        self.tab_view = CustomTabview(master=self, command=self.change_tab)
         self._aur_frame_name = i18n.project_actions_au_rec[PA_NAME]
         self._mf_frame_name = i18n.project_actions_fit[PA_NAME]
         self.master = master
@@ -34,10 +34,14 @@ class ProjectActionView(View):
         self._au_recognition_frame = None
         self._au_tag_frame = None
 
+    def change_tab(self):
+        self._au_recognition_frame.update_tree_views()
+
     def update_language(self):
         logger.debug(f"update language in project action view")
         self.tab_view.rename(old_name=self._mf_frame_name, new_name=i18n.project_actions_fit[PA_NAME])
         self.tab_view.rename(old_name=self._aur_frame_name, new_name=i18n.project_actions_au_rec[PA_NAME])
+        self.tab_view.rename(old_name=self._au_tag_frame, new_name=i18n.project_actions_au_tag[PA_NAME])
         self.model_combobox.update_language()
         self._aur_frame_name = i18n.project_actions_au_rec[PA_NAME]
         self._mf_frame_name = i18n.project_actions_fit[PA_NAME]

@@ -14,19 +14,15 @@ class BaseModelInterface(ABC):
     def fit(fit_data, images_to_fit, additional_data):
         pass
 
-    @abstractmethod
-    def get_mesh_from_params(self, params):
-        """Restituisce una mesh a partire da parametri"""
-        pass
-
     @staticmethod
     @abstractmethod
     def au_difference(mesh_neutral, mesh_list, normalization_params, project):
         """Restituisce file con differenze di punti mesh"""
         pass
 
+    @staticmethod
     @abstractmethod
-    def emoca_tag(self, diff_files, threshold, au_names):
+    def emoca_tag(diff_to_tag, threshold, project_data):
         """Genera file con vertici taggati"""
         pass
 

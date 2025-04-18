@@ -58,7 +58,8 @@ class Viewer3DGl(View):
                                           selected=i18n.gl_viewer["normal_combo"][GL_NO],
                                           values=list(i18n.gl_viewer['normal_combo'].values()), state="readonly")
         self.lighting_checkbox = CustomCheckBox(master=self.control_frame, text="gl_light", textvariable=StringVar(),
-                                                command=self._toggle_light)
+                                                command=self._toggle_light, check_state=True)
+        self.lighting_checkbox.update_language()
         self.reset_icon = CustomTkImage(
             light_image=Image.open(asset("reset_view_light.png")),
             dark_image=Image.open(asset("reset_view_dark.png")),
@@ -318,7 +319,7 @@ class Frame3DGl(OpenGLFrame):
             "useLight": {
                 GL_U_TYPE: "bool",
                 GL_U_POINTER: None,
-                GL_U_VALUE: False,
+                GL_U_VALUE: True,
             },
             "isPoints": {
                 GL_U_TYPE: "bool",

@@ -251,6 +251,21 @@
         "message": "Comparazione completata con successo",
         "title": "AU recognition - Comparazione Completata",
         "detail": "Comparazione completata con successo."
+      },
+      "compare_failure": {
+        "message": "Comparazione non completata",
+        "title": "AU recognition - Comparazione Completata",
+        "detail": "Comparazione fallita con errori."
+      },
+      "tag_success": {
+        "message": "Tag completato con successo",
+        "title": "AU recognition - Tag completato",
+        "detail": "Tag completato con successo."
+      },
+      "tag_failure": {
+        "message": "Tag non completato",
+        "title": "AU recognition - Tag Completato",
+        "detail": "Tag fallito con errori."
       }
     },
     "confirmation_dialog": {

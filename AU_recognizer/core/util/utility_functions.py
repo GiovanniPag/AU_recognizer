@@ -6,7 +6,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import Union
 
-from . import logger, nect_config, windowing_system, operating_system, write_config
+from . import logger, nect_config, operating_system, write_config, config
 from .constants import CONFIG, GUIDE_FILE, LOG_FOLDER, P_NAME, P_PATH, F_OUTPUT, F_INPUT, DESKTOP_LIST, OPEN_PROJECTS
 
 
@@ -31,12 +31,12 @@ def call_by_ws(x11_func, win32_func, aqua_func):
     if not (callable(x11_func) and callable(win32_func) and callable(aqua_func)):
         logger.exception("one of the argument function is not callable")
         return
-    logger.debug("windowing system: " + windowing_system)
-    if windowing_system == "x11":  # unix
+    logger.debug("windowing system: " + config.windowing_system)
+    if config.windowing_system == "x11":  # unix
         x11_func()
-    if windowing_system == "win32":  # windows
+    if config.windowing_system == "win32":  # windows
         win32_func()
-    if windowing_system == "aqua":  # macos
+    if config.windowing_system == "aqua":  # macos
         aqua_func()
 
 

@@ -10,7 +10,12 @@ from AU_recognizer.core.user_interface.views import (View, MenuBar, ProjectTreeV
 from AU_recognizer.core.user_interface.dialogs.complex_dialog import SettingsDialog
 from AU_recognizer.core.controllers import Controller, MenuController, TreeViewMenuController, TreeController, \
     Viewer3DController, ProjectActionController
+import os
+import torch
 
+# Cap memory to 90% of the GPU to leave room for system or other processes
+torch.cuda.set_per_process_memory_fraction(0.9, 0)
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:32"
 set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -94,11 +99,11 @@ class AURecognizer(CustomTk):
         self.project_tree_view = ProjectTreeView(master=self)
         mainframe.add(self.project_tree_view, weight=2)
         logger.debug("center frame initialization")
-        self.project_actions = ProjectActionView(self)
-        mainframe.add(self.project_actions, weight=3)
-        logger.debug("right frame initialization")
         self.viewer = Viewer3DView(self)
         mainframe.add(self.viewer, weight=15)
+        logger.debug("right frame initialization")
+        self.project_actions = ProjectActionView(self)
+        mainframe.add(self.project_actions, weight=3)
         # create context menu
         self.tree_menu = TreeViewMenu(self.project_tree_view)
 
@@ -160,9 +165,7 @@ class AURecognizer(CustomTk):
             self.event_generate("<<UpdateTree>>")
 
     def selected_file(self, event):
-        from pprint import pprint
-        # TODO: Open viewer tab
-        pprint(event)
+        self.select_file(None)
 
     def select_file(self, event):
         file = self.tree_controller.get_last_selected_file()

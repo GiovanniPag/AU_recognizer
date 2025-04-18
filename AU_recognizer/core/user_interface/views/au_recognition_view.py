@@ -65,7 +65,7 @@ class AURecognitionView(View):
         # Main frame
         self.main_frame.pack(fill=BOTH, expand=True)
         # neutral_left_frame
-        self.neutral_frame.pack(side=LEFT, fill=BOTH, expand=True)
+        self.neutral_frame.pack(side=TOP, fill=BOTH, expand=True)
         # Treeview for images
         self.mesh_treeview_neutral.column(TD_MESH_N, anchor=T_CENTER, minwidth=300, width=300)
         self.mesh_treeview_neutral.heading(TD_MESH_N, text=i18n.mesh_sel_dialog[T_COLUMNS][TD_MESH_N])
@@ -78,7 +78,7 @@ class AURecognitionView(View):
         self.mesh_treeview_neutral.pack(fill=BOTH, expand=True)
         self.filter_entry_neutral.pack(fill=X, padx=5, pady=5)  # Filter text box
         # compare right frame
-        self.compare_frame.pack(side=LEFT, fill=BOTH, expand=True)
+        self.compare_frame.pack(side=TOP, fill=BOTH, expand=True)
         # Treeview for images
         self.mesh_treeview_compare.column(TD_MESH_C, anchor=T_CENTER, minwidth=300, width=300)
         self.mesh_treeview_compare.heading(TD_MESH_C, text=i18n.mesh_sel_dialog[T_COLUMNS][TD_MESH_C])
@@ -90,21 +90,21 @@ class AURecognitionView(View):
         self.mesh_treeview_compare["show"] = "headings"
         self.mesh_treeview_compare.pack(fill=BOTH, expand=True)
         self.filter_entry_compare.pack(fill=X, padx=5, pady=5)  # Filter text box
-        self.instructions_frame.pack(side=RIGHT, fill=BOTH, expand=True)
+        self.instructions_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
         # Checkbox for Pose Normalization
         self.pose_checkbox = CustomCheckBox(
             self.instructions_frame,
             textvariable=self.pose_checkbox_label,
             variable=self.normalize_pose_var
         )
-        self.pose_checkbox.pack(side=TOP, padx=5, pady=5)
+        self.pose_checkbox.pack(side=LEFT, padx=5, pady=5)
         # Checkbox for Identity Normalization
         self.identity_checkbox = CustomCheckBox(
             self.instructions_frame,
             textvariable=self.identity_checkbox_label,
             variable=self.normalize_identity_var
         )
-        self.identity_checkbox.pack(side=TOP, padx=5, pady=5)
+        self.identity_checkbox.pack(side=LEFT, padx=5, pady=5)
         # Bottom frame for buttons
         self.bottom_frame.pack(side=BOTTOM, fill=X, expand=True)
         # Buttons
@@ -218,18 +218,22 @@ class AURecognitionView(View):
                           icon=INFORMATION_ICON).show()
             return
         self.compare_faces(neutral_face_path=neutral_face, compare_list_paths=faces_compare)
-        open_message_dialog(master=self, message="compare_success")
         logger.debug("<<UpdateTreeSmall>> event generation")
         self.master.event_generate("<<UpdateTreeSmall>>")
 
     def compare_faces(self, neutral_face_path, compare_list_paths):
         logger.debug(f"compare {neutral_face_path} with list {compare_list_paths}")
         model_class = load_model_class(self.model)
-        model_class.au_difference(mesh_neutral=neutral_face_path, mesh_list=compare_list_paths, normalization_params={
-            "pose": self.normalize_pose_var.get(),
-            "identity": self.normalize_identity_var.get()
-        }, project=self._project_info)
-        self.log_face_comparisons(neutral_face_path, compare_list_paths)
+        result = model_class.au_difference(mesh_neutral=neutral_face_path, mesh_list=compare_list_paths,
+                                           normalization_params={
+                                               "pose": self.normalize_pose_var.get(),
+                                               "identity": self.normalize_identity_var.get()
+                                           }, project=self._project_info)
+        if result:
+            open_message_dialog(master=self, message="compare_success")
+            self.log_face_comparisons(neutral_face_path, compare_list_paths)
+        else:
+            open_message_dialog(master=self, message="compare_failure")
 
     def log_face_comparisons(self, neutral_face_path, compare_list_paths):
         logger.debug(f"Logging comparison between {neutral_face_path} and {compare_list_paths}")
@@ -259,3 +263,6 @@ class AURecognitionView(View):
         if self.model != new_model:
             self.model = new_model
 
+    def update_tree_views(self):
+        self.populate_neutral_treeview()
+        self.populate_compare_treeview()

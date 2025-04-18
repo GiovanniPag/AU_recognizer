@@ -1,4 +1,5 @@
 import copy
+import json
 import re
 from pathlib import Path
 from tkinter import StringVar, NSEW, EW
@@ -13,10 +14,11 @@ from AU_recognizer.ext_3dmm.emoca.models.DecaFLAME import FLAME_mediapipe
 from AU_recognizer.ext_3dmm.emoca.utils.model import test, save_obj, save_images, save_codes
 from AU_recognizer.ext_3dmm.emoca.utils.utility import load_model
 from ..base_model_interface import BaseModelInterface
+from ..util import extract_codes
 from ...user_interface import CustomFrame, ScrollableFrame, CustomCheckBox
 from ...user_interface.widgets.complex_widget import RadioList
 from ...util import nect_config, CONFIG, MODEL_FOLDER, MF_MODEL, MF_SAVE_IMAGES, MF_SAVE_CODES, MF_SAVE_MESH, \
-    MF_FIT_MODE, i18n, R_DETAIL, R_COARSE, logger, P_PATH, F_OUTPUT, F_COMPARE, OBJ
+    MF_FIT_MODE, i18n, R_DETAIL, R_COARSE, logger, P_PATH, F_OUTPUT, F_COMPARE, OBJ, F_TAG
 
 
 class EmocaModel(BaseModelInterface):
@@ -84,10 +86,6 @@ class EmocaModel(BaseModelInterface):
             return False  # Failure
         return True
 
-    def get_mesh_from_params(self, params):
-        # Ricostruzione mesh da parametri
-        pass
-
     @staticmethod
     def au_difference(mesh_neutral, mesh_list, normalization_params, project):
         # Calcolo differenze
@@ -151,10 +149,45 @@ class EmocaModel(BaseModelInterface):
             # Usa una regex per inserire un "_" tra lettere e numeri
             modified_name = re.sub(r'([A-Za-z]+)(\d)', r'\1_\2', face_path.name[:-2])
             np.save(output_path / f"{modified_name}_diffs{suffix}.npy", diffs)  # Save as binary
+        return True
 
-    def emoca_tag(self, diff_files, threshold, au_names):
-        # Tagging topologia
-        pass
+    @staticmethod
+    def emoca_tag(diff_to_tag, threshold, project_data):
+        logger.debug("Tagging vertices based on threshold...")
+        project_name = str(project_data.sections()[0])
+        output_path = Path(project_data[project_name][P_PATH]) / F_OUTPUT / F_TAG
+        output_path.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+
+        tagged_vertices = [[] for _ in range(5023)]  # List of sequences for each vertex
+
+        for diff_file in diff_to_tag:
+            if diff_file.suffix.lower() == '.npy':
+                code = extract_codes(diff_file.stem)  # Extract only the codes
+                if not code:
+                    logger.warning(f"no code in file name {diff_file.stem}")
+                    continue  # Skip files with no valid code
+                diffs = np.load(diff_file)  # Load the NumPy array
+                if diffs.shape[0] != 5023:
+                    logger.warning(f"File {diff_file} has {diffs.shape[0]} vertices instead of 5023. Skipping.")
+                    continue  # Skip files with unexpected shapes
+
+                # Normalize safely (avoid division by zero)
+                min_val, max_val = np.min(diffs), np.max(diffs)
+                if max_val == min_val:
+                    normalized_diffs = np.zeros_like(diffs)  # If all values are the same, set them to 0
+                else:
+                    normalized_diffs = (diffs - min_val) / (max_val - min_val)
+
+                for i, norm_diff in enumerate(normalized_diffs):
+                    if norm_diff >= threshold:
+                        tagged_vertices[i].append(code)  # Append the tag code
+
+        # Save tagged data to a file
+        output_file = output_path / f"tagged_vertices_{threshold}.json"
+        with open(output_file, "w") as f:
+            json.dump(tagged_vertices, f, indent=2)  # Pretty-print for readability
+        logger.info(f"Tagging completed. Results saved to {output_path}")
+        return True
 
     @staticmethod
     def get_ui_for_fit_data(master_widget) -> CustomFrame:

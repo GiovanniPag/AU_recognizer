@@ -76,8 +76,8 @@ class TreeViewMenu(Menu):
         self.add_command_item(cmd_name=MT_SEL_P, info=i18n.menut_selected_project)
         self.add_command_item(cmd_name=MT_ADD_IMAGES, info=i18n.menut_add_images)
         self.add_separator()
-        self.add_command_item(cmd_name=MT_RENAME_P, info=i18n.menut_rename_project)
         self.add_command_item(cmd_name=MT_SELECT_P, info=i18n.menut_select_project)
+        self.add_command_item(cmd_name=MT_RENAME_P, info=i18n.menut_rename_project)
         self.add_command_item(cmd_name=MT_CLOSE_P, info=i18n.menut_close_project)
         self.add_command_item(cmd_name=MT_DELETE_P, info=i18n.menut_delete_project)
         # separator
@@ -117,8 +117,8 @@ class TreeViewMenu(Menu):
             self.update_command_or_cascade(name=MT_SEL_P, info_updated=sel_p)
             self.update_command_or_cascade(name=MT_ADD_IMAGES, info_updated={M_STATE: M_STATE_NORMAL},
                                            update_state=True)
-            self.update_command_or_cascade(name=MT_RENAME_P, info_updated={M_STATE: M_STATE_NORMAL}, update_state=True)
             self.update_command_or_cascade(name=MT_SELECT_P, info_updated={M_STATE: M_STATE_NORMAL}, update_state=True)
+            self.update_command_or_cascade(name=MT_RENAME_P, info_updated={M_STATE: M_STATE_NORMAL}, update_state=True)
             self.update_command_or_cascade(name=MT_CLOSE_P, info_updated={M_STATE: M_STATE_NORMAL}, update_state=True)
             self.update_command_or_cascade(name=MT_DELETE_P, info_updated={M_STATE: M_STATE_NORMAL}, update_state=True)
         else:
@@ -126,8 +126,8 @@ class TreeViewMenu(Menu):
             sel_p['label'] += " " + i18n.none
             self.update_command_or_cascade(name=MT_SEL_P, info_updated=sel_p)
             self.update_command_or_cascade(name=MT_ADD_IMAGES, info_updated={M_STATE: DISABLED}, update_state=True)
-            self.update_command_or_cascade(name=MT_RENAME_P, info_updated={M_STATE: DISABLED}, update_state=True)
             self.update_command_or_cascade(name=MT_SELECT_P, info_updated={M_STATE: DISABLED}, update_state=True)
+            self.update_command_or_cascade(name=MT_RENAME_P, info_updated={M_STATE: DISABLED}, update_state=True)
             self.update_command_or_cascade(name=MT_CLOSE_P, info_updated={M_STATE: DISABLED}, update_state=True)
             self.update_command_or_cascade(name=MT_DELETE_P, info_updated={M_STATE: DISABLED}, update_state=True)
         if data[TM_PROJECT_PATH] is not None:
@@ -148,8 +148,8 @@ class TreeViewMenu(Menu):
         self.update_command_or_cascade(name=MT_OPEN_P, info_updated=i18n.menut_open_project)
         self.update_command_or_cascade(name=MT_SEL_P, info_updated=i18n.menut_selected_project)
         self.update_command_or_cascade(name=MT_ADD_IMAGES, info_updated=i18n.menut_add_images)
-        self.update_command_or_cascade(name=MT_RENAME_P, info_updated=i18n.menut_rename_project)
         self.update_command_or_cascade(name=MT_SELECT_P, info_updated=i18n.menut_select_project)
+        self.update_command_or_cascade(name=MT_RENAME_P, info_updated=i18n.menut_rename_project)
         self.update_command_or_cascade(name=MT_CLOSE_P, info_updated=i18n.menut_close_project)
         self.update_command_or_cascade(name=MT_DELETE_P, info_updated=i18n.menut_delete_project)
         self.update_command_or_cascade(name=MT_SEL_F, info_updated=i18n.menut_selected_file)
