@@ -86,7 +86,7 @@ mamba activate au_env
 python main.py
 ```
 
-now you the main GUI of the application
+now you will see the main GUI of the application
 
 <p align="center"> 
 <img src="AU_recognizer/var/images/main.png">
@@ -95,6 +95,8 @@ now you the main GUI of the application
 
 From here you will need to open or create a new project and select it, once it is selected add images to it with `right click`->`add images` or copy them inside the `input` folder. to fully use the app the images should follow this naming convention: `nameWithoutNumbers_AU_numbers_list_separated_without_letters`. Right now, it does not support encoding action unit strength in the file name.
 Example: `subject1_2_4` (indicates that AUs 1, 2, and 4 are activated)
+
+**I uploaded the sample data  i used taken from Artanatomia under  `var\data\ `**
 
 <table>
   <tr>
