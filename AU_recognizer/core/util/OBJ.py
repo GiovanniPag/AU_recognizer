@@ -111,6 +111,7 @@ class OBJ:
                     current_material.normal_map = Path(f) if Path(f).is_absolute() else (
                             mtl_filepath.parent / f).resolve()
 
+    # noinspection PyUnreachableCode
     def calculate_normals(self):
         # Initialize normals array
         normals_accum = np.zeros((len(self.vertices), 3), dtype=np.float32)

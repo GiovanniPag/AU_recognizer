@@ -137,8 +137,14 @@ class AURecognizer(CustomTk):
                   lambda event: self.tree_controller.update_tree_view(populate_root=False, sort_tree=True))
         logger.debug("attach virtual event controllers for <<selected_project>>")
         self.bind("<<selected_project>>", self.select_project)
-        logger.debug("attach virtual event controllers for <<selected_file>>")
+        logger.debug("attach virtual event controllers for <<selected_item>>")
         self.bind("<<selected_item>>", self.select_file)
+        logger.debug("attach virtual event controllers for <<selected_file>>")
+        self.bind("<<selected_file>>", self.selected_file)
+        logger.debug("attach virtual event controllers for <<new_project>>")
+        self.bind("<<new_project>>", lambda _: self.menu_controller.create_new_project())
+        logger.debug("attach virtual event controllers for <<open_project>>")
+        self.bind("<<open_project>>", lambda _: self.menu_controller.open_project())
 
     def select_project(self, event):
         project = self.tree_controller.get_last_selected_project()
@@ -152,6 +158,11 @@ class AURecognizer(CustomTk):
         except KeyError as e:
             logger.error(f"Errore: {e}, file doesn't exist, update tree view")
             self.event_generate("<<UpdateTree>>")
+
+    def selected_file(self, event):
+        from pprint import pprint
+        # TODO: Open viewer tab
+        pprint(event)
 
     def select_file(self, event):
         file = self.tree_controller.get_last_selected_file()

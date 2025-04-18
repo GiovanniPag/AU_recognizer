@@ -36,6 +36,7 @@ class AskColor(CustomToplevel):
         self._color = None
         self.title(title)
         self.resizable(width=False, height=False)
+        # noinspection PyTypeChecker
         self.transient(self.master)
         self.after(100, self.lift)
         self.grid_columnconfigure(0, weight=1)

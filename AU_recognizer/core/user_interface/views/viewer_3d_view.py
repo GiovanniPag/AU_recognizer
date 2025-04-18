@@ -43,6 +43,7 @@ class Viewer3DView(View):
         path = Path(self.data[P_PATH])
         if type_of_file == "image":
             logger.debug("show image in Viewer3D view")
+            # noinspection PyUnresolvedReferences
             self.__canvas_image = CanvasImage(placeholder=self.__placeholder, path=path,
                                               can_grab_focus=self.master.can_grab_focus())
             self.__canvas_image.grid(row=0, column=0, sticky='nswe')

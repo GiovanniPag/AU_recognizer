@@ -11,4 +11,4 @@ if __name__ == "__main__":
 
 # TODO: check error on coarse fitting, return nulls and crashes
 # TODO: mappa texture con muscolo su mesh
-# TODO: individua muscolo su texture e tagga punti per AU
+# TODO: individua muscolo su texture e tag punti per AU

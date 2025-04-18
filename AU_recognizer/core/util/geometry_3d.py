@@ -59,6 +59,7 @@ def perspective(fov, aspect, near, far):
     return m
 
 
+# noinspection PyUnreachableCode
 def look_at(eye, target, up):
     # Normalize the forward, right, and up vectors
     f = (target - eye)

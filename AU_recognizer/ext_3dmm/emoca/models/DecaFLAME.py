@@ -38,6 +38,7 @@ class FLAME(nn.Module):
     which outputs the mesh and 2D/3D facial landmarks
     """
 
+    # noinspection PyUnresolvedReferences
     def __init__(self, config):
         super(FLAME, self).__init__()
         print("creating the FLAME Decoder")
@@ -261,6 +262,7 @@ class FLAME(nn.Module):
         return vertices, landmarks2d, landmarks3d
 
 
+# noinspection PyPep8Naming
 class FLAME_mediapipe(FLAME):
 
     def __init__(self, config):

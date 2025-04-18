@@ -56,8 +56,11 @@ class I18N:
                 self.menu_help_guide = data['menu']['menu_help']["guide"]
                 # tree menu context
                 self.menut_add_images = data['menu_contextual']['tree_view']["add_images"]
+                self.menut_new_project = data['menu_contextual']['tree_view']["new_project"]
+                self.menut_open_project = data['menu_contextual']['tree_view']["open_project"]
                 self.menut_selected_project = data['menu_contextual']['tree_view']["selected_project"]
                 self.menut_select_project = data['menu_contextual']['tree_view']["select_project"]
+                self.menut_rename_project = data['menu_contextual']['tree_view']["rename_project"]
                 self.menut_close_project = data['menu_contextual']['tree_view']["close_project"]
                 self.menut_delete_project = data['menu_contextual']['tree_view']["delete_project"]
                 self.menut_selected_file = data['menu_contextual']['tree_view']["selected_file"]
@@ -89,6 +92,7 @@ class I18N:
                 # project actions
                 self.project_actions_fit = data['project_actions']['fit']
                 self.project_actions_au_rec = data['project_actions']['au_rec']
+                self.project_actions_au_tag = data['project_actions']['au_tag']
                 # entry buttons
                 self.entry_buttons = data['entry_buttons']
                 # radio buttons
@@ -106,6 +110,8 @@ class I18N:
                 self.gl_viewer = data['gl_viewer']
                 # tooltips
                 self.tooltips = data['tooltips']
+                # none
+                self.none = data["none"]
 
 
 i18n = I18N()

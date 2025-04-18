@@ -16,7 +16,8 @@ from AU_recognizer.core.user_interface.views import ProjectTreeView, TreeViewMen
 from AU_recognizer.core.util import logger, T_VALUES, TM_FILE, TM_PROJECT, T_TEXT, TM_FILE_PATH, TM_PROJECT_PATH, \
     P_PATH, T_SIZE, T_MODIFIED, T_NAME, T_DATA, T_FILE_TYPE, T_END, MT_ADD_IMAGES, M_COMMAND, MT_SELECT_P, MT_CLOSE_P, \
     MT_DELETE_P, MT_OPEN_F, MT_DELETE_F, MT_RENAME_F, get_desktop_path, i18n, I18N_TITLE, F_INPUT, I18N_YES_BUTTON, \
-    check_if_is_project, ERROR_ICON, check_if_folder_exist, check_if_file_exist, rename_path, rename_project
+    check_if_is_project, ERROR_ICON, check_if_folder_exist, check_if_file_exist, rename_path, rename_project, \
+    MT_RENAME_P, MT_NEW_P, MT_OPEN_P
 from AU_recognizer.core.util.utility_functions import sizeof_fmt
 
 
@@ -46,10 +47,10 @@ class TreeController(Controller):
         logger.debug("Tree_view controller bind commands")
         self.view.bind("<<TreeviewSelect>>", self.focus_item)
         self.view.tag_bind('item', '<Double-Button-1>', self.select_project)
-        self.view.tag_bind('file', '<Double-Button-1>', self.open_file)
+        self.view.tag_bind('file', '<Double-Button-1>', self.select_file)
         self.view.bind('<2>', self.deselect)
         self.view.bind('<<contextual_menu>>', self.show_contextual_menu)
-        self.view.tag_bind('item', "<Button-3>", self.show_contextual_menu_trigger)
+        self.view.bind("<Button-3>", self.show_contextual_menu_trigger)
         logger.debug("populate treeview items")
         self.update_tree_view(populate_root=True, sort_tree=True)
 
@@ -61,15 +62,24 @@ class TreeController(Controller):
     def show_contextual_menu(self, _):
         logger.debug("show contextual menu of treeview")
         item_id = self.view.identify("item", self.menu_pos.x, self.menu_pos.y)
-        root = self.get_root_node(item_id)
-        root_data = ast.literal_eval(root[T_VALUES][-1])
-        data = {TM_FILE: Path(item_id).name,
-                TM_PROJECT: root[T_TEXT],
-                TM_FILE_PATH: item_id,
-                TM_PROJECT_PATH: root_data[P_PATH]
-                }
-        self.view.selection_set(item_id)
-        self.context_controller.open_menu(self.menu_pos, data)
+        if item_id:
+            root = self.get_root_node(item_id)
+            root_data = ast.literal_eval(root[T_VALUES][-1])
+            data = {TM_FILE: Path(item_id).name,
+                    TM_PROJECT: root[T_TEXT],
+                    TM_FILE_PATH: item_id,
+                    TM_PROJECT_PATH: root_data[P_PATH]
+                    }
+            self.view.selection_set(item_id)
+            self.context_controller.open_menu(self.menu_pos, data)
+        else:
+            root_data = self.get_last_selected_project()
+            data = {TM_FILE: None,
+                    TM_PROJECT: Path(root_data[P_PATH]).name if root_data else None,
+                    TM_FILE_PATH: None,
+                    TM_PROJECT_PATH: root_data[P_PATH] if root_data else None
+                    }
+            self.context_controller.open_menu(self.menu_pos, data)
 
     def deselect(self, _):
         logger.debug(f"deselect current item, event {_}")
@@ -93,8 +103,8 @@ class TreeController(Controller):
             self.__last_selected_file = {}
             self.master.event_generate("<<selected_item>>")
 
-    def open_file(self, _):
-        self.master.event_generate("<<open_file>>")
+    def select_file(self, _):
+        self.master.event_generate("<<selected_file>>")
 
     def deselect_all(self):
         self.schedule_update()
@@ -106,7 +116,7 @@ class TreeController(Controller):
         logger.debug("tree view deselect project")
         self.deselect(None)
         self.__last_selected_file = None
-        self.master.event_generate("<<selected_file>>")
+        self.master.event_generate("<<selected_item>>")
 
     def deselect_project(self):
         logger.debug("tree view deselect project")
@@ -265,13 +275,18 @@ class TreeViewMenuController(Controller):
         logger.debug("menu controller bind commands")
         self.view.bind("<<Unpost>>", self.unpost_menu)
         # menu help
+        self.view.update_command_or_cascade(MT_NEW_P,
+                                            {M_COMMAND: lambda: self.master.event_generate("<<new_project>>")})
+        self.view.update_command_or_cascade(MT_OPEN_P,
+                                            {M_COMMAND: lambda: self.master.event_generate("<<open_project>>")})
         self.view.update_command_or_cascade(MT_ADD_IMAGES, {M_COMMAND: lambda: self.ask_images()})
         self.view.update_command_or_cascade(MT_SELECT_P, {M_COMMAND: lambda: self.controller.select_project(None)})
         self.view.update_command_or_cascade(MT_CLOSE_P, {M_COMMAND: lambda: self.close_project()})
         self.view.update_command_or_cascade(MT_DELETE_P, {M_COMMAND: lambda: self.delete_project()})
-        self.view.update_command_or_cascade(MT_OPEN_F, {M_COMMAND: lambda: self.controller.open_file(None)})
+        self.view.update_command_or_cascade(MT_OPEN_F, {M_COMMAND: lambda: self.controller.select_file(None)})
         self.view.update_command_or_cascade(MT_DELETE_F, {M_COMMAND: lambda: self.delete_file()})
         self.view.update_command_or_cascade(MT_RENAME_F, {M_COMMAND: lambda: self.rename_file()})
+        self.view.update_command_or_cascade(MT_RENAME_P, {M_COMMAND: lambda: self.rename_project()})
 
     def ask_images(self):
         logger.debug(f"add images to  project {self.view.data[TM_PROJECT]}")
@@ -328,10 +343,12 @@ class TreeViewMenuController(Controller):
 
     def delete_file(self):
         logger.debug(f"remove file {self.view.data[TM_FILE]} from file system")
-        if self.view.data[TM_FILE_PATH] == self.view.data[TM_PROJECT_PATH]:
+        if (self.view.data[TM_PROJECT_PATH] is not None and
+                self.view.data[TM_FILE_PATH] == self.view.data[TM_PROJECT_PATH]):
             self.delete_project()
         else:
-            if self.view.data[TM_FILE] == (self.view.data[TM_PROJECT] + ".ini"):
+            if (self.view.data[TM_PROJECT] is not None and
+                    self.view.data[TM_FILE] == (self.view.data[TM_PROJECT] + ".ini")):
                 answer = open_confirmation_dialogue(self.master, "corrupt_project")
                 if answer == I18N_YES_BUTTON:
                     self.close_project()
@@ -340,13 +357,13 @@ class TreeViewMenuController(Controller):
             else:
                 removed = delete_path(path_to_delete=self.view.data[TM_FILE_PATH], master=self.master)
                 if removed:
-                    is_project = check_if_is_project(path=Path(self.view.data[TM_PROJECT_PATH]),
-                                                     project_name=self.view.data[TM_PROJECT])
-                    if is_project:
-                        self.controller.remove_tree_node(path=self.view.data[TM_FILE_PATH])
-                    else:
-                        open_message_dialog(master=self.master, message="corrupted_project", icon=ERROR_ICON)
-                        self.close_project()
+                    self.controller.remove_tree_node(path=self.view.data[TM_FILE_PATH])
+                    if self.view.data[TM_PROJECT_PATH] is not None and self.view.data[TM_PROJECT] is not None:
+                        is_project = check_if_is_project(path=Path(self.view.data[TM_PROJECT_PATH]),
+                                                         project_name=self.view.data[TM_PROJECT])
+                        if not is_project:
+                            open_message_dialog(master=self.master, message="corrupted_project", icon=ERROR_ICON)
+                            self.close_project()
 
     def rename_project(self):
         logger.debug(f"rename project {self.view.data[TM_PROJECT_PATH]}")
@@ -368,6 +385,7 @@ class TreeViewMenuController(Controller):
                                    old_name=self.view.data[TM_PROJECT], new_name=new_project_name)
                     # modify master list
                     is_project, metadata = check_if_is_project(new_path, new_project_name)
+                    # noinspection PyTestUnpassedFixture
                     self.master.rename_project(old_path=str(path), new_name=new_project_name, new_metadata=metadata)
                     self.master.event_generate("<<UpdateTree>>")
                 else:
@@ -378,8 +396,10 @@ class TreeViewMenuController(Controller):
 
     def rename_file(self):
         logger.debug(f"rename file {self.view.data[TM_FILE]}")
-        if self.view.data[TM_FILE_PATH] == self.view.data[TM_PROJECT_PATH] or self.view.data[TM_FILE] == (
-                self.view.data[TM_PROJECT] + ".ini"):
+        if (self.view.data[TM_PROJECT_PATH] is not None and
+                self.view.data[TM_FILE_PATH] == self.view.data[TM_PROJECT_PATH] or
+                self.view.data[TM_PROJECT] is not None and self.view.data[TM_FILE] == (
+                        self.view.data[TM_PROJECT] + ".ini")):
             self.rename_project()
         else:
             renamed, path = confirm_rename_path(path_to_rename=self.view.data[TM_FILE_PATH], master=self.master)

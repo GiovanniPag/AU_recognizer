@@ -279,6 +279,7 @@ def batch_orth_proj(x, camera):
     return xn
 
 
+# noinspection PyUnboundLocalVariable
 def tensor_vis_landmarks(images, landmarks, gt_landmarks=None, color='g', is_scale=True, rgb2bgr=True,
                          scale_colors=True):
     # visualize landmarks
@@ -332,6 +333,7 @@ def tensor2image(tensor):
 end_list = np.array([17, 22, 27, 42, 48, 31, 36, 68], dtype=np.int32) - 1
 
 
+# noinspection PyUnboundLocalVariable
 def plot_kpts(image, kpts, color='r'):
     """ Draw 68 key points
     Args:
@@ -362,6 +364,7 @@ def plot_kpts(image, kpts, color='r'):
     return image
 
 
+# noinspection PyUnboundLocalVariable
 def plot_verts(image, kpts, color='r'):
     """ Draw 68 key points
     Args:

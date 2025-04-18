@@ -56,6 +56,7 @@
       }
     }
   },
+  "none": "None",
   "radio_buttons": {
     "detail": "Detail",
     "coarse": "Coarse"
@@ -125,6 +126,21 @@
       },
       "add_images": {
         "label": "Add images to project",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "new_project": {
+        "label": "Create new project",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "open_project": {
+        "label": "Open existing project",
+        "default_state": "normal",
+        "underline": 0
+      },
+      "rename_project": {
+        "label": "Rename the project",
         "default_state": "normal",
         "underline": 0
       },
@@ -318,6 +334,7 @@
         "fitted": "Fitted",
         "not_fitted": "Not fitted"
       },
+      "filter": "Filter by name:",
       "hide_fitted": "Hide fitted images"
     },
     "mesh_tag": {
@@ -375,6 +392,9 @@
       "name": "AU Recognition",
       "select_mesh": "Select mesh",
       "tag_mesh": "Tag mesh by differences"
+    },
+    "au_tag": {
+      "name": "AU Tag"
     }
   }
 }

@@ -193,6 +193,7 @@ class EmoNet(nn.Module):
                 print(err)
                 pass
 
+    # noinspection PyUnboundLocalVariable
     def forward(self, x, reset_smoothing=False, intermediate_features=False):
 
         # Resets the temporal smoothing
@@ -200,7 +201,7 @@ class EmoNet(nn.Module):
             self.init_smoothing = False
             self.temporal_state = torch.zeros(x.size(0), self.n_temporal_states, self.n_expression + self.n_reg).cuda()
         if reset_smoothing:
-            self.temporal_state = self.temporal_state.zeros_()
+            self.temporal_state = self.temporal_state.zeros_()  # type: ignore
 
         x = func.relu(self.bn1(self.conv1(x)), True)
         x = func.max_pool2d(self.conv2(x), 2, stride=2)
@@ -217,7 +218,7 @@ class EmoNet(nn.Module):
             ll = self._modules['top_m_' + str(i)](ll)
 
             ll = func.relu(self._modules['bn_end' + str(i)]
-                        (self._modules['conv_last' + str(i)](ll)), True)
+                           (self._modules['conv_last' + str(i)](ll)), True)
 
             tmp_out = self._modules['l' + str(i)](ll)
 

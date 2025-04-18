@@ -21,7 +21,7 @@ https://github.com/YadiraF/DECA/
 """
 import torch.nn as nn
 import torch
-import ResNet as resNet
+from . import ResNet as resNet
 
 
 class BaseEncoder(nn.Module):

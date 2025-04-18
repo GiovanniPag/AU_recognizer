@@ -9,7 +9,7 @@ from AU_recognizer.core.util import logger, T_COLUMNS, T_SIZE, T_MODIFIED, T_NAM
 class ProjectTreeView(ttk.Treeview, View):
     def __init__(self, master=None):
         View.__init__(self, master=master)
-        ttk.Treeview.__init__(self, master, columns=(T_NAME, T_SIZE, T_MODIFIED))
+        ttk.Treeview.__init__(self, master, columns=(T_SIZE, T_MODIFIED))
         self.tree_style = None
         self.master = master
         self.rowconfigure(0, weight=1)
@@ -42,8 +42,6 @@ class ProjectTreeView(ttk.Treeview, View):
         self.heading(T_MODIFIED, text=i18n.tree_view[T_COLUMNS][T_MODIFIED])
         # select mode
         self["selectmode"] = "browse"
-        # displayColumns
-        self["displaycolumns"] = [T_SIZE, T_MODIFIED]
         # show
         self["show"] = "tree headings"
         # tree Display tree labels in column #0.

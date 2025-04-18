@@ -9,10 +9,10 @@ import numpy as np
 import torch
 from matplotlib import cm
 
-from AU_recognizer.core.projects import emoca_fit
-from AU_recognizer.core.projects.emoca_tag import emoca_tag
-from AU_recognizer.core.projects.models.DecaFLAME import FLAME_mediapipe
-from AU_recognizer.core.projects.utils.utility import load_model
+from AU_recognizer.core.model.util import image_fit
+from AU_recognizer.core.model.models.emoca.emoca_tag import emoca_tag
+from AU_recognizer.ext_3dmm.emoca.models.DecaFLAME import FLAME_mediapipe
+from AU_recognizer.ext_3dmm.emoca.utils.utility import load_model
 from AU_recognizer.core.user_interface import CustomFrame, CustomButton, CustomCheckBox, CustomEntry, ThemeManager, \
     CustomTabview, CustomLabel
 from AU_recognizer.core.user_interface.dialogs import Dialog
@@ -26,7 +26,7 @@ from AU_recognizer.core.util import i18n, PA_NAME, TD_IMAGES, TD_FITTED, TD_HIDE
     nect_config, CONFIG, MODEL_FOLDER, GENERAL_TAB, VIEWER_TAB, I18N_PATH, LOGGER_PATH, LOG_FOLDER, PROJECTS_FOLDER, \
     LANGUAGE, retrieve_files_from_path, VIEWER, FILL_COLOR, LINE_COLOR, CANVAS_COLOR, POINT_COLOR, POINT_SIZE, \
     GROUND_COLOR, SKY_COLOR, MOVING_STEP, I18N_SAVE_BUTTON, write_config, MESH_POSE, MESH_IDENTITY, TD_HIDE_IDENTITY, \
-    TD_HIDE_POSE, TD_HIDE_NOT_NORM, I18N_TAG_SEL_BUTTON, TD_THRESHOLD
+    TD_HIDE_POSE, TD_HIDE_NOT_NORM, I18N_TAG_SEL_BUTTON, TD_THRESHOLD, TD_FILTER, MODEL
 from AU_recognizer.core.util.utility_functions import lighten_color, gray_to_hex
 
 
@@ -97,7 +97,7 @@ class SelectFitImageDialog(Dialog):
         self.available_treeview.pack(fill=BOTH, expand=True)
         self.selected_treeview.pack(side=LEFT, fill=BOTH, expand=True)
         # Bottom frame for buttons
-        CustomLabel(master=self.left_frame, text=i18n.mesh_tag_dialog[TD_THRESHOLD]).pack()
+        CustomLabel(master=self.left_frame, text=i18n.im_sel_dialog[TD_FILTER]).pack()
         self.filter_entry.pack(fill=X, padx=5, pady=5)  # Filter text box
         # Buttons
         close_button = CustomButton(self.bottom_frame, text=i18n.dialog_buttons[I18N_CLOSE_BUTTON], command=self.close)
@@ -148,7 +148,7 @@ class SelectFitImageDialog(Dialog):
             if image.suffix.lower() in image_suffixes and filter_text in image.name.lower():
                 if image.name in selected_images:
                     continue
-                output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MF_MODEL]
+                output_folder = Path(self.project[self._project_name][P_PATH]) / F_OUTPUT / self.fit_data[MODEL]
                 fit_status = i18n.im_sel_dialog["data"]["fitted"] if output_folder.exists() and (
                     any(d.is_dir() and d.name.startswith(image.stem) for d in output_folder.iterdir())) else \
                     i18n.im_sel_dialog["data"]["not_fitted"]
@@ -157,7 +157,7 @@ class SelectFitImageDialog(Dialog):
 
     def fit_all(self):
         logger.debug(f"{self.__class__.__name__} fit all images")
-        emoca_fit(master=self, fit_data=self.fit_data,
+        image_fit(master=self, fit_data=self.fit_data,
                   images_to_fit=Path(self.project[self._project_name][P_PATH]) / F_INPUT,
                   project_data=self.project)
         logger.debug("<<UpdateTreeSmall>> event generation")
@@ -171,7 +171,7 @@ class SelectFitImageDialog(Dialog):
             image_name = self.selected_treeview.item(item, 'values')[0]
             images_to_fit.append(Path(self.project[self._project_name][P_PATH]) / F_INPUT / image_name)
         if images_to_fit:
-            emoca_fit(master=self, fit_data=self.fit_data, images_to_fit=images_to_fit, project_data=self.project)
+            image_fit(master=self, fit_data=self.fit_data, images_to_fit=images_to_fit, project_data=self.project)
         else:
             logger.info("No images where selected.")
             data = i18n.project_message["no_images_selected"]

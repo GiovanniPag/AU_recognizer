@@ -30,6 +30,7 @@ class DecaMode(Enum):
     DETAIL = 2  # when switched on, only coarse and detail part of DECA-based networks is used
 
 
+# noinspection PyUnboundLocalVariable
 class DecaModule(LightningModule):
     """
     DecaModule is a PL module that implements DECA-inspired face reconstruction networks.
@@ -357,7 +358,7 @@ class DecaModule(LightningModule):
                 # --- extract texture
                 uv_pverts = self.deca.render.world2uv(trans_verts).detach()
                 uv_gt = func.grid_sample(torch.cat([images_resized, masks], dim=1),
-                                      uv_pverts.permute(0, 2, 3, 1)[:, :, :, :2],
+                                         uv_pverts.permute(0, 2, 3, 1)[:, :, :, :2],
                                          mode='bilinear', align_corners=True)
                 uv_texture_gt = uv_gt[:, :3, :, :].detach()
                 uv_mask_gt = uv_gt[:, 3:, :, :].detach()

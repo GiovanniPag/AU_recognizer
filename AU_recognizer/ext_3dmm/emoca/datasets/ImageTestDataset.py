@@ -120,7 +120,9 @@ class TestData(Dataset):
                             top = bb[1]
                             bottom = bb[3]
                             osz, c = bbox2point(left, right, top, bottom, l_type=bbox_type)
+                        # noinspection PyUnboundLocalVariable
                         old_size += [osz]
+                        # noinspection PyUnboundLocalVariable
                         center += [c]
 
             if isinstance(old_size, list):

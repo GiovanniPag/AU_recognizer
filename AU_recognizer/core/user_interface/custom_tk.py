@@ -194,6 +194,7 @@ class CustomTk(tk.Tk, CustomAppearanceModeBaseClass, CustomScalingBaseClass):
             super().configure(bg=self._apply_appearance_mode(self._fg_color))
             for child in self.winfo_children():
                 try:
+                    # noinspection PyArgumentList
                     child.configure(bg_color=self._fg_color)
                 except Exception as err:
                     logger.error(err)

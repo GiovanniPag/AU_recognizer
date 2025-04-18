@@ -199,6 +199,7 @@ class EmotionRecognitionBaseModule(pl.LightningModule):
             v_weight = None
             a_weight = None
         if self.predicts_valence() and self.trains_valence():
+            # noinspection PyUnboundLocalVariable
             losses, metrics = v_or_a_loss(self.v_loss, pred, gt, loss_term_weights, metrics, losses, "valence",
                                           pred_prefix=pred_prefix, permit_dropping_corr=not training,
                                           sample_weights=v_weight)
@@ -495,19 +496,20 @@ def exp_loss(loss, pred, gt, class_weight, metrics, losses, expression_balancing
         else:
             weight = torch.ones_like(class_weight)
 
+        # noinspection PyUnresolvedReferences
         if (num_classes <= gt["expr_classification"].max()).any():
             print("[Warning] Class label index is higher and will be reduced.")
             gt["expr_classification"][gt["expr_classification"] >= num_classes] = num_classes - 1
         metrics[pred_prefix + "expr_nll"] = func.nll_loss(pred[pred_prefix + "expr_classification"],
-                                                       gt["expr_classification"][:, 0],
+                                                          gt["expr_classification"][:, 0],
                                                           None)
         if weight is not None:
             metrics[pred_prefix + "expr_weighted_nll"] = func.nll_loss(pred[pred_prefix + "expr_classification"],
-                                                                    gt["expr_classification"][:, 0],
+                                                                       gt["expr_classification"][:, 0],
                                                                        class_weight)
         else:
             metrics[pred_prefix + "expr_weighted_nll"] = func.nll_loss(pred[pred_prefix + "expr_classification"],
-                                                                    gt["expr_classification"][:, 0],
+                                                                       gt["expr_classification"][:, 0],
                                                                        None)
         metrics[pred_prefix + "expr_acc"] = ACC_torch(
             torch.argmax(pred[pred_prefix + "expr_classification"], dim=1),

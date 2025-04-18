@@ -58,6 +58,7 @@ class ScalingTracker:
     @classmethod
     def remove_widget(cls, widget_callback, widget):
         window_root = cls.get_window_root_of_widget(widget)
+        # noinspection PyBroadException
         try:
             cls.window_widgets_dict[window_root].remove(widget_callback)
         except Exception:
@@ -65,6 +66,7 @@ class ScalingTracker:
 
     @classmethod
     def remove_window(cls, window):
+        # noinspection PyBroadException
         try:
             del cls.window_widgets_dict[window]
         except Exception:

@@ -3,9 +3,9 @@ from pathlib import Path
 import torch
 from tqdm import auto
 
-from .datasets.ImageTestDataset import TestData
-from .utils.model import save_obj, save_images, save_codes
-from .utils.utility import load_model
+from AU_recognizer.ext_3dmm.emoca.datasets.ImageTestDataset import TestData
+from AU_recognizer.ext_3dmm.emoca.utils.model import save_obj, save_images, save_codes
+from AU_recognizer.ext_3dmm.emoca.utils.utility import load_model
 from AU_recognizer.core.util import (logger, P_PATH, nect_config, CONFIG, MODEL_FOLDER, MF_MODEL, F_OUTPUT, MF_FIT_MODE,
                                      MF_SAVE_MESH, MF_SAVE_IMAGES, MF_SAVE_CODES)
 

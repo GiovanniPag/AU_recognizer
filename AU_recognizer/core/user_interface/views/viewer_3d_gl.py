@@ -120,6 +120,7 @@ class Viewer3DGl(View):
         self.canvas_3d.update_shader_uniforms([("useLight", self.lighting_checkbox.get())], start_shader=True)
 
     def open_settings(self):
+        # noinspection PyUnresolvedReferences
         self.master.open_settings(page="viewer")
 
     def settings_update(self):
@@ -713,6 +714,7 @@ class Frame3DGl(OpenGLFrame):
         self._last_mouse_x_pan = event.x
         self._last_mouse_y_pan = event.y
 
+    # noinspection PyUnreachableCode
     def _handle_rotation(self, event):
         # Rotation logic (Y-axis and X-axis rotation)
         """Rotate the object based on mouse movement"""

@@ -224,6 +224,7 @@ class EmoBackboneLoss(EmoLossBase):
         return params
 
     def forward(self, images):
+        # noinspection PyProtectedMember
         return self.backbone._forward(images)
 
     def train(self, b=True):
@@ -261,6 +262,7 @@ class EmoBackboneDualLoss(EmoBackboneLoss):
         return trainable_params
 
     def _forward_output(self, images):
+        # noinspection PyProtectedMember
         return self.trainable_backbone._forward(images)
 
     def train(self, b=True):

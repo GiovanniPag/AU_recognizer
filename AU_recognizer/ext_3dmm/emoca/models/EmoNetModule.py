@@ -59,6 +59,7 @@ class EmoNetModule(EmotionRecognitionBaseModule):
         arousal = emotion['arousal']
         if self.exp_activation is not None:
             expression = self.exp_activation(emotion['expression'], dim=1)
+        # noinspection PyUnboundLocalVariable
         values = {'valence': valence.view(-1, 1), 'arousal': arousal.view(-1, 1), 'expr_classification': expression}
         # WARNING: HACK
         if 'n_expression' not in self.config.data:

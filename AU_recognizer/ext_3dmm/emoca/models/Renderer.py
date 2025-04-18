@@ -5,6 +5,7 @@ import torch.nn.functional as func
 from pytorch3d.structures import Meshes
 from pytorch3d.io import load_obj
 from pytorch3d.renderer.mesh import rasterize_meshes
+# noinspection PyPep8Naming
 from ..utils import DecaUtils as util
 
 
@@ -216,7 +217,8 @@ class SRenderY(nn.Module):
         """
         light_direction = lights[:, :, :3]
         light_intensities = lights[:, :, 3:]
-        directions_to_lights = func.normalize(light_direction[:, :, None, :].expand(-1, -1, normals.shape[1], -1), dim=3)
+        directions_to_lights = func.normalize(light_direction[:, :, None, :].expand(-1, -1, normals.shape[1], -1),
+                                              dim=3)
         # normals_dot_lights = torch.clamp((normals[:,None,:,:]*directions_to_lights).sum(dim=3), 0., 1.)
         # normals_dot_lights = (normals[:,None,:,:]*directions_to_lights).sum(dim=3)
         normals_dot_lights = torch.clamp((normals[:, None, :, :] * directions_to_lights).sum(dim=3), 0., 1.)
@@ -261,8 +263,6 @@ class SRenderY(nn.Module):
 
         # albedo
         albedo_images = rendering[:, :3, :, :]
-        # mask
-        transformed_normal_map = rendering[:, 3:6, :, :].detach()
 
         # shading
         normal_images = rendering[:, 9:12, :, :].detach()

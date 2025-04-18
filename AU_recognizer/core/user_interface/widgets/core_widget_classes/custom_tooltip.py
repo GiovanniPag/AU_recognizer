@@ -76,7 +76,7 @@ class CustomTooltip(CustomToplevel):
         super().__init__(self.master)
         super().withdraw()  # hide and reshow window once all code is ran to fix issues due to slower machines (??)
         self._visible = True
-        x, y, cx, cy = self.master.bbox("insert") # type: ignore
+        x, y, cx, cy = self.master.bbox("insert")  # type: ignore
         # Has to be offset from mouse position, otherwise it will appear and disappear instantly because it left the
         # parent widget
         x += self.master.winfo_pointerx() + self.mouse_offset[0]

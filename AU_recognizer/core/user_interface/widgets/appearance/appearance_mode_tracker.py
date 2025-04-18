@@ -40,6 +40,7 @@ class AppearanceModeTracker:
     def update_callbacks(cls):
         if cls.appearance_mode == 0:
             for callback in cls.callback_list:
+                # noinspection PyBroadException
                 try:
                     callback("Light")
                 except Exception:
@@ -47,6 +48,7 @@ class AppearanceModeTracker:
 
         elif cls.appearance_mode == 1:
             for callback in cls.callback_list:
+                # noinspection PyBroadException
                 try:
                     callback("Dark")
                 except Exception:

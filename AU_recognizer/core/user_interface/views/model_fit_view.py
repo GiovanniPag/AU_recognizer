@@ -1,73 +1,59 @@
 from configparser import ConfigParser
-from pathlib import Path
-from tkinter import NSEW, EW, E, StringVar
+from tkinter import E, StringVar, NE, NW
 from typing import Optional
 
-from AU_recognizer.core.user_interface import ScrollableFrame, CustomButton, CustomCheckBox
+from AU_recognizer.core.model.model_manager import load_model_class
+from AU_recognizer.core.user_interface import CustomButton
 from AU_recognizer.core.user_interface.views.view import View
-from AU_recognizer.core.user_interface.widgets.complex_widget import ComboLabel, RadioList
-from AU_recognizer.core.util import (nect_config, CONFIG, MODEL_FOLDER, R_DETAIL, R_COARSE,
-                                     logger, i18n, MF_SELECT_IMG, MF_MODEL, MF_SAVE_IMAGES, MF_SAVE_CODES, MF_SAVE_MESH,
-                                     MF_FIT_MODE)
+from AU_recognizer.core.util import (nect_config, CONFIG, logger, i18n, MF_SELECT_IMG, MF_MODEL, MODEL)
 
 
 class ModelFitView(View):
-    def __init__(self, master=None):
+    def __init__(self, master=None, model=nect_config[CONFIG][MODEL]):
         super().__init__(master)
         self.master = master
-        self.rowconfigure(0, weight=1)
+        self.model = model
         self.columnconfigure(0, weight=1)
-        self.scrollFrame = ScrollableFrame(self, orientation="both")  # add a new scrollable frame
-        self.scrollFrame.rowconfigure(0, weight=1)
-        self.scrollFrame.columnconfigure(0, weight=1)
         self._project_info: Optional[ConfigParser] = None
-        models = [x for x in Path(nect_config[CONFIG][MODEL_FOLDER]).iterdir() if x.is_dir()]
-        self.model_combobox = ComboLabel(master=self.scrollFrame, label_text="m_combo",
-                                         selected="EMOCA_v2_lr_mse_20",
-                                         values=[str(file_name.name) for file_name in models], state="readonly")
-        self.save_images_text = StringVar(value=i18n.entry_buttons["c_simages"])
-        self.save_images = CustomCheckBox(master=self.scrollFrame, text="c_simages", textvariable=self.save_images_text,
-                                          check_state=False)
-        self.save_codes_text = StringVar(value=i18n.entry_buttons["c_scodes"])
-        self.save_codes = CustomCheckBox(master=self.scrollFrame, text="c_scodes", textvariable=self.save_codes_text,
-                                         check_state=True)
-        self.save_mesh_text = StringVar(value=i18n.entry_buttons["c_smesh"])
-        self.save_mesh = CustomCheckBox(master=self.scrollFrame, text="c_smesh", textvariable=self.save_mesh_text,
-                                        check_state=True)
-        self.fit_mode = RadioList(master=self.scrollFrame, list_title="mode_radio", default=R_DETAIL,
-                                  data=[R_DETAIL, R_COARSE])
-
+        self.model_view = None
         self.select_images_button_label = StringVar()
         self.select_images_button: Optional[CustomButton] = None
         self.update_language()
 
+    def update_model(self, new_model=nect_config[CONFIG][MODEL], force_change=False):
+        logger.debug("model changed, update views")
+        if self.model != new_model:
+            if load_model_class(self.model) != load_model_class(new_model) or force_change:
+                self.model = new_model
+                self.model_view = load_model_class(self.model).get_ui_for_fit_data(self)
+                self.model_view.create_view()
+                self.__update_view()
+
     def update_language(self):
         logger.debug("update language in ModelFit view")
-        self.model_combobox.update_language()
-        self.save_images.update_language()
-        self.save_codes.update_language()
-        self.save_mesh.update_language()
-        self.fit_mode.update_language()
+        if self.model_view is not None:
+            self.model_view.update_language()
         self.select_images_button_label.set(i18n.project_actions_fit[MF_SELECT_IMG])
 
     def create_view(self):
         logger.debug("create view in ModelFit view")
-        self.scrollFrame.grid(row=0, column=0, sticky=NSEW, padx=10, pady=5)
-        # Combo box for model selection
-        self.model_combobox.create_view()
-        # Checkboxes for options
-        self.fit_mode.create_view()
+        # Dynamic model-specific form
+        try:
+            model_class = load_model_class(self.model)  # helper that imports dynamically
+            self.model_view = model_class.get_ui_for_fit_data(self)
+            self.model_view.create_view()
+        except Exception as e:
+            logger.error(f"Failed to load model form: {e}")
+            self.model_view = None
         # Button to select images
-        self.select_images_button = CustomButton(self.scrollFrame, textvariable=self.select_images_button_label)
+        self.select_images_button = CustomButton(self, textvariable=self.select_images_button_label)
 
     def __update_view(self):
         logger.debug("update view in ModelFit view")
-        self.model_combobox.grid(row=0, column=0, sticky=EW, pady=5)
-        self.save_images.grid(row=1, column=0, sticky=EW, pady=5)
-        self.save_codes.grid(row=2, column=0, sticky=EW, pady=5)
-        self.save_mesh.grid(row=3, column=0, sticky=EW, pady=5)
-        self.fit_mode.grid(row=4, column=0, sticky=EW, pady=5)
-        self.select_images_button.grid(row=5, column=0, sticky=E, pady=5)
+        if self.model_view is not None:
+            self.model_view.update_view()
+            self.model_view.grid(row=0, column=0, sticky=NW + E, pady=5, padx=5)
+        self.select_images_button.grid(row=1, column=0, sticky=NE, pady=5)
 
     def update_selected_project(self, data: Optional[ConfigParser] = None):
         logger.debug("update selected project in fit view")
@@ -75,10 +61,9 @@ class ModelFitView(View):
         self.__update_view()
 
     def get_form(self):
-        return {
-            MF_MODEL: self.model_combobox.get_value(),
-            MF_SAVE_IMAGES: self.save_images.get(),
-            MF_SAVE_CODES: self.save_codes.get(),
-            MF_SAVE_MESH: self.save_mesh.get(),
-            MF_FIT_MODE: self.fit_mode.get_value()
+        form = {
+            MF_MODEL: self.model,
         }
+        if self.model_view:
+            form.update(self.model_view.get_data())
+        return form

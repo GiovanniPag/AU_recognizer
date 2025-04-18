@@ -155,6 +155,7 @@ class CustomColorPicker(CustomFrame):
             except ValueError:
                 pass  # Ignore invalid input
         else:
+            # noinspection PyBroadException
             try:
                 brightness = self.brightness_slider_value.get()
                 self.get_target_color()
@@ -165,6 +166,7 @@ class CustomColorPicker(CustomFrame):
                 self.default_hex_color = f"#{r:02x}{g:02x}{b:02x}"
             except Exception:
                 pass
+        # noinspection PyBroadException
         try:
             self.slider.configure(progress_color=self.default_hex_color)
             self.label.configure(fg_color=self.default_hex_color)

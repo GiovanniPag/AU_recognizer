@@ -3,7 +3,5 @@ from .au_recognition_controller import AURecognitionController
 from .menu_controller import MenuController
 from .model_fit_controller import ModelFitController
 from .project_action_controller import ProjectActionController
-from .select_project_controller import SelectedProjectController
-from .selected_file_controller import SelectedFileController
 from .tree_controller import TreeViewMenuController, TreeController
 from .viewer_3d_controller import Viewer3DController
