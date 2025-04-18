@@ -50,6 +50,7 @@ if not exist:
     }
     nect_config[OPEN_PROJECTS] = {}
 # global logger
+Path(nect_config[CONFIG][LOG_FOLDER]).mkdir(parents=True, exist_ok=True)
 logging.config.fileConfig(fname=Path(nect_config[CONFIG][LOGGER_PATH]), disable_existing_loggers=False,
                           defaults={
                               LOG_FOLDER: str((Path(nect_config[CONFIG][LOG_FOLDER]) / __get_log_name()).resolve())})
