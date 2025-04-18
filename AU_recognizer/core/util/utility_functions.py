@@ -13,7 +13,10 @@ from .constants import CONFIG, GUIDE_FILE, LOG_FOLDER, P_NAME, P_PATH, F_OUTPUT,
 def open_guide():
     logger.debug(" open " + GUIDE_FILE + " file")
     path = nect_config[CONFIG][GUIDE_FILE]
-    open_path_by_os(path)
+    if Path(path).exists():
+        open_path_by_os(path)
+    else:
+        logger.warning("no guide file provided")
 
 
 def open_log_folder():
