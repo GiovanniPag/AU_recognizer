@@ -1,4 +1,5 @@
-cd AU_recognizer/var/asset/models
+mkdir -p AU_recognizer/var/asset/models/EMOCA/models
+cd AU_recognizer/var/asset/models/EMOCA/models
 
 echo "In order to run EMOCA, you need to download FLAME. Before you continue, you must register and agree to license terms at:"
 echo -e '\e]8;;https://flame.is.tue.mpg.de\ahttps://flame.is.tue.mpg.de\e]8;;\a'
